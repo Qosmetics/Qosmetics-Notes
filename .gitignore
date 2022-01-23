@@ -1,0 +1,8 @@
+build/
+extern/
+extern.cmake
+qpm_defines.cmake
+tombstone_*
+qpm.shared.json
+mod.template.json
+*.log

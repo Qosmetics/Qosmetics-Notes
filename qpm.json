@@ -1,0 +1,45 @@
+{
+  "sharedDir": "shared",
+  "dependenciesDir": "extern",
+  "info": {
+    "name": "Qosmetics Cyoob",
+    "id": "qosmetics-notes",
+    "version": "0.1.0",
+    "url": "https://github.com/Qosmetics/Qosmetics-Notes",
+    "additionalData": {
+      "overrideSoName": "libqosmetics-notes.so"
+    }
+  },
+  "dependencies": [
+    {
+      "id": "beatsaber-hook",
+      "versionRange": "^3.6.1",
+      "additionalData": {
+        "extraFiles": [
+          "src/inline-hook"
+        ]
+      }
+    },
+    {
+      "id": "codegen",
+      "versionRange": "^0.19.0",
+      "additionalData": {}
+    },
+    {
+      "id": "custom-types",
+      "versionRange": "^0.15.2",
+      "additionalData": {}
+    },
+    {
+      "id": "questui",
+      "versionRange": "^0.12.3",
+      "additionalData": {}
+    },
+    {
+      "id": "modloader",
+      "versionRange": "^1.2.3",
+      "additionalData": {}
+    }
+  ],
+  "additionalData": {}
+}
