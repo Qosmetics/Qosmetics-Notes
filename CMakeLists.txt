@@ -4,6 +4,7 @@ include(qpm_defines.cmake)
 cmake_minimum_required(VERSION 3.22)
 project(${COMPILE_ID})
 
+
 # c++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED 20)
@@ -83,3 +84,5 @@ add_custom_command(TARGET ${COMPILE_ID} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${a_file} debug/${file}
     COMMENT "Copy a files for ndk stack")
 endforeach()
+
+include(assets_include.cmake)
