@@ -2,9 +2,13 @@
 #include "qosmetics-core/shared/Utils/FileUtils.hpp"
 #include "qosmetics-core/shared/Utils/ZipUtils.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
+#include "questui/shared/CustomTypes/Components/List/QuestUITableView.hpp"
 #include "static-defines.hpp"
 
 #include "HMUI/TableView.hpp"
+#include "HMUI/TableView_ScrollPositionType.hpp"
+
+#include <algorithm>
 
 DEFINE_TYPE(Qosmetics::Notes, SelectionViewController);
 
@@ -23,7 +27,7 @@ namespace Qosmetics::Notes
             auto refreshBtn = CreateUIButton(buttonHorizontal->get_transform(), "Refresh", []() {});
 
             deletionConfirmationModal = Qosmetics::Core::DeletionConfirmationModal::Create(get_transform());
-            descriptorList = CreateScrollableCustomSourceList<Qosmetics::Core::QosmeticObjectTableData*>(vertical->get_transform(), std::bind(&Qosmetics::Notes::SelectionViewController::OnSelectDescriptor, this, std::placeholders::_1));
+            descriptorList = CreateScrollableCustomSourceList<Qosmetics::Core::QosmeticObjectTableData*>(vertical->get_transform(), UnityEngine::Vector2(0.0f, 0.0f), UnityEngine::Vector2(100.0f, 80.0f), std::bind(&Qosmetics::Notes::SelectionViewController::OnSelectDescriptor, this, std::placeholders::_1));
             descriptorList->deletionConfirmationModal = deletionConfirmationModal;
 
             ReloadDescriptorList();
@@ -34,25 +38,33 @@ namespace Qosmetics::Notes
     {
         std::vector<std::string> cyoobs = {};
         Qosmetics::Core::FileUtils::GetFilesInFolderPath("cyoob", cyoob_path, cyoobs);
+        auto tableView = reinterpret_cast<QuestUI::TableView*>(descriptorList->tableView);
+        int scrolledRow = tableView->get_scrolledRow();
 
         auto& descriptorSet = descriptorList->objectDescriptors;
+        int current = 0;
         for (auto& cyoob : cyoobs)
         {
+            current++;
             std::string filePath = string_format("%s/%s", cyoob_path, cyoob.c_str());
             auto orig = std::find_if(descriptorSet.begin(), descriptorSet.end(), [filePath](auto& d)
                                      { return d.get_filePath() == filePath; });
+            // check if the cyoob was already parsed
             if (orig != descriptorSet.end())
                 continue;
 
-            std::vector<uint8_t> descriptorSet;
-            if (Qosmetics::Core::ZipUtils::GetBytesFromZipFile(filePath, "package.json", descriptorSet))
+            // get bytes from the zip file that a cyoob is
+            std::vector<uint8_t> packageData;
+            if (Qosmetics::Core::ZipUtils::GetBytesFromZipFile(filePath, "package.json", packageData))
             {
                 rapidjson::Document doc;
-                doc.Parse(reinterpret_cast<char*>(descriptorSet.data()));
-                descriptorSet.emplace_back(doc["descriptor"], filePath);
+                doc.Parse(reinterpret_cast<char*>(packageData.data()));
+                // add to the set
+                descriptorSet.emplace(doc["descriptor"], filePath);
             }
         }
 
+        // check each descriptor to see if it still exists on disk, if not it should be removed from the list
         for (auto it = descriptorSet.begin(); it != descriptorSet.end(); /* nothing */)
         {
             auto itr = std::find(cyoobs.begin(), cyoobs.end(), Qosmetics::Core::FileUtils::GetFileName(it->get_filePath()));
@@ -62,8 +74,9 @@ namespace Qosmetics::Notes
                 it++;
         }
 
-        descriptorList->tableView->ReloadData();
-        descriptorList->tableView->RefreshCells(true, true);
+        tableView->ReloadData();
+        tableView->RefreshCells(true, true);
+        tableView->ScrollToCellWithIdx(std::clamp(scrolledRow, 0, (int)descriptorSet.size()), HMUI::TableView::ScrollPositionType::Beginning, true);
     }
 
     void SelectionViewController::OnSelectDescriptor(int idx)
