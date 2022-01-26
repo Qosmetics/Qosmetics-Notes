@@ -37,13 +37,15 @@ namespace Qosmetics::Notes
 
         std::string filePath = string_format("%s/%s", cyoob_path, lastUsedCyoob.c_str());
         currentManifest = Qosmetics::Core::Manifest<NoteObjectConfig>(filePath);
-        StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine()));
+        StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(nullptr)));
     }
 
-    void NoteModelContainer::LoadObject(const Qosmetics::Core::Descriptor& descriptor)
+    void NoteModelContainer::LoadObject(const Qosmetics::Core::Descriptor& descriptor, std::function<void(NoteModelContainer*)> onFinished)
     {
+        if (isLoading)
+            return;
         currentManifest = Qosmetics::Core::Manifest<NoteObjectConfig>(descriptor.get_filePath());
-        StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine()));
+        StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(onFinished)));
     }
 
     const NoteObjectConfig& NoteModelContainer::GetNoteConfig()
@@ -51,8 +53,9 @@ namespace Qosmetics::Notes
         return currentManifest.get_config();
     }
 
-    custom_types::Helpers::Coroutine NoteModelContainer::LoadBundleRoutine()
+    custom_types::Helpers::Coroutine NoteModelContainer::LoadBundleRoutine(std::function<void(NoteModelContainer*)> onFinished)
     {
+        isLoading = true;
         co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadBundleFromZipAsync(currentManifest.get_filePath(), currentManifest.get_fileName(), bundle));
 
         co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadAssetFromBundleAsync<UnityEngine::GameObject*>(bundle, "_Cyoob", currentNoteObject));
@@ -60,6 +63,10 @@ namespace Qosmetics::Notes
         auto name = currentNoteObject->get_name();
         currentNoteObject = UnityEngine::Object::Instantiate(currentNoteObject, get_transform());
         currentNoteObject->set_name(name);
+
+        isLoading = false;
+        if (onFinished)
+            onFinished(this);
 
         co_return;
     }

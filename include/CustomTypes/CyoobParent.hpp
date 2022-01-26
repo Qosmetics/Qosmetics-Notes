@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CustomTypes/CyoobHandler.hpp"
 #include "GlobalNamespace/INoteControllerDidInitEvent.hpp"
 #include "GlobalNamespace/NoteControllerBase.hpp"
 #include "UnityEngine/MonoBehaviour.hpp"
@@ -12,6 +13,7 @@
 
 DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, CyoobParent, UnityEngine::MonoBehaviour, classof(GlobalNamespace::INoteControllerDidInitEvent*),
                                  DECLARE_INSTANCE_FIELD(GlobalNamespace::NoteControllerBase*, noteController);
+                                 DECLARE_INSTANCE_FIELD(CyoobHandler*, cyoobHandler);
                                  DECLARE_INSTANCE_METHOD(void, Awake);
                                  DECLARE_INSTANCE_METHOD(void, OnDestroy);
                                  DECLARE_OVERRIDE_METHOD_MATCH(void, HandleNoteControllerDidInit, &GlobalNamespace::INoteControllerDidInitEvent::HandleNoteControllerDidInit, GlobalNamespace::NoteControllerBase* noteController);

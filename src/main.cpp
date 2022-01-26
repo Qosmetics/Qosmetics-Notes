@@ -16,7 +16,10 @@
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/Vector3.hpp"
 
+#include "CustomTypes/CyoobHandler.hpp"
 #include "CustomTypes/CyoobParent.hpp"
+#include "CustomTypes/NoteModelContainer.hpp"
+
 #include "UI/CyoobFlowCoordinator.hpp"
 #include "assets.hpp"
 
@@ -24,7 +27,13 @@
 
 REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::GameNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
 {
-    normalBasicNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
+    auto cyoobParent = normalBasicNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
+    auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
+    if (noteModelContainer->currentNoteObject)
+    {
+        auto notes = UnityEngine::Object::Instantiate(noteModelContainer->currentNoteObject, normalBasicNotePrefab->get_transform()->Find("NoteCube"));
+        cyoobParent->cyoobHandler = notes->AddComponent<Qosmetics::Notes::CyoobHandler*>();
+    }
     return normalBasicNotePrefab;
 }
 

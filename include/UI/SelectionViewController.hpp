@@ -3,6 +3,7 @@
 #include "HMUI/ViewController.hpp"
 #include "custom-types/shared/macros.hpp"
 #include "qosmetics-core/shared/UI/Components/DeletionConfirmationModal.hpp"
+#include "qosmetics-core/shared/UI/Components/QosmeticObjectTableCell.hpp"
 #include "qosmetics-core/shared/UI/Components/QosmeticObjectTableData.hpp"
 
 #ifndef DECLARE_OVERRIDE_METHOD_MATCH
@@ -20,7 +21,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SelectionViewController, HMUI::ViewContr
                       public
                       :
 
-                      void OnSelectDescriptor(int idx);
+                      void OnSelectDescriptor(Qosmetics::Core::QosmeticObjectTableCell* cell);
                       void ReloadDescriptorList();
 
 )

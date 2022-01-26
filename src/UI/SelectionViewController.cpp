@@ -1,4 +1,5 @@
 #include "UI/SelectionViewController.hpp"
+#include "CustomTypes/NoteModelContainer.hpp"
 #include "qosmetics-core/shared/Utils/FileUtils.hpp"
 #include "qosmetics-core/shared/Utils/ZipUtils.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
@@ -27,9 +28,9 @@ namespace Qosmetics::Notes
             auto refreshBtn = CreateUIButton(buttonHorizontal->get_transform(), "Refresh", []() {});
 
             deletionConfirmationModal = Qosmetics::Core::DeletionConfirmationModal::Create(get_transform());
-            descriptorList = CreateScrollableCustomSourceList<Qosmetics::Core::QosmeticObjectTableData*>(vertical->get_transform(), UnityEngine::Vector2(0.0f, 0.0f), UnityEngine::Vector2(100.0f, 80.0f), std::bind(&Qosmetics::Notes::SelectionViewController::OnSelectDescriptor, this, std::placeholders::_1));
+            descriptorList = CreateScrollableCustomSourceList<Qosmetics::Core::QosmeticObjectTableData*>(vertical->get_transform(), UnityEngine::Vector2(0.0f, 0.0f), UnityEngine::Vector2(100.0f, 80.0f), nullptr);
             descriptorList->deletionConfirmationModal = deletionConfirmationModal;
-
+            descriptorList->onSelect = std::bind(reinterpret_cast<void (SelectionViewController::*)(HMUI::TableCell*)>(&SelectionViewController::OnSelectDescriptor), this, std::placeholders::_1);
             ReloadDescriptorList();
         }
     }
@@ -79,10 +80,12 @@ namespace Qosmetics::Notes
         tableView->ScrollToCellWithIdx(std::clamp(scrolledRow, 0, (int)descriptorSet.size()), HMUI::TableView::ScrollPositionType::Beginning, true);
     }
 
-    void SelectionViewController::OnSelectDescriptor(int idx)
+    void SelectionViewController::OnSelectDescriptor(Qosmetics::Core::QosmeticObjectTableCell* cell)
     {
-        if (descriptorList->objectDescriptors.size() < idx)
-            return;
-        auto& descriptor = *std::next(descriptorList->objectDescriptors.begin(), idx);
+        if (cell)
+        {
+            auto& descriptor = cell->descriptor;
+            NoteModelContainer::get_instance()->LoadObject(descriptor);
+        }
     }
 }

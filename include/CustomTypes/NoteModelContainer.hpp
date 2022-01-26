@@ -20,14 +20,14 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, NoteModelContainer, UnityEngine::MonoBeh
                       public
                       :
 
-                      NoteModelContainer * get_instance();
-                      void LoadObject(const Qosmetics::Core::Descriptor& descriptor);
+                      static NoteModelContainer * get_instance();
+                      void LoadObject(const Qosmetics::Core::Descriptor& descriptor, std::function<void(NoteModelContainer*)> onFinished = nullptr);
                       const NoteObjectConfig& GetNoteConfig();
 
                       private
                       :
 
-                      custom_types::Helpers::Coroutine LoadBundleRoutine();
+                      custom_types::Helpers::Coroutine LoadBundleRoutine(std::function<void(NoteModelContainer*)> onFinished);
                       void UnloadBundle();
 
                       Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig> currentManifest;
