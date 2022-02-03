@@ -1,5 +1,6 @@
 #include "CustomTypes/CyoobHandler.hpp"
 #include "UnityEngine/Transform.hpp"
+#include "logging.hpp"
 
 DEFINE_TYPE(Qosmetics::Notes, CyoobHandler);
 
@@ -21,9 +22,12 @@ namespace Qosmetics::Notes
     {
         // if we are not changing which one is active, just return
         if (previouslyActive == obj)
+        {
+            DEBUG("Skipping showing specific note due to it being the same one as already active");
             return;
+        }
         // if we have not cached the note objects yet, we should do that
-        if (!objects.convert())
+        if (!objects)
             FindNotes();
 
         // for each of the 4 possibilities, check if they are the correct one
@@ -36,7 +40,7 @@ namespace Qosmetics::Notes
     void CyoobHandler::FindNotes()
     {
         // create array
-        if (!objects.convert())
+        if (!objects)
             objects = ArrayW<UnityEngine::GameObject*>(4);
         // cache local transform ptr
         auto t = get_transform();

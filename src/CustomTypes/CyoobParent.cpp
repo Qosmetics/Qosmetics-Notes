@@ -1,4 +1,5 @@
 #include "CustomTypes/CyoobParent.hpp"
+#include "logging.hpp"
 
 #include "GlobalNamespace/ColorNoteVisuals.hpp"
 #include "GlobalNamespace/ColorType.hpp"
@@ -8,6 +9,7 @@
 #include "GlobalNamespace/NoteData.hpp"
 
 #include "UnityEngine/GameObject.hpp"
+#include "UnityEngine/Transform.hpp"
 
 DEFINE_TYPE(Qosmetics::Notes, CyoobParent);
 
@@ -17,6 +19,7 @@ namespace Qosmetics::Notes
     {
         noteController = get_gameObject()->GetComponent<GlobalNamespace::NoteControllerBase*>();
         noteController->get_didInitEvent()->Add(reinterpret_cast<GlobalNamespace::INoteControllerDidInitEvent*>(this));
+        cyoobHandler = get_gameObject()->GetComponentInChildren<CyoobHandler*>();
     }
 
     void CyoobParent::OnDestroy()
@@ -28,7 +31,9 @@ namespace Qosmetics::Notes
     {
         auto gameNoteController = reinterpret_cast<GlobalNamespace::GameNoteController*>(noteController);
         if (!cyoobHandler)
+        {
             return;
+        }
 
         auto noteData = gameNoteController->get_noteData();
         bool right = noteData->get_colorType() == GlobalNamespace::ColorType::ColorB;

@@ -23,12 +23,23 @@ namespace Qosmetics::Notes
             GET_BOOL(hasSlider);
             GET_BOOL(hasBomb);
             GET_BOOL(showArrows);
+            GET_BOOL(isLegacy);
+            isDefault = false;
         }
+
+        bool get_hasDebris() const { return hasDebris; };
+        bool get_hasSlider() const { return hasSlider; };
+        bool get_hasBomb() const { return hasBomb; };
+        bool get_showArrows() const { return showArrows; };
+        bool get_isDefault() const { return isDefault; };
+        bool get_isLegacy() const { return isLegacy; };
 
     private:
         bool hasDebris = false;
         bool hasSlider = false;
         bool hasBomb = false;
-        bool showArrows = false;
+        bool showArrows = true;
+        bool isDefault = true;
+        bool isLegacy = false;
     };
 }

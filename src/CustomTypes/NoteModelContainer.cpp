@@ -10,6 +10,45 @@ DEFINE_TYPE(Qosmetics::Notes, NoteModelContainer);
 
 using namespace UnityEngine;
 
+void LegacyFixups(UnityEngine::GameObject* loadedObject)
+{
+    static auto Bomb = ConstString("Bomb");
+    static auto LeftArrow = ConstString("LeftArrow");
+    static auto RightArrow = ConstString("RightArrow");
+    static auto LeftDot = ConstString("LeftDot");
+    static auto RightDot = ConstString("RightDot");
+    static auto LeftDebris = ConstString("LeftDebris");
+    static auto RightDebris = ConstString("RightDebris");
+    static auto Notes = ConstString("Notes");
+
+    auto t = loadedObject->get_transform();
+    auto notes = GameObject::New_ctor(Notes);
+    auto nt = notes->get_transform();
+    nt->SetParent(t, false);
+
+    auto leftArrow = t->Find(LeftArrow);
+    auto rightArrow = t->Find(RightArrow);
+    auto leftDot = t->Find(LeftDot);
+    auto rightDot = t->Find(RightDot);
+
+    leftArrow->SetParent(nt, false);
+    rightArrow->SetParent(nt, false);
+    leftDot->SetParent(nt, false);
+    rightDot->SetParent(nt, false);
+
+    auto leftDebris = t->Find(LeftDebris);
+    auto rightDebris = t->Find(RightDebris);
+    if (leftDebris && rightDebris)
+    {
+        static auto Debris = ConstString("Debris");
+        auto debris = GameObject::New_ctor(Debris);
+        auto dt = debris->get_transform();
+        dt->SetParent(t, false);
+        leftDebris->SetParent(dt, false);
+        rightDebris->SetParent(dt, false);
+    }
+}
+
 namespace Qosmetics::Notes
 {
     NoteModelContainer* NoteModelContainer::instance = nullptr;
@@ -58,12 +97,17 @@ namespace Qosmetics::Notes
         isLoading = true;
         co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadBundleFromZipAsync(currentManifest.get_filePath(), currentManifest.get_fileName(), bundle));
 
-        co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadAssetFromBundleAsync<UnityEngine::GameObject*>(bundle, "_Cyoob", currentNoteObject));
+        bool isLegacy = currentManifest.get_config().get_isLegacy();
+        co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadAssetFromBundleAsync<UnityEngine::GameObject*>(bundle, isLegacy ? "_CustomNote" : "_Cyoob", currentNoteObject));
 
         auto name = currentNoteObject->get_name();
+        currentNoteObject->set_layer(8);
         currentNoteObject = UnityEngine::Object::Instantiate(currentNoteObject, get_transform());
         currentNoteObject->set_name(name);
+        if (isLegacy)
+            LegacyFixups(currentNoteObject);
 
+        currentNoteObject->SetActive(false);
         isLoading = false;
         if (onFinished)
             onFinished(this);

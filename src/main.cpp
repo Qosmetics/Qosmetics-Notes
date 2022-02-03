@@ -7,35 +7,12 @@
 #include "HMUI/ImageView.hpp"
 
 #include "qosmetics-core/shared/FlowCoordinatorRegister.hpp"
-#include "qosmetics-core/shared/RedecorationRegister.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
-
-#include "GlobalNamespace/BeatmapObjectsInstaller.hpp"
-#include "GlobalNamespace/GameNoteController.hpp"
-#include "UnityEngine/GameObject.hpp"
-#include "UnityEngine/Transform.hpp"
-#include "UnityEngine/Vector3.hpp"
-
-#include "CustomTypes/CyoobHandler.hpp"
-#include "CustomTypes/CyoobParent.hpp"
-#include "CustomTypes/NoteModelContainer.hpp"
 
 #include "UI/CyoobFlowCoordinator.hpp"
 #include "assets.hpp"
 
 #include <vector>
-
-REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::GameNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
-{
-    auto cyoobParent = normalBasicNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
-    auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
-    if (noteModelContainer->currentNoteObject)
-    {
-        auto notes = UnityEngine::Object::Instantiate(noteModelContainer->currentNoteObject, normalBasicNotePrefab->get_transform()->Find("NoteCube"));
-        cyoobParent->cyoobHandler = notes->AddComponent<Qosmetics::Notes::CyoobHandler*>();
-    }
-    return normalBasicNotePrefab;
-}
 
 QOSMETICS_FLOWCOORDINATOR_REGISTER(Cyoobs, Qosmetics::Notes::CyoobFlowCoordinator*)
 {
