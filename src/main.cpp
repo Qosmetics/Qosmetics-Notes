@@ -9,10 +9,13 @@
 #include "qosmetics-core/shared/FlowCoordinatorRegister.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
 
+#include "CustomTypes/NoteModelContainer.hpp"
 #include "UI/CyoobFlowCoordinator.hpp"
 #include "assets.hpp"
 
 #include <vector>
+
+#include "GlobalNamespace/MainFlowCoordinator.hpp"
 
 QOSMETICS_FLOWCOORDINATOR_REGISTER(Cyoobs, Qosmetics::Notes::CyoobFlowCoordinator*)
 {
@@ -21,6 +24,12 @@ QOSMETICS_FLOWCOORDINATOR_REGISTER(Cyoobs, Qosmetics::Notes::CyoobFlowCoordinato
     auto active_data = NoteIconSelected_png::getData();
     auto active = QuestUI::BeatSaberUI::VectorToSprite(std::vector<uint8_t>(active_data, active_data + NoteIconSelected_png::getLength()));
     return std::make_pair(inactive, active);
+}
+
+MAKE_AUTO_HOOK_MATCH(MainFlowCoordinator_DidActivate, &GlobalNamespace::MainFlowCoordinator::DidActivate, void, GlobalNamespace::MainFlowCoordinator* self, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+{
+    MainFlowCoordinator_DidActivate(self, firstActivation, addedToHierarchy, screenSystemEnabling);
+    auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
 }
 
 ModInfo modInfo = {ID, VERSION};

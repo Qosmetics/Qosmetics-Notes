@@ -19,6 +19,7 @@ namespace Qosmetics::Notes
     {
         noteController = get_gameObject()->GetComponent<GlobalNamespace::NoteControllerBase*>();
         noteController->get_didInitEvent()->Add(reinterpret_cast<GlobalNamespace::INoteControllerDidInitEvent*>(this));
+        colorManager = get_gameObject()->GetComponentInChildren<GlobalNamespace::ColorNoteVisuals*>()->dyn__colorManager();
         cyoobHandler = get_gameObject()->GetComponentInChildren<CyoobHandler*>();
     }
 
@@ -40,6 +41,11 @@ namespace Qosmetics::Notes
         bool dot = noteData->get_cutDirection() >= 8;
 
         cyoobHandler->ShowNote(right, dot);
+
+        UnityEngine::Color thisColor = colorManager->ColorForType(noteData->get_colorType());
+        UnityEngine::Color thatColor = colorManager->ColorForType(1 - noteData->get_colorType());
+
+        cyoobHandler->SetColors(thisColor, thatColor);
     }
 
 }

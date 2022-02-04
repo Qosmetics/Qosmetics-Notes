@@ -7,7 +7,7 @@ namespace Qosmetics::Notes
     {
         std::string lastUsedCyoob;
 
-        static Config& config;
+        static Config& get_config();
     };
 
     struct NoteConfigRegistration : public Qosmetics::Core::Config::Registration

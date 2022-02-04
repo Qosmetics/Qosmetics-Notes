@@ -20,10 +20,17 @@
 #include "CustomTypes/NoteModelContainer.hpp"
 
 #define PROPERTY_ID(identifier)                                                 \
-    int identifier()                                                            \
+    static int identifier()                                                     \
     {                                                                           \
         static int identifier = UnityEngine::Shader::PropertyToID(#identifier); \
         return identifier;                                                      \
+    }
+
+#define CONST_STRING(identifier)                    \
+    static StringW identifier()                     \
+    {                                               \
+        static ConstString identifier(#identifier); \
+        return identifier;                          \
     }
 
 namespace PropertyID
@@ -36,6 +43,13 @@ namespace PropertyID
     PROPERTY_ID(_BlendDstFactor);
     PROPERTY_ID(_BlendSrcFactorA);
     PROPERTY_ID(_BlendDstFactorA);
+}
+
+namespace ConstStrings
+{
+    CONST_STRING(NoteArrow);
+    CONST_STRING(NoteCircleGlow);
+    CONST_STRING(NoteArrowGlow);
 }
 
 #pragma region bombs
@@ -158,9 +172,9 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
         // if we don't want to show arrows, disable the arrow gameobjects
         if (!config.get_showArrows())
         {
-            noteCubeTransform->Find("NoteArrow")->get_gameObject()->SetActive(false);
-            noteCubeTransform->Find("NoteArrowGlow")->get_gameObject()->SetActive(false);
-            noteCubeTransform->Find("NoteCircleGlow")->get_gameObject()->SetActive(false);
+            noteCubeTransform->Find(ConstStrings::NoteArrow())->get_gameObject()->SetActive(false);
+            noteCubeTransform->Find(ConstStrings::NoteArrowGlow())->get_gameObject()->SetActive(false);
+            noteCubeTransform->Find(ConstStrings::NoteCircleGlow())->get_gameObject()->SetActive(false);
         }
 
         // if the note is not default config, set the mesh to nullptr so it can never show
@@ -217,12 +231,17 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
 
         cyoobParent->cyoobHandler = mirroredNotes->AddComponent<Qosmetics::Notes::CyoobHandler*>();
 
+        int childCount = mirroredNotes->get_transform()->get_childCount();
+        for (int i = 0; i < childCount; i++)
+        {
+            mirroredNotes->get_transform()->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+        }
+
         // if we don't want to show arrows, disable the arrow gameobjects
         if (!config.get_showArrows())
         {
-            static ConstString NoteArrow = "NoteArrow";
-            mirroredNoteCubeTransform->Find(NoteArrow)->get_gameObject()->SetActive(false);
-            mirroredNoteCubeTransform->Find("NoteCircleGlow")->get_gameObject()->SetActive(false);
+            mirroredNoteCubeTransform->Find(ConstStrings::NoteArrow())->get_gameObject()->SetActive(false);
+            mirroredNoteCubeTransform->Find(ConstStrings::NoteCircleGlow())->get_gameObject()->SetActive(false);
         }
 
         // if the note is not default config, set the mesh to nullptr so it can never show

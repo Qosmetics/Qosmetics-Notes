@@ -8,6 +8,8 @@
 #include "custom-types/shared/macros.hpp"
 
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, CyoobColorHandler, UnityEngine::MonoBehaviour,
+                      DECLARE_INSTANCE_FIELD(UnityEngine::Color, lastThisColor);
+                      DECLARE_INSTANCE_FIELD(UnityEngine::Color, lastThatColor);
                       DECLARE_INSTANCE_FIELD(ArrayW<UnityEngine::Material*>, customColorMaterials);
                       DECLARE_INSTANCE_FIELD(GlobalNamespace::ColorNoteVisuals*, colorNoteVisuals);
 

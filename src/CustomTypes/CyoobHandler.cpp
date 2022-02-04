@@ -35,6 +35,14 @@ namespace Qosmetics::Notes
         {
             objects[i]->SetActive(obj == i);
         }
+
+        previouslyActive = obj;
+    }
+
+    void CyoobHandler::SetColors(UnityEngine::Color thisColor, UnityEngine::Color thatColor)
+    {
+        if (previouslyActive != -1)
+            colorHandlers[previouslyActive]->SetColors(thisColor, thatColor);
     }
 
     void CyoobHandler::FindNotes()
@@ -42,14 +50,20 @@ namespace Qosmetics::Notes
         // create array
         if (!objects)
             objects = ArrayW<UnityEngine::GameObject*>(4);
+        if (!colorHandlers)
+            colorHandlers = ArrayW<CyoobColorHandler*>(4);
         // cache local transform ptr
         auto t = get_transform();
 
         // find the different objects
         objects[0] = t->Find("LeftArrow")->get_gameObject();
+        colorHandlers[0] = objects[0]->GetComponent<CyoobColorHandler*>();
         objects[1] = t->Find("RightArrow")->get_gameObject();
+        colorHandlers[1] = objects[1]->GetComponent<CyoobColorHandler*>();
         objects[2] = t->Find("LeftDot")->get_gameObject();
+        colorHandlers[2] = objects[2]->GetComponent<CyoobColorHandler*>();
         objects[3] = t->Find("RightDot")->get_gameObject();
+        colorHandlers[3] = objects[3]->GetComponent<CyoobColorHandler*>();
     }
 
 }

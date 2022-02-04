@@ -1,5 +1,8 @@
 #include "UI/SelectionViewController.hpp"
 #include "CustomTypes/NoteModelContainer.hpp"
+#include "config.hpp"
+#include "logging.hpp"
+#include "qosmetics-core/shared/ConfigRegister.hpp"
 #include "qosmetics-core/shared/Utils/FileUtils.hpp"
 #include "qosmetics-core/shared/Utils/ZipUtils.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
@@ -58,10 +61,18 @@ namespace Qosmetics::Notes
             std::vector<uint8_t> packageData;
             if (Qosmetics::Core::ZipUtils::GetBytesFromZipFile(filePath, "package.json", packageData))
             {
+                DEBUG("Got package: %s", packageData.data());
                 rapidjson::Document doc;
                 doc.Parse(reinterpret_cast<char*>(packageData.data()));
                 // add to the set
-                descriptorSet.emplace(doc["descriptor"], filePath);
+                try
+                {
+                    descriptorSet.emplace(doc["descriptor"], filePath);
+                }
+                catch (const std::runtime_error& e)
+                {
+                    ERROR("error thrown while parsing descriptor from package: %s", e.what());
+                }
             }
         }
 
@@ -86,6 +97,9 @@ namespace Qosmetics::Notes
         {
             auto& descriptor = cell->descriptor;
             NoteModelContainer::get_instance()->LoadObject(descriptor);
+
+            Qosmetics::Notes::Config::get_config().lastUsedCyoob = Qosmetics::Core::FileUtils::GetFileName(descriptor.get_filePath(), true);
+            Qosmetics::Core::Config::SaveConfig();
         }
     }
 }

@@ -1,12 +1,18 @@
 #include "CustomTypes/NoteModelContainer.hpp"
 #include "config.hpp"
+#include "logging.hpp"
 #include "qosmetics-core/shared/Utils/BundleUtils.hpp"
+#include "qosmetics-core/shared/Utils/FileUtils.hpp"
 #include "qosmetics-core/shared/Utils/ZipUtils.hpp"
 #include "static-defines.hpp"
 
+#include "GlobalNamespace/SharedCoroutineStarter.hpp"
+#include "UnityEngine/Coroutine.hpp"
 #include "UnityEngine/Transform.hpp"
 
 DEFINE_TYPE(Qosmetics::Notes, NoteModelContainer);
+
+#define STARTCOROUTINE(routine) GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(routine)
 
 using namespace UnityEngine;
 
@@ -70,12 +76,15 @@ namespace Qosmetics::Notes
     void NoteModelContainer::Start()
     {
         // TODO: Start loading last loaded object or something I guess
-        auto lastUsedCyoob = Qosmetics::Notes::Config::config.lastUsedCyoob;
+        auto lastUsedCyoob = Qosmetics::Notes::Config::get_config().lastUsedCyoob;
         if (lastUsedCyoob == "" || lastUsedCyoob == "Default")
             return;
 
-        std::string filePath = string_format("%s/%s", cyoob_path, lastUsedCyoob.c_str());
+        std::string filePath = string_format("%s/%s.cyoob", cyoob_path, lastUsedCyoob.c_str());
+        if (!fileexists(filePath))
+            return;
         currentManifest = Qosmetics::Core::Manifest<NoteObjectConfig>(filePath);
+        INFO("Loading Note Object %s", currentManifest.get_descriptor().get_name().data());
         StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(nullptr)));
     }
 
@@ -83,6 +92,9 @@ namespace Qosmetics::Notes
     {
         if (isLoading)
             return;
+        if (descriptor.get_filePath() == currentManifest.get_filePath())
+            return;
+        INFO("Loading Note Object %s", descriptor.get_name().data());
         currentManifest = Qosmetics::Core::Manifest<NoteObjectConfig>(descriptor.get_filePath());
         StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(onFinished)));
     }
@@ -95,6 +107,11 @@ namespace Qosmetics::Notes
     custom_types::Helpers::Coroutine NoteModelContainer::LoadBundleRoutine(std::function<void(NoteModelContainer*)> onFinished)
     {
         isLoading = true;
+        if (currentNoteObject)
+            Object::DestroyImmediate(currentNoteObject);
+        if (bundle)
+            bundle->Unload(true);
+
         co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadBundleFromZipAsync(currentManifest.get_filePath(), currentManifest.get_fileName(), bundle));
 
         bool isLegacy = currentManifest.get_config().get_isLegacy();
@@ -108,6 +125,7 @@ namespace Qosmetics::Notes
             LegacyFixups(currentNoteObject);
 
         currentNoteObject->SetActive(false);
+
         isLoading = false;
         if (onFinished)
             onFinished(this);
@@ -115,6 +133,21 @@ namespace Qosmetics::Notes
         co_return;
     }
 
+    void NoteModelContainer::Default()
+    {
+        if (isLoading)
+            return;
+        if (currentNoteObject)
+        {
+            Object::DestroyImmediate(currentNoteObject);
+            currentNoteObject = nullptr;
+        }
+        if (bundle)
+        {
+            bundle->Unload(true);
+            bundle = nullptr;
+        }
+    }
     void NoteModelContainer::OnDestroy()
     {
         instance = nullptr;
