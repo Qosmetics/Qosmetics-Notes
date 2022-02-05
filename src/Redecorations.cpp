@@ -1,9 +1,11 @@
 #include "GlobalNamespace/BeatmapObjectsInstaller.hpp"
 #include "GlobalNamespace/BombNoteController.hpp"
+#include "GlobalNamespace/EffectPoolsManualInstaller.hpp"
 #include "GlobalNamespace/FakeMirrorObjectsInstaller.hpp"
 #include "GlobalNamespace/GameNoteController.hpp"
 #include "GlobalNamespace/MirroredBombNoteController.hpp"
 #include "GlobalNamespace/MirroredCubeNoteController.hpp"
+#include "GlobalNamespace/NoteDebris.hpp"
 
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Material.hpp"
@@ -17,14 +19,11 @@
 #include "CustomTypes/CyoobColorHandler.hpp"
 #include "CustomTypes/CyoobHandler.hpp"
 #include "CustomTypes/CyoobParent.hpp"
+#include "CustomTypes/DebrisColorHandler.hpp"
+#include "CustomTypes/DebrisHandler.hpp"
+#include "CustomTypes/DebrisParent.hpp"
 #include "CustomTypes/NoteModelContainer.hpp"
-
-#define PROPERTY_ID(identifier)                                                 \
-    static int identifier()                                                     \
-    {                                                                           \
-        static int identifier = UnityEngine::Shader::PropertyToID(#identifier); \
-        return identifier;                                                      \
-    }
+#include "PropertyID.hpp"
 
 #define CONST_STRING(identifier)                    \
     static StringW identifier()                     \
@@ -32,18 +31,6 @@
         static ConstString identifier(#identifier); \
         return identifier;                          \
     }
-
-namespace PropertyID
-{
-    PROPERTY_ID(_Alpha);
-    PROPERTY_ID(_StencilRefID);
-    PROPERTY_ID(_StencilComp);
-    PROPERTY_ID(_StencilOp);
-    PROPERTY_ID(_BlendSrcFactor);
-    PROPERTY_ID(_BlendDstFactor);
-    PROPERTY_ID(_BlendSrcFactorA);
-    PROPERTY_ID(_BlendDstFactorA);
-}
 
 namespace ConstStrings
 {
@@ -278,4 +265,45 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
     }
     return mirroredGameNoteControllerPrefab;
 }
+#pragma endregion
+
+#pragma region debris
+
+GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab)
+{
+    auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
+    auto& config = noteModelContainer->GetNoteConfig();
+    if (config.get_hasDebris())
+    {
+        auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
+
+        auto meshTransform = noteDebrisPrefab->dyn__meshTransform();
+        auto actualDebris = noteModelContainer->currentNoteObject->get_transform()->Find("Debris");
+        auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
+        debris->set_name("Debris");
+        debris->get_transform()->set_localScale({0.4f, 0.4f, 0.4f});
+
+        debris->AddComponent<Qosmetics::Notes::DebrisHandler*>();
+
+        int childCount = debris->get_transform()->get_childCount();
+        for (int i = 0; i < childCount; i++)
+        {
+            debris->get_transform()->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+        }
+
+        meshTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
+    }
+    return noteDebrisPrefab;
+}
+
+REDECORATION_REGISTRATION(noteDebrisHDPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::EffectPoolsManualInstaller*)
+{
+    return RedecorateNoteDebris(noteDebrisHDPrefab);
+}
+
+REDECORATION_REGISTRATION(noteDebrisLWPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::EffectPoolsManualInstaller*)
+{
+    return RedecorateNoteDebris(noteDebrisLWPrefab);
+}
+
 #pragma endregion

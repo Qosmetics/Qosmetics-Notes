@@ -46,8 +46,9 @@ namespace Qosmetics::Notes
     {
     }
 
-    // QOSMETICS_CONFIG_REGISTER(NoteConfigRegistration, "cyoobConfig");
+    QOSMETICS_CONFIG_REGISTER(NoteConfigRegistration, "cyoobConfig");
 
+    /*
     struct config_registration_NoteConfigRegistration : public NoteConfigRegistration
     {
         config_registration_NoteConfigRegistration() : NoteConfigRegistration("cyoobConfig")
@@ -56,4 +57,5 @@ namespace Qosmetics::Notes
         };
     };
     static config_registration_NoteConfigRegistration config_registration_NoteConfigRegistration_Instance = config_registration_NoteConfigRegistration();
+    */
 }

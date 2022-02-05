@@ -1,4 +1,4 @@
-#include "CustomTypes/CyoobColorHandler.hpp"
+#include "CustomTypes/DebrisColorHandler.hpp"
 #include "MaterialUtils.hpp"
 #include "PropertyID.hpp"
 #include "logging.hpp"
@@ -6,11 +6,11 @@
 #include "UnityEngine/Renderer.hpp"
 #include "UnityEngine/Shader.hpp"
 
-DEFINE_TYPE(Qosmetics::Notes, CyoobColorHandler);
+DEFINE_TYPE(Qosmetics::Notes, DebrisColorHandler);
 
 namespace Qosmetics::Notes
 {
-    void CyoobColorHandler::Awake()
+    void DebrisColorHandler::Awake()
     {
         auto renderers = GetComponentsInChildren<UnityEngine::Renderer*>(true);
 
@@ -29,10 +29,11 @@ namespace Qosmetics::Notes
         customColorMaterials = il2cpp_utils::vectorToArray(customColorMaterialsVec);
     }
 
-    void CyoobColorHandler::SetColors(UnityEngine::Color thisColor, UnityEngine::Color thatColor)
+    void DebrisColorHandler::SetColors(UnityEngine::Color thisColor, UnityEngine::Color thatColor)
     {
         if (lastThisColor == thisColor && lastThatColor == thatColor)
             return;
+
         DEBUG("%p: setting colors!", this);
         DEBUG("thisColor: %.2f, %.2f, %.2f, %.2f", thisColor.r, thisColor.g, thisColor.b, thisColor.a);
         DEBUG("thatColor: %.2f, %.2f, %.2f, %.2f", thatColor.r, thatColor.g, thatColor.b, thatColor.a);

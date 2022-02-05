@@ -54,7 +54,7 @@ public:
         static funcType hook() { return hook_##name_; }                                                                                             \
         static retval hook_##name_(__VA_ARGS__);                                                                                                    \
     };                                                                                                                                              \
-    AUTO_INSTALL(name_)                                                                                                                             \
+    AUTO_INSTALL(name_);                                                                                                                            \
     retval Hook_##name_::hook_##name_(__VA_ARGS__)
 
 #define MAKE_AUTO_HOOK_ORIG_MATCH(name_, mPtr, retval, ...)                                                                                         \
@@ -69,5 +69,5 @@ public:
         static funcType hook() { return hook_##name_; }                                                                                             \
         static retval hook_##name_(__VA_ARGS__);                                                                                                    \
     };                                                                                                                                              \
-    AUTO_INSTALL_ORIG(name_)                                                                                                                        \
+    AUTO_INSTALL_ORIG(name_);                                                                                                                       \
     retval Hook_##name_::hook_##name_(__VA_ARGS__)
