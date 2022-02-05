@@ -12,9 +12,15 @@
 #include "sombrero/shared/FastQuaternion.hpp"
 #include "sombrero/shared/FastVector3.hpp"
 #include "sombrero/shared/MiscUtils.hpp"
+#include "sombrero/shared/RandomUtils.hpp"
 
 #include "CustomTypes/DebrisParent.hpp"
 #include "hooks.hpp"
+
+static constexpr Sombrero::FastVector3 Cross(const Sombrero::FastVector3& lhs, const Sombrero::FastVector3& rhs)
+{
+    return Sombrero::FastVector3(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x);
+}
 
 // this method is orig because it does not call orig
 // it does not call orig because we need access to the spawned notedebris which is not possible in any other way
@@ -22,26 +28,26 @@ MAKE_AUTO_HOOK_ORIG_MATCH(NoteDebrisSpawner_SpawnDebris, &GlobalNamespace::NoteD
 {
     GlobalNamespace::NoteDebris* noteDebris = self->dyn__noteDebrisPool()->Spawn();
     noteDebris->get_didFinishEvent()->Add(reinterpret_cast<GlobalNamespace::INoteDebrisDidFinishEvent*>(self));
-    noteDebris->get_transform()->SetPositionAndRotation(Sombrero::FastVector3::zero(), UnityEngine::Quaternion::get_identity());
+    noteDebris->get_transform()->SetPositionAndRotation(Sombrero::FastVector3::zero(), Sombrero::FastQuaternion::identity());
     GlobalNamespace::NoteDebris* noteDebris2 = self->dyn__noteDebrisPool()->Spawn();
     noteDebris2->get_didFinishEvent()->Add(reinterpret_cast<GlobalNamespace::INoteDebrisDidFinishEvent*>(self));
-    noteDebris2->get_transform()->SetPositionAndRotation(Sombrero::FastVector3::zero(), UnityEngine::Quaternion::get_identity());
-    float magnitude = moveVec.get_magnitude();
+    noteDebris2->get_transform()->SetPositionAndRotation(Sombrero::FastVector3::zero(), Sombrero::FastQuaternion::identity());
+    float magnitude = Sombrero::sqroot(double(moveVec.x * moveVec.x) + double(moveVec.y * moveVec.y) + double(moveVec.z * moveVec.z));
     float lifeTime = std::clamp(timeToNextColorNote + 0.05f, 0.2f, 2.0f);
     Sombrero::FastVector3 vector = UnityEngine::Vector3::ProjectOnPlane(saberDir, moveVec / magnitude);
     Sombrero::FastVector3 vector2 = vector * (saberSpeed * self->dyn__cutDirMultiplier()) + moveVec * self->dyn__moveSpeedMultiplier();
     if (cutPoint.y < 1.3f)
-    {
         vector2.y = std::min(vector2.y, 0.0f);
-    }
     else if (cutPoint.y > 1.3f)
-    {
         vector2.y = std::min(vector2.y, 0.0f);
-    }
     Sombrero::FastQuaternion rotation = self->get_transform()->get_rotation();
-    Sombrero::FastVector3 force = rotation * (-(cutNormal + UnityEngine::Random::get_onUnitSphere() * 0.1f) * self->dyn__fromCenterSpeed() + vector2);
-    Sombrero::FastVector3 force2 = rotation * ((cutNormal + UnityEngine::Random::get_onUnitSphere() * 0.1f) * self->dyn__fromCenterSpeed() + vector2);
-    Sombrero::FastVector3 vector3 = rotation * Sombrero::FastVector3::Cross(cutNormal, vector) * self->dyn__rotation() / std::max(1.0f, timeToNextColorNote * 2.0f);
+    Sombrero::FastVector3 randomOnSphere(Sombrero::RandomFast::randomNumber(0.0f), Sombrero::RandomFast::randomNumber(0.0f), Sombrero::RandomFast::randomNumber(0.0f));
+    Sombrero::FastVector3 force = rotation * (-(cutNormal + randomOnSphere * 0.1f) * self->dyn__fromCenterSpeed() + vector2);
+    randomOnSphere.Normalize();
+    Sombrero::FastVector3 randomOnSphere2(Sombrero::RandomFast::randomNumber(0.0f), Sombrero::RandomFast::randomNumber(0.0f), Sombrero::RandomFast::randomNumber(0.0f));
+    randomOnSphere2.Normalize();
+    Sombrero::FastVector3 force2 = rotation * ((cutNormal + randomOnSphere2 * 0.1f) * self->dyn__fromCenterSpeed() + vector2);
+    Sombrero::FastVector3 vector3 = rotation * Cross(cutNormal, vector) * self->dyn__rotation() / std::max(1.0f, timeToNextColorNote * 2.0f);
     Sombrero::FastVector3 position = self->get_transform()->get_position();
     noteDebris->Init(colorType, notePos, noteRotation, moveVec, noteScale, position, rotation, cutPoint, -cutNormal, force, -vector3, lifeTime);
     noteDebris2->Init(colorType, notePos, noteRotation, moveVec, noteScale, position, rotation, cutPoint, cutNormal, force2, vector3, lifeTime);

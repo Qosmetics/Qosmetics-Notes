@@ -29,9 +29,9 @@ namespace Qosmetics::Notes
         customColorMaterials = il2cpp_utils::vectorToArray(customColorMaterialsVec);
     }
 
-    void DebrisColorHandler::SetColors(UnityEngine::Color thisColor, UnityEngine::Color thatColor)
+    void DebrisColorHandler::SetColors(Sombrero::FastColor thisColor, Sombrero::FastColor thatColor)
     {
-        if (lastThisColor == thisColor && lastThatColor == thatColor)
+        if (lastThisColor.operator==(thisColor) && lastThatColor.operator==(thatColor))
             return;
 
         DEBUG("%p: setting colors!", this);
