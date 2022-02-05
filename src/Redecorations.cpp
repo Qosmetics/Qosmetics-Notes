@@ -15,6 +15,8 @@
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/Vector3.hpp"
 #include "qosmetics-core/shared/RedecorationRegister.hpp"
+#include "sombrero/shared/FastQuaternion.hpp"
+#include "sombrero/shared/FastVector3.hpp"
 
 #include "CustomTypes/CyoobColorHandler.hpp"
 #include "CustomTypes/CyoobHandler.hpp"
@@ -51,6 +53,8 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
         auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
         bomb->set_name("Bomb");
         bomb->get_transform()->set_localScale(UnityEngine::Vector3(0.4f, 0.4f, 0.4f));
+        bomb->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
+        bomb->get_transform()->set_localRotation(Sombrero::FastQuaternion::identity());
         auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
         meshRenderer->set_enabled(false);
 
@@ -93,38 +97,41 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
     if (noteModelContainer->currentNoteObject && config.get_hasBomb())
     {
         auto mesh = mirroredBombNoteControllerPrefab->get_transform()->Find("Mesh");
-        auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find("Bomb");
-        auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
-        bomb->set_name("Bomb");
-        bomb->get_transform()->set_localScale(UnityEngine::Vector3(0.4f, 0.4f, 0.4f));
         auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
         meshRenderer->set_enabled(false);
-
-        auto renderers = bomb->GetComponentsInChildren<UnityEngine::MeshRenderer*>(true);
-
-        for (auto renderer : renderers)
+        if (config.get_isMirrorable())
         {
-            auto materials = renderer->get_materials();
-            for (auto material : materials)
-            {
-                material->set_renderQueue(1951);
-                if (material->HasProperty(PropertyID::_Alpha()))
-                    material->SetFloat(PropertyID::_Alpha(), 0.05f);
-                if (material->HasProperty(PropertyID::_StencilRefID()))
-                    material->SetFloat(PropertyID::_StencilRefID(), 1);
-                if (material->HasProperty(PropertyID::_StencilComp()))
-                    material->SetFloat(PropertyID::_StencilComp(), 3);
-                if (material->HasProperty(PropertyID::_StencilOp()))
-                    material->SetFloat(PropertyID::_StencilOp(), 0);
+            auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find("Bomb");
+            auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
+            bomb->set_name("Bomb");
+            bomb->get_transform()->set_localScale(UnityEngine::Vector3(0.4f, 0.4f, 0.4f));
 
-                if (material->HasProperty(PropertyID::_BlendDstFactor()))
-                    material->SetFloat(PropertyID::_BlendDstFactor(), 10);
-                if (material->HasProperty(PropertyID::_BlendDstFactorA()))
-                    material->SetFloat(PropertyID::_BlendDstFactorA(), 0);
-                if (material->HasProperty(PropertyID::_BlendSrcFactor()))
-                    material->SetFloat(PropertyID::_BlendSrcFactor(), 5);
-                if (material->HasProperty(PropertyID::_BlendSrcFactorA()))
-                    material->SetFloat(PropertyID::_BlendSrcFactorA(), 0);
+            auto renderers = bomb->GetComponentsInChildren<UnityEngine::MeshRenderer*>(true);
+
+            for (auto renderer : renderers)
+            {
+                auto materials = renderer->get_materials();
+                for (auto material : materials)
+                {
+                    material->set_renderQueue(1951);
+                    if (material->HasProperty(PropertyID::_Alpha()))
+                        material->SetFloat(PropertyID::_Alpha(), 0.05f);
+                    if (material->HasProperty(PropertyID::_StencilRefID()))
+                        material->SetFloat(PropertyID::_StencilRefID(), 1);
+                    if (material->HasProperty(PropertyID::_StencilComp()))
+                        material->SetFloat(PropertyID::_StencilComp(), 3);
+                    if (material->HasProperty(PropertyID::_StencilOp()))
+                        material->SetFloat(PropertyID::_StencilOp(), 0);
+
+                    if (material->HasProperty(PropertyID::_BlendDstFactor()))
+                        material->SetFloat(PropertyID::_BlendDstFactor(), 10);
+                    if (material->HasProperty(PropertyID::_BlendDstFactorA()))
+                        material->SetFloat(PropertyID::_BlendDstFactorA(), 0);
+                    if (material->HasProperty(PropertyID::_BlendSrcFactor()))
+                        material->SetFloat(PropertyID::_BlendSrcFactor(), 5);
+                    if (material->HasProperty(PropertyID::_BlendSrcFactorA()))
+                        material->SetFloat(PropertyID::_BlendSrcFactorA(), 0);
+                }
             }
         }
     }
@@ -153,7 +160,10 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
         int childCount = notes->get_transform()->get_childCount();
         for (int i = 0; i < childCount; i++)
         {
-            notes->get_transform()->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+            auto child = notes->get_transform()->GetChild(i);
+            child->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+            child->set_localPosition(Sombrero::FastVector3::zero());
+            child->set_localRotation(Sombrero::FastQuaternion::identity());
         }
 
         // if we don't want to show arrows, disable the arrow gameobjects
@@ -206,60 +216,66 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
     auto& config = noteModelContainer->GetNoteConfig();
     if (noteModelContainer->currentNoteObject)
     {
-        auto cyoobParent = mirroredGameNoteControllerPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
-        // get the notecubetransform to edit it's children
         auto mirroredNoteCubeTransform = mirroredGameNoteControllerPrefab->get_transform()->Find("NoteCube");
-        auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find("Notes");
-
-        // instantiate the notes prefab
-        auto mirroredNotes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), mirroredNoteCubeTransform);
-        mirroredNotes->set_name("Notes");
-        mirroredNotes->get_transform()->set_localScale({0.4f, 0.4f, 0.4f});
-
-        cyoobParent->cyoobHandler = mirroredNotes->AddComponent<Qosmetics::Notes::CyoobHandler*>();
-
-        int childCount = mirroredNotes->get_transform()->get_childCount();
-        for (int i = 0; i < childCount; i++)
+        if (config.get_isMirrorable())
         {
-            mirroredNotes->get_transform()->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
-        }
+            auto cyoobParent = mirroredGameNoteControllerPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
+            // get the notecubetransform to edit it's children
+            auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find("Notes");
 
-        // if we don't want to show arrows, disable the arrow gameobjects
-        if (!config.get_showArrows())
-        {
-            mirroredNoteCubeTransform->Find(ConstStrings::NoteArrow())->get_gameObject()->SetActive(false);
-            mirroredNoteCubeTransform->Find(ConstStrings::NoteCircleGlow())->get_gameObject()->SetActive(false);
-        }
+            // instantiate the notes prefab
+            auto mirroredNotes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), mirroredNoteCubeTransform);
+            mirroredNotes->set_name("Notes");
+            mirroredNotes->get_transform()->set_localScale({0.4f, 0.4f, 0.4f});
 
-        // if the note is not default config, set the mesh to nullptr so it can never show
-        if (!config.get_isDefault())
-            mirroredNoteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
+            cyoobParent->cyoobHandler = mirroredNotes->AddComponent<Qosmetics::Notes::CyoobHandler*>();
 
-        auto renderers = mirroredNotes->GetComponentsInChildren<UnityEngine::MeshRenderer*>(true);
-
-        for (auto renderer : renderers)
-        {
-            auto materials = renderer->get_materials();
-            for (auto material : materials)
+            int childCount = mirroredNotes->get_transform()->get_childCount();
+            for (int i = 0; i < childCount; i++)
             {
-                material->set_renderQueue(1951);
-                if (material->HasProperty(PropertyID::_Alpha()))
-                    material->SetFloat(PropertyID::_Alpha(), 0.05f);
-                if (material->HasProperty(PropertyID::_StencilRefID()))
-                    material->SetFloat(PropertyID::_StencilRefID(), 1);
-                if (material->HasProperty(PropertyID::_StencilComp()))
-                    material->SetFloat(PropertyID::_StencilComp(), 3);
-                if (material->HasProperty(PropertyID::_StencilOp()))
-                    material->SetFloat(PropertyID::_StencilOp(), 0);
+                auto child = mirroredNotes->get_transform()->GetChild(i);
+                child->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+                child->set_localPosition(Sombrero::FastVector3::zero());
+                child->set_localRotation(Sombrero::FastQuaternion::identity());
+            }
 
-                if (material->HasProperty(PropertyID::_BlendDstFactor()))
-                    material->SetFloat(PropertyID::_BlendDstFactor(), 10);
-                if (material->HasProperty(PropertyID::_BlendDstFactorA()))
-                    material->SetFloat(PropertyID::_BlendDstFactorA(), 0);
-                if (material->HasProperty(PropertyID::_BlendSrcFactor()))
-                    material->SetFloat(PropertyID::_BlendSrcFactor(), 5);
-                if (material->HasProperty(PropertyID::_BlendSrcFactorA()))
-                    material->SetFloat(PropertyID::_BlendSrcFactorA(), 0);
+            // if we don't want to show arrows, disable the arrow gameobjects
+            if (!config.get_showArrows())
+            {
+                mirroredNoteCubeTransform->Find(ConstStrings::NoteArrow())->get_gameObject()->SetActive(false);
+                mirroredNoteCubeTransform->Find(ConstStrings::NoteCircleGlow())->get_gameObject()->SetActive(false);
+            }
+
+            // if the note is not default config, set the mesh to nullptr so it can never show
+            if (!config.get_isDefault())
+                mirroredNoteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
+
+            auto renderers = mirroredNotes->GetComponentsInChildren<UnityEngine::MeshRenderer*>(true);
+
+            for (auto renderer : renderers)
+            {
+                auto materials = renderer->get_materials();
+                for (auto material : materials)
+                {
+                    material->set_renderQueue(1951);
+                    if (material->HasProperty(PropertyID::_Alpha()))
+                        material->SetFloat(PropertyID::_Alpha(), 0.05f);
+                    if (material->HasProperty(PropertyID::_StencilRefID()))
+                        material->SetFloat(PropertyID::_StencilRefID(), 1);
+                    if (material->HasProperty(PropertyID::_StencilComp()))
+                        material->SetFloat(PropertyID::_StencilComp(), 3);
+                    if (material->HasProperty(PropertyID::_StencilOp()))
+                        material->SetFloat(PropertyID::_StencilOp(), 0);
+
+                    if (material->HasProperty(PropertyID::_BlendDstFactor()))
+                        material->SetFloat(PropertyID::_BlendDstFactor(), 10);
+                    if (material->HasProperty(PropertyID::_BlendDstFactorA()))
+                        material->SetFloat(PropertyID::_BlendDstFactorA(), 0);
+                    if (material->HasProperty(PropertyID::_BlendSrcFactor()))
+                        material->SetFloat(PropertyID::_BlendSrcFactor(), 5);
+                    if (material->HasProperty(PropertyID::_BlendSrcFactorA()))
+                        material->SetFloat(PropertyID::_BlendSrcFactorA(), 0);
+                }
             }
         }
     }
@@ -288,7 +304,10 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
         int childCount = debris->get_transform()->get_childCount();
         for (int i = 0; i < childCount; i++)
         {
-            debris->get_transform()->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+            auto child = debris->get_transform()->GetChild(i);
+            child->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+            child->set_localPosition(Sombrero::FastVector3::zero());
+            child->set_localRotation(Sombrero::FastQuaternion::identity());
         }
 
         meshTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);

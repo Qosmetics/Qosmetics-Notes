@@ -20,9 +20,11 @@ namespace Qosmetics::Notes
     {
         if (firstActivation)
         {
-            settingsViewController = CreateViewController<Qosmetics::Notes::SettingsViewController*>();
-            selectionViewController = CreateViewController<Qosmetics::Notes::SelectionViewController*>();
             previewViewController = CreateViewController<Qosmetics::Notes::PreviewViewController*>();
+            settingsViewController = CreateViewController<Qosmetics::Notes::SettingsViewController*>();
+            reinterpret_cast<Qosmetics::Notes::SettingsViewController*>(settingsViewController)->previewViewController = reinterpret_cast<Qosmetics::Notes::PreviewViewController*>(previewViewController);
+            selectionViewController = CreateViewController<Qosmetics::Notes::SelectionViewController*>();
+            reinterpret_cast<Qosmetics::Notes::SelectionViewController*>(selectionViewController)->previewViewController = reinterpret_cast<Qosmetics::Notes::PreviewViewController*>(previewViewController);
             ProvideInitialViewControllers(selectionViewController, settingsViewController, previewViewController, nullptr, nullptr);
 
             set_showBackButton(true);

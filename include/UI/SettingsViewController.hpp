@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HMUI/ViewController.hpp"
+#include "UI/PreviewViewController.hpp"
 #include "custom-types/shared/macros.hpp"
 
 #ifndef DECLARE_OVERRIDE_METHOD_MATCH
@@ -9,7 +10,7 @@
 #endif
 
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SettingsViewController, HMUI::ViewController,
-
+                        DECLARE_INSTANCE_FIELD(PreviewViewController*, previewViewController);
                       DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
 
 )

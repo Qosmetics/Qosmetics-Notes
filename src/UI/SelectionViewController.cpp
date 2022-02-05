@@ -61,9 +61,9 @@ namespace Qosmetics::Notes
             std::vector<uint8_t> packageData;
             if (Qosmetics::Core::ZipUtils::GetBytesFromZipFile(filePath, "package.json", packageData))
             {
-                DEBUG("Got package: %s", packageData.data());
+                DEBUG("Got package: %s", std::string(packageData.begin(), packageData.end()).c_str());
                 rapidjson::Document doc;
-                doc.Parse(reinterpret_cast<char*>(packageData.data()));
+                doc.Parse(std::string(packageData.begin(), packageData.end()));
                 // add to the set
                 try
                 {
@@ -96,10 +96,15 @@ namespace Qosmetics::Notes
         if (cell)
         {
             auto& descriptor = cell->descriptor;
-            NoteModelContainer::get_instance()->LoadObject(descriptor);
+            NoteModelContainer::get_instance()->LoadObject(descriptor, std::bind(&SelectionViewController::OnObjectLoadFinished, this));
 
             Qosmetics::Notes::Config::get_config().lastUsedCyoob = Qosmetics::Core::FileUtils::GetFileName(descriptor.get_filePath(), true);
             Qosmetics::Core::Config::SaveConfig();
         }
+    }
+
+    void SelectionViewController::OnObjectLoadFinished()
+    {
+        // something to do after we changed the object
     }
 }

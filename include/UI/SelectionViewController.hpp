@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HMUI/ViewController.hpp"
+#include "UI/PreviewViewController.hpp"
 #include "custom-types/shared/macros.hpp"
 #include "qosmetics-core/shared/UI/Components/DeletionConfirmationModal.hpp"
 #include "qosmetics-core/shared/UI/Components/QosmeticObjectTableCell.hpp"
@@ -13,6 +14,7 @@
 
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SelectionViewController, HMUI::ViewController,
 
+                      DECLARE_INSTANCE_FIELD(PreviewViewController*, previewViewController);
                       DECLARE_INSTANCE_FIELD(Qosmetics::Core::QosmeticObjectTableData*, descriptorList);
                       DECLARE_INSTANCE_FIELD(Qosmetics::Core::DeletionConfirmationModal*, deletionConfirmationModal);
 
@@ -23,5 +25,6 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SelectionViewController, HMUI::ViewContr
 
                       void OnSelectDescriptor(Qosmetics::Core::QosmeticObjectTableCell* cell);
                       void ReloadDescriptorList();
+                      void OnObjectLoadFinished();
 
 )

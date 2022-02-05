@@ -115,7 +115,8 @@ namespace Qosmetics::Notes
         co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadBundleFromZipAsync(currentManifest.get_filePath(), currentManifest.get_fileName(), bundle));
 
         bool isLegacy = currentManifest.get_config().get_isLegacy();
-        co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadAssetFromBundleAsync<UnityEngine::GameObject*>(bundle, isLegacy ? "_CustomNote" : "_Cyoob", currentNoteObject));
+        DEBUG("Loading %sCyoob", isLegacy ? "legacy " : "");
+        co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadAssetFromBundleAsync<UnityEngine::GameObject*>(bundle, isLegacy ? "_CustomBloq" : "_Cyoob", currentNoteObject));
 
         auto name = currentNoteObject->get_name();
         currentNoteObject->set_layer(8);

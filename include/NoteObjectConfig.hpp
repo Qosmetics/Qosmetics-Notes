@@ -11,6 +11,12 @@
     }
 
 #endif
+
+#ifndef CONST_GETTER
+#define CONST_GETTER(identifier) \
+    auto get_##identifier() const { return identifier; }
+#endif
+
 namespace Qosmetics::Notes
 {
     class NoteObjectConfig : public Qosmetics::Core::BasicConfig
@@ -24,15 +30,17 @@ namespace Qosmetics::Notes
             GET_BOOL(hasBomb);
             GET_BOOL(showArrows);
             GET_BOOL(isLegacy);
+            GET_BOOL(isMirrorable);
             isDefault = false;
         }
 
-        bool get_hasDebris() const { return hasDebris; };
-        bool get_hasSlider() const { return hasSlider; };
-        bool get_hasBomb() const { return hasBomb; };
-        bool get_showArrows() const { return showArrows; };
-        bool get_isDefault() const { return isDefault; };
-        bool get_isLegacy() const { return isLegacy; };
+        CONST_GETTER(hasDebris)
+        CONST_GETTER(hasSlider)
+        CONST_GETTER(hasBomb)
+        CONST_GETTER(showArrows)
+        CONST_GETTER(isDefault)
+        CONST_GETTER(isLegacy)
+        CONST_GETTER(isMirrorable)
 
     private:
         bool hasDebris = false;
@@ -41,5 +49,6 @@ namespace Qosmetics::Notes
         bool showArrows = true;
         bool isDefault = true;
         bool isLegacy = false;
+        bool isMirrorable = false;
     };
 }
