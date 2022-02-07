@@ -13,6 +13,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, DebrisColorHandler, UnityEngine::MonoBeh
                       DECLARE_INSTANCE_FIELD(ArrayW<UnityEngine::Material*>, customColorMaterials);
 
                       DECLARE_INSTANCE_METHOD(void, Awake);
+                      DECLARE_INSTANCE_METHOD(void, FetchCCMaterials);
                       DECLARE_INSTANCE_METHOD(void, SetColors, Sombrero::FastColor thisColor, Sombrero::FastColor thatColor);
 
 );

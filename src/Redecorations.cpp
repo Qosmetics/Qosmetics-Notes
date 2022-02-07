@@ -1,8 +1,10 @@
 #include "GlobalNamespace/BeatmapObjectsInstaller.hpp"
 #include "GlobalNamespace/BombNoteController.hpp"
+#include "GlobalNamespace/ColorScheme.hpp"
 #include "GlobalNamespace/EffectPoolsManualInstaller.hpp"
 #include "GlobalNamespace/FakeMirrorObjectsInstaller.hpp"
 #include "GlobalNamespace/GameNoteController.hpp"
+#include "GlobalNamespace/GameplayCoreSceneSetupData.hpp"
 #include "GlobalNamespace/MirroredBombNoteController.hpp"
 #include "GlobalNamespace/MirroredCubeNoteController.hpp"
 #include "GlobalNamespace/NoteDebris.hpp"
@@ -158,12 +160,29 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
 
         cyoobParent->cyoobHandler = notes->AddComponent<Qosmetics::Notes::CyoobHandler*>();
         int childCount = notes->get_transform()->get_childCount();
+
+        auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
+        auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
+        auto leftColor = colorScheme->dyn__saberAColor();
+        auto rightColor = colorScheme->dyn__saberBColor();
+
         for (int i = 0; i < childCount; i++)
         {
             auto child = notes->get_transform()->GetChild(i);
-            child->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
             child->set_localPosition(Sombrero::FastVector3::zero());
             child->set_localRotation(Sombrero::FastQuaternion::identity());
+
+            /// add color handler and set colors
+            auto colorHandler = child->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+            colorHandler->FetchCCMaterials();
+            if (child->get_name().starts_with("Left"))
+            {
+                colorHandler->SetColors(leftColor, rightColor);
+            }
+            else
+            {
+                colorHandler->SetColors(rightColor, leftColor);
+            }
         }
 
         // if we don't want to show arrows, disable the arrow gameobjects
@@ -230,13 +249,29 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
 
             cyoobParent->cyoobHandler = mirroredNotes->AddComponent<Qosmetics::Notes::CyoobHandler*>();
 
+            auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
+            auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
+            auto leftColor = colorScheme->dyn__saberAColor();
+            auto rightColor = colorScheme->dyn__saberBColor();
+
             int childCount = mirroredNotes->get_transform()->get_childCount();
             for (int i = 0; i < childCount; i++)
             {
                 auto child = mirroredNotes->get_transform()->GetChild(i);
-                child->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
                 child->set_localPosition(Sombrero::FastVector3::zero());
                 child->set_localRotation(Sombrero::FastQuaternion::identity());
+
+                /// add color handler and set colors
+                auto colorHandler = child->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+                colorHandler->FetchCCMaterials();
+                if (child->get_name().starts_with("Left"))
+                {
+                    colorHandler->SetColors(leftColor, rightColor);
+                }
+                else
+                {
+                    colorHandler->SetColors(rightColor, leftColor);
+                }
             }
 
             // if we don't want to show arrows, disable the arrow gameobjects
@@ -285,7 +320,7 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
 
 #pragma region debris
 
-GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab)
+GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container)
 {
     auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
     auto& config = noteModelContainer->GetNoteConfig();
@@ -301,13 +336,29 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
 
         debris->AddComponent<Qosmetics::Notes::DebrisHandler*>();
 
+        auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
+        auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
+        auto leftColor = colorScheme->dyn__saberAColor();
+        auto rightColor = colorScheme->dyn__saberBColor();
+
         int childCount = debris->get_transform()->get_childCount();
         for (int i = 0; i < childCount; i++)
         {
             auto child = debris->get_transform()->GetChild(i);
-            child->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
             child->set_localPosition(Sombrero::FastVector3::zero());
             child->set_localRotation(Sombrero::FastQuaternion::identity());
+
+            /// add color handler and set colors
+            auto colorHandler = child->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+            colorHandler->FetchCCMaterials();
+            if (child->get_name().starts_with("Left"))
+            {
+                colorHandler->SetColors(leftColor, rightColor);
+            }
+            else
+            {
+                colorHandler->SetColors(rightColor, leftColor);
+            }
         }
 
         meshTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
@@ -317,12 +368,12 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
 
 REDECORATION_REGISTRATION(noteDebrisHDPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::EffectPoolsManualInstaller*)
 {
-    return RedecorateNoteDebris(noteDebrisHDPrefab);
+    return RedecorateNoteDebris(noteDebrisHDPrefab, container);
 }
 
 REDECORATION_REGISTRATION(noteDebrisLWPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::EffectPoolsManualInstaller*)
 {
-    return RedecorateNoteDebris(noteDebrisLWPrefab);
+    return RedecorateNoteDebris(noteDebrisLWPrefab, container);
 }
 
 #pragma endregion

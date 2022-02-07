@@ -12,21 +12,7 @@ namespace Qosmetics::Notes
 {
     void CyoobColorHandler::Awake()
     {
-        auto renderers = GetComponentsInChildren<UnityEngine::Renderer*>(true);
-
-        std::vector<UnityEngine::Material*> customColorMaterialsVec = {};
-        for (auto renderer : renderers)
-        {
-            auto materials = renderer->get_materials();
-
-            for (auto material : materials)
-            {
-                if (MaterialUtils::ShouldCC(material))
-                    customColorMaterialsVec.push_back(material);
-            }
-        }
-        DEBUG("Found %lu custom colors materials", customColorMaterialsVec.size());
-        customColorMaterials = il2cpp_utils::vectorToArray(customColorMaterialsVec);
+        FetchCCMaterials();
     }
 
     void CyoobColorHandler::SetColors(UnityEngine::Color thisColor, UnityEngine::Color thatColor)
@@ -48,4 +34,26 @@ namespace Qosmetics::Notes
                 mat->SetColor(PropertyID::_OtherColor(), thatColor);
         }
     }
+
+    void CyoobColorHandler::FetchCCMaterials()
+    {
+        if (customColorMaterials)
+            return;
+        auto renderers = GetComponentsInChildren<UnityEngine::Renderer*>(true);
+
+        std::vector<UnityEngine::Material*> customColorMaterialsVec = {};
+        for (auto renderer : renderers)
+        {
+            auto materials = renderer->get_materials();
+
+            for (auto material : materials)
+            {
+                if (MaterialUtils::ShouldCC(material))
+                    customColorMaterialsVec.push_back(material);
+            }
+        }
+        DEBUG("Found %lu custom colors materials", customColorMaterialsVec.size());
+        customColorMaterials = il2cpp_utils::vectorToArray(customColorMaterialsVec);
+    }
+
 }

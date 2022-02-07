@@ -42,10 +42,12 @@ namespace Qosmetics::Notes
 
         cyoobHandler->ShowNote(right, dot);
 
+        /*
         UnityEngine::Color thisColor = colorManager->ColorForType(noteData->get_colorType());
         UnityEngine::Color thatColor = colorManager->ColorForType(1 - noteData->get_colorType());
 
         cyoobHandler->SetColors(thisColor, thatColor);
+        */
     }
 
 }

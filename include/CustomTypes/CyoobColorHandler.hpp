@@ -14,6 +14,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, CyoobColorHandler, UnityEngine::MonoBeha
                       DECLARE_INSTANCE_FIELD(GlobalNamespace::ColorNoteVisuals*, colorNoteVisuals);
 
                       DECLARE_INSTANCE_METHOD(void, Awake);
+                      DECLARE_INSTANCE_METHOD(void, FetchCCMaterials);
                       DECLARE_INSTANCE_METHOD(void, SetColors, UnityEngine::Color thisColor, UnityEngine::Color thatColor);
 
 )

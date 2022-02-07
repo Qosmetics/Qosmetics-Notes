@@ -12,21 +12,7 @@ namespace Qosmetics::Notes
 {
     void DebrisColorHandler::Awake()
     {
-        auto renderers = GetComponentsInChildren<UnityEngine::Renderer*>(true);
-
-        std::vector<UnityEngine::Material*> customColorMaterialsVec = {};
-        for (auto renderer : renderers)
-        {
-            auto materials = renderer->get_materials();
-
-            for (auto material : materials)
-            {
-                if (MaterialUtils::ShouldCC(material))
-                    customColorMaterialsVec.push_back(material);
-            }
-        }
-        DEBUG("Found %lu custom colors materials", customColorMaterialsVec.size());
-        customColorMaterials = il2cpp_utils::vectorToArray(customColorMaterialsVec);
+        FetchCCMaterials();
     }
 
     void DebrisColorHandler::SetColors(Sombrero::FastColor thisColor, Sombrero::FastColor thatColor)
@@ -48,5 +34,24 @@ namespace Qosmetics::Notes
             if (mat->HasProperty(PropertyID::_OtherColor()))
                 mat->SetColor(PropertyID::_OtherColor(), thatColor);
         }
+    }
+
+    void DebrisColorHandler::FetchCCMaterials()
+    {
+        auto renderers = GetComponentsInChildren<UnityEngine::Renderer*>(true);
+
+        std::vector<UnityEngine::Material*> customColorMaterialsVec = {};
+        for (auto renderer : renderers)
+        {
+            auto materials = renderer->get_materials();
+
+            for (auto material : materials)
+            {
+                if (MaterialUtils::ShouldCC(material))
+                    customColorMaterialsVec.push_back(material);
+            }
+        }
+        DEBUG("Found %lu custom colors materials", customColorMaterialsVec.size());
+        customColorMaterials = il2cpp_utils::vectorToArray(customColorMaterialsVec);
     }
 }

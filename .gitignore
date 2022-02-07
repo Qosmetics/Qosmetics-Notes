@@ -6,3 +6,5 @@ tombstone_*
 qpm.shared.json
 mod.template.json
 *.log
+*.qmod
+mod.json

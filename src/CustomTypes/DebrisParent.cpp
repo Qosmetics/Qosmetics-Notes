@@ -36,9 +36,11 @@ namespace Qosmetics::Notes
         debrisHandler->ShowDebris(colorType);
         debrisHandler->SetSliceProperties(cutPoint, cutNormal);
 
+        /*
         UnityEngine::Color thisColor = colorManager->ColorForType(colorType);
         UnityEngine::Color thatColor = colorManager->ColorForType(1 - colorType);
 
         debrisHandler->SetColors(thisColor, thatColor);
+        */
     }
 }
