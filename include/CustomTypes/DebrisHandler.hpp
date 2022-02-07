@@ -18,6 +18,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, DebrisHandler, UnityEngine::MonoBehaviou
                       DECLARE_INSTANCE_FIELD(ArrayW<DebrisColorHandler*>, colorHandlers);
                       using RendererMaterialPair = System::Collections::Generic::KeyValuePair_2<UnityEngine::Renderer*, UnityEngine::Material*>;
                       DECLARE_INSTANCE_FIELD(ArrayW<ArrayW<RendererMaterialPair>>, sliceMaterials);
+                      DECLARE_INSTANCE_FIELD(ArrayW<bool>, anySliceMaterials);
                       DECLARE_INSTANCE_FIELD(Sombrero::FastVector3, lastCutPoint);
                       DECLARE_INSTANCE_FIELD(Sombrero::FastVector3, lastCutNormal);
 
