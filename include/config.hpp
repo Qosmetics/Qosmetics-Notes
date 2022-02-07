@@ -6,6 +6,13 @@ namespace Qosmetics::Notes
     struct Config
     {
         std::string lastUsedCyoob;
+        bool overrideNoteSize = false;
+        double noteSize = 1.0f;
+        bool alsoChangeHitboxes = false;
+        bool forceDefaultBombs = false;
+        bool forceDefaultDebris = false;
+        bool disableReflections = false;
+        bool disabled = false;
 
         static Config& get_config();
     };

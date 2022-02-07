@@ -44,6 +44,11 @@
       "id": "sombrero",
       "versionRange": "^0.1.28",
       "additionalData": {}
+    },
+    {
+      "id": "diglett",
+      "versionRange": "^1.0.0",
+      "additionalData": {}
     }
   ],
   "additionalData": {}

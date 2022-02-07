@@ -71,11 +71,14 @@ namespace Qosmetics::Notes
     void NoteModelContainer::ctor()
     {
         instance = this;
+        bundle = nullptr;
+        isLoading = false;
+        currentNoteObject = nullptr;
+        currentManifest = Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig>();
     }
 
     void NoteModelContainer::Start()
     {
-        // TODO: Start loading last loaded object or something I guess
         auto lastUsedCyoob = Qosmetics::Notes::Config::get_config().lastUsedCyoob;
         if (lastUsedCyoob == "" || lastUsedCyoob == "Default")
             return;

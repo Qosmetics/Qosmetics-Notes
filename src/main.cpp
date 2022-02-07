@@ -1,4 +1,8 @@
+#include "CustomTypes/NoteModelContainer.hpp"
+#include "UI/CyoobFlowCoordinator.hpp"
+#include "assets.hpp"
 #include "custom-types/shared/register.hpp"
+#include "diglett/shared/Register.hpp"
 #include "hooks.hpp"
 #include "logging.hpp"
 #include "modloader/shared/modloader.hpp"
@@ -8,10 +12,6 @@
 
 #include "qosmetics-core/shared/FlowCoordinatorRegister.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
-
-#include "CustomTypes/NoteModelContainer.hpp"
-#include "UI/CyoobFlowCoordinator.hpp"
-#include "assets.hpp"
 
 #include <vector>
 
@@ -38,6 +38,14 @@ extern "C" void load()
     il2cpp_functions::Class_Init(classof(HMUI::ImageView*));
     il2cpp_functions::Class_Init(classof(HMUI::CurvedTextMeshPro*));
 
-    Hooks::InstallHooks(Qosmetics::Notes::Logging::getLogger());
+    auto& logger = Qosmetics::Notes::Logging::getLogger();
+    Hooks::InstallHooks(logger);
     custom_types::Register::AutoRegister();
+
+    Diglett::Register::RegisterLocales<Diglett::Languages::German>(logger, ASSET_TO_XML(de_xml));
+    Diglett::Register::RegisterLocales<Diglett::Languages::English>(logger, ASSET_TO_XML(en_xml));
+    Diglett::Register::RegisterLocales<Diglett::Languages::Spanish>(logger, ASSET_TO_XML(es_xml));
+    Diglett::Register::RegisterLocales<Diglett::Languages::French>(logger, ASSET_TO_XML(fr_xml));
+    Diglett::Register::RegisterLocales<Diglett::Languages::Japanese>(logger, ASSET_TO_XML(ja_xml));
+    Diglett::Register::RegisterLocales<Diglett::Languages::Korean>(logger, ASSET_TO_XML(ko_xml));
 }

@@ -24,6 +24,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SelectionViewController, HMUI::ViewContr
                       :
 
                       void OnSelectDescriptor(Qosmetics::Core::QosmeticObjectTableCell* cell);
+                      void OnSelectDefault();
                       void ReloadDescriptorList();
                       void OnObjectLoadFinished();
 

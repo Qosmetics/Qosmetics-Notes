@@ -50,6 +50,7 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
     auto& config = noteModelContainer->GetNoteConfig();
     if (noteModelContainer->currentNoteObject && config.get_hasBomb())
     {
+        // TODO: Implement global config value honoring
         auto mesh = bombNotePrefab->get_transform()->Find("Mesh");
         auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find("Bomb");
         auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
@@ -101,6 +102,7 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
         auto mesh = mirroredBombNoteControllerPrefab->get_transform()->Find("Mesh");
         auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
         meshRenderer->set_enabled(false);
+        // TODO: Implement global config value honoring
         if (config.get_isMirrorable())
         {
             auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find("Bomb");
@@ -185,6 +187,7 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
             }
         }
 
+        // TODO: Implement global config value honoring
         // if we don't want to show arrows, disable the arrow gameobjects
         if (!config.get_showArrows())
         {
@@ -274,6 +277,7 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
                 }
             }
 
+            // TODO: Implement global config value honoring
             // if we don't want to show arrows, disable the arrow gameobjects
             if (!config.get_showArrows())
             {
@@ -324,6 +328,8 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
 {
     auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
     auto& config = noteModelContainer->GetNoteConfig();
+    // TODO: Implement global config value honoring
+    // TODO: Check settings for no debris spawning, we need to not spawn custom debris if the user wants no debris
     if (config.get_hasDebris())
     {
         auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();

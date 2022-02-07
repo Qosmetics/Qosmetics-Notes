@@ -1,6 +1,7 @@
 #include "UI/SelectionViewController.hpp"
 #include "CustomTypes/NoteModelContainer.hpp"
 #include "config.hpp"
+#include "diglett/shared/Diglett.hpp"
 #include "logging.hpp"
 #include "qosmetics-core/shared/ConfigRegister.hpp"
 #include "qosmetics-core/shared/Utils/FileUtils.hpp"
@@ -27,8 +28,9 @@ namespace Qosmetics::Notes
             auto vertical = CreateVerticalLayoutGroup(get_transform());
             auto buttonHorizontal = CreateHorizontalLayoutGroup(vertical->get_transform());
 
-            auto defaultObjectBtn = CreateUIButton(buttonHorizontal->get_transform(), "Default", []() {});
-            auto refreshBtn = CreateUIButton(buttonHorizontal->get_transform(), "Refresh", []() {});
+            auto localization = Localization::GetSelected();
+            auto defaultObjectBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->Get("QosmeticsCore:QosmeticsTable:Default"), std::bind(&SelectionViewController::OnSelectDefault, this));
+            auto refreshBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->Get("QosmeticsCore:QosmeticsTable:Refresh"), std::bind(&SelectionViewController::ReloadDescriptorList, this));
 
             deletionConfirmationModal = Qosmetics::Core::DeletionConfirmationModal::Create(get_transform());
             descriptorList = CreateScrollableCustomSourceList<Qosmetics::Core::QosmeticObjectTableData*>(vertical->get_transform(), UnityEngine::Vector2(0.0f, 0.0f), UnityEngine::Vector2(100.0f, 80.0f), nullptr);
@@ -89,6 +91,16 @@ namespace Qosmetics::Notes
         tableView->ReloadData();
         tableView->RefreshCells(true, true);
         tableView->ScrollToCellWithIdx(std::clamp(scrolledRow, 0, (int)descriptorSet.size()), HMUI::TableView::ScrollPositionType::Beginning, true);
+    }
+
+    void SelectionViewController::OnSelectDefault()
+    {
+        auto noteModelContainer = NoteModelContainer::get_instance();
+        noteModelContainer->Default();
+
+        Qosmetics::Notes::Config::get_config().lastUsedCyoob = "";
+        Qosmetics::Core::Config::SaveConfig();
+        OnObjectLoadFinished();
     }
 
     void SelectionViewController::OnSelectDescriptor(Qosmetics::Core::QosmeticObjectTableCell* cell)
