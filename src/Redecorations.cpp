@@ -5,9 +5,11 @@
 #include "GlobalNamespace/FakeMirrorObjectsInstaller.hpp"
 #include "GlobalNamespace/GameNoteController.hpp"
 #include "GlobalNamespace/GameplayCoreSceneSetupData.hpp"
+#include "GlobalNamespace/GameplayModifiers.hpp"
 #include "GlobalNamespace/MirroredBombNoteController.hpp"
 #include "GlobalNamespace/MirroredCubeNoteController.hpp"
 #include "GlobalNamespace/NoteDebris.hpp"
+#include "GlobalNamespace/PlayerSpecificSettings.hpp"
 
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Material.hpp"
@@ -20,6 +22,7 @@
 #include "sombrero/shared/FastQuaternion.hpp"
 #include "sombrero/shared/FastVector3.hpp"
 
+#include "ConstStrings.hpp"
 #include "CustomTypes/CyoobColorHandler.hpp"
 #include "CustomTypes/CyoobHandler.hpp"
 #include "CustomTypes/CyoobParent.hpp"
@@ -29,19 +32,7 @@
 #include "CustomTypes/NoteModelContainer.hpp"
 #include "PropertyID.hpp"
 
-#define CONST_STRING(identifier)                    \
-    static StringW identifier()                     \
-    {                                               \
-        static ConstString identifier(#identifier); \
-        return identifier;                          \
-    }
-
-namespace ConstStrings
-{
-    CONST_STRING(NoteArrow);
-    CONST_STRING(NoteCircleGlow);
-    CONST_STRING(NoteArrowGlow);
-}
+#include "config.hpp"
 
 #pragma region bombs
 REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
@@ -52,43 +43,14 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
     {
         // TODO: Implement global config value honoring
         auto mesh = bombNotePrefab->get_transform()->Find("Mesh");
-        auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find("Bomb");
+        auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Bomb());
         auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
-        bomb->set_name("Bomb");
+        bomb->set_name(ConstStrings::Bomb());
         bomb->get_transform()->set_localScale(UnityEngine::Vector3(0.4f, 0.4f, 0.4f));
         bomb->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
         bomb->get_transform()->set_localRotation(Sombrero::FastQuaternion::identity());
         auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
         meshRenderer->set_enabled(false);
-
-        auto renderers = bomb->GetComponentsInChildren<UnityEngine::MeshRenderer*>(true);
-
-        for (auto renderer : renderers)
-        {
-            auto materials = renderer->get_materials();
-
-            for (auto material : materials)
-            {
-                material->set_renderQueue(2004);
-                if (material->HasProperty(PropertyID::_Alpha()))
-                    material->SetFloat(PropertyID::_Alpha(), 1.0f);
-                if (material->HasProperty(PropertyID::_StencilRefID()))
-                    material->SetFloat(PropertyID::_StencilRefID(), 0);
-                if (material->HasProperty(PropertyID::_StencilComp()))
-                    material->SetFloat(PropertyID::_StencilComp(), 8);
-                if (material->HasProperty(PropertyID::_StencilOp()))
-                    material->SetFloat(PropertyID::_StencilOp(), 0);
-
-                if (material->HasProperty(PropertyID::_BlendDstFactor()))
-                    material->SetFloat(PropertyID::_BlendDstFactor(), 0);
-                if (material->HasProperty(PropertyID::_BlendDstFactorA()))
-                    material->SetFloat(PropertyID::_BlendDstFactorA(), 0);
-                if (material->HasProperty(PropertyID::_BlendSrcFactor()))
-                    material->SetFloat(PropertyID::_BlendSrcFactor(), 1);
-                if (material->HasProperty(PropertyID::_BlendSrcFactorA()))
-                    material->SetFloat(PropertyID::_BlendSrcFactorA(), 0);
-            }
-        }
     }
     return bombNotePrefab;
 }
@@ -97,7 +59,9 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
 {
     auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
     auto& config = noteModelContainer->GetNoteConfig();
-    if (noteModelContainer->currentNoteObject && config.get_hasBomb())
+    auto& globalConfig = Qosmetics::Notes::Config::get_config();
+    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
+    if (noteModelContainer->currentNoteObject && config.get_hasBomb() && !globalConfig.forceDefaultBombs)
     {
         auto mesh = mirroredBombNoteControllerPrefab->get_transform()->Find("Mesh");
         auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
@@ -105,38 +69,20 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
         // TODO: Implement global config value honoring
         if (config.get_isMirrorable())
         {
-            auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find("Bomb");
+            auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::MirrorBomb());
             auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
-            bomb->set_name("Bomb");
+            bomb->set_name(ConstStrings::Bomb());
+
+            float actualBombSize = 0.4f * (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
+            bomb->get_transform()->set_localScale(Sombrero::FastVector3::one() * actualBombSize);
+
             bomb->get_transform()->set_localScale(UnityEngine::Vector3(0.4f, 0.4f, 0.4f));
-
-            auto renderers = bomb->GetComponentsInChildren<UnityEngine::MeshRenderer*>(true);
-
-            for (auto renderer : renderers)
-            {
-                auto materials = renderer->get_materials();
-                for (auto material : materials)
-                {
-                    material->set_renderQueue(1951);
-                    if (material->HasProperty(PropertyID::_Alpha()))
-                        material->SetFloat(PropertyID::_Alpha(), 0.05f);
-                    if (material->HasProperty(PropertyID::_StencilRefID()))
-                        material->SetFloat(PropertyID::_StencilRefID(), 1);
-                    if (material->HasProperty(PropertyID::_StencilComp()))
-                        material->SetFloat(PropertyID::_StencilComp(), 3);
-                    if (material->HasProperty(PropertyID::_StencilOp()))
-                        material->SetFloat(PropertyID::_StencilOp(), 0);
-
-                    if (material->HasProperty(PropertyID::_BlendDstFactor()))
-                        material->SetFloat(PropertyID::_BlendDstFactor(), 10);
-                    if (material->HasProperty(PropertyID::_BlendDstFactorA()))
-                        material->SetFloat(PropertyID::_BlendDstFactorA(), 0);
-                    if (material->HasProperty(PropertyID::_BlendSrcFactor()))
-                        material->SetFloat(PropertyID::_BlendSrcFactor(), 5);
-                    if (material->HasProperty(PropertyID::_BlendSrcFactorA()))
-                        material->SetFloat(PropertyID::_BlendSrcFactorA(), 0);
-                }
-            }
+        }
+        else if (globalConfig.disableReflections)
+        {
+            auto mesh = mirroredBombNoteControllerPrefab->get_transform()->Find("Mesh");
+            auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
+            meshRenderer->set_enabled(false);
         }
     }
     return mirroredBombNoteControllerPrefab;
@@ -154,13 +100,13 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
         auto cyoobParent = normalBasicNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
         // get the notecubetransform to edit it's children
         auto noteCubeTransform = normalBasicNotePrefab->get_transform()->Find("NoteCube");
-        auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find("Notes");
+        auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Notes());
         // instantiate the notes prefab
         auto notes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), noteCubeTransform);
         notes->set_name("Notes");
         notes->get_transform()->set_localScale({0.4f, 0.4f, 0.4f});
 
-        cyoobParent->cyoobHandler = notes->AddComponent<Qosmetics::Notes::CyoobHandler*>();
+        cyoobParent->cyoobHandler = notes->GetComponent<Qosmetics::Notes::CyoobHandler*>();
         int childCount = notes->get_transform()->get_childCount();
 
         auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
@@ -175,7 +121,7 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
             child->set_localRotation(Sombrero::FastQuaternion::identity());
 
             /// add color handler and set colors
-            auto colorHandler = child->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+            auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::CyoobColorHandler*>();
             colorHandler->FetchCCMaterials();
             if (child->get_name().starts_with("Left"))
             {
@@ -199,35 +145,6 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
         // if the note is not default config, set the mesh to nullptr so it can never show
         if (!config.get_isDefault())
             noteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
-
-        auto renderers = notes->GetComponentsInChildren<UnityEngine::MeshRenderer*>(true);
-
-        for (auto renderer : renderers)
-        {
-            auto materials = renderer->get_materials();
-
-            for (auto material : materials)
-            {
-                material->set_renderQueue(2004);
-                if (material->HasProperty(PropertyID::_Alpha()))
-                    material->SetFloat(PropertyID::_Alpha(), 1.0f);
-                if (material->HasProperty(PropertyID::_StencilRefID()))
-                    material->SetFloat(PropertyID::_StencilRefID(), 0);
-                if (material->HasProperty(PropertyID::_StencilComp()))
-                    material->SetFloat(PropertyID::_StencilComp(), 8);
-                if (material->HasProperty(PropertyID::_StencilOp()))
-                    material->SetFloat(PropertyID::_StencilOp(), 0);
-
-                if (material->HasProperty(PropertyID::_BlendDstFactor()))
-                    material->SetFloat(PropertyID::_BlendDstFactor(), 0);
-                if (material->HasProperty(PropertyID::_BlendDstFactorA()))
-                    material->SetFloat(PropertyID::_BlendDstFactorA(), 0);
-                if (material->HasProperty(PropertyID::_BlendSrcFactor()))
-                    material->SetFloat(PropertyID::_BlendSrcFactor(), 1);
-                if (material->HasProperty(PropertyID::_BlendSrcFactorA()))
-                    material->SetFloat(PropertyID::_BlendSrcFactorA(), 0);
-            }
-        }
     }
     return normalBasicNotePrefab;
 }
@@ -243,14 +160,14 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
         {
             auto cyoobParent = mirroredGameNoteControllerPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
             // get the notecubetransform to edit it's children
-            auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find("Notes");
+            auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::MirrorNotes());
 
             // instantiate the notes prefab
             auto mirroredNotes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), mirroredNoteCubeTransform);
             mirroredNotes->set_name("Notes");
             mirroredNotes->get_transform()->set_localScale({0.4f, 0.4f, 0.4f});
 
-            cyoobParent->cyoobHandler = mirroredNotes->AddComponent<Qosmetics::Notes::CyoobHandler*>();
+            cyoobParent->cyoobHandler = mirroredNotes->GetComponent<Qosmetics::Notes::CyoobHandler*>();
 
             auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
             auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
@@ -265,7 +182,7 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
                 child->set_localRotation(Sombrero::FastQuaternion::identity());
 
                 /// add color handler and set colors
-                auto colorHandler = child->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+                auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::CyoobColorHandler*>();
                 colorHandler->FetchCCMaterials();
                 if (child->get_name().starts_with("Left"))
                 {
@@ -288,34 +205,6 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
             // if the note is not default config, set the mesh to nullptr so it can never show
             if (!config.get_isDefault())
                 mirroredNoteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
-
-            auto renderers = mirroredNotes->GetComponentsInChildren<UnityEngine::MeshRenderer*>(true);
-
-            for (auto renderer : renderers)
-            {
-                auto materials = renderer->get_materials();
-                for (auto material : materials)
-                {
-                    material->set_renderQueue(1951);
-                    if (material->HasProperty(PropertyID::_Alpha()))
-                        material->SetFloat(PropertyID::_Alpha(), 0.05f);
-                    if (material->HasProperty(PropertyID::_StencilRefID()))
-                        material->SetFloat(PropertyID::_StencilRefID(), 1);
-                    if (material->HasProperty(PropertyID::_StencilComp()))
-                        material->SetFloat(PropertyID::_StencilComp(), 3);
-                    if (material->HasProperty(PropertyID::_StencilOp()))
-                        material->SetFloat(PropertyID::_StencilOp(), 0);
-
-                    if (material->HasProperty(PropertyID::_BlendDstFactor()))
-                        material->SetFloat(PropertyID::_BlendDstFactor(), 10);
-                    if (material->HasProperty(PropertyID::_BlendDstFactorA()))
-                        material->SetFloat(PropertyID::_BlendDstFactorA(), 0);
-                    if (material->HasProperty(PropertyID::_BlendSrcFactor()))
-                        material->SetFloat(PropertyID::_BlendSrcFactor(), 5);
-                    if (material->HasProperty(PropertyID::_BlendSrcFactorA()))
-                        material->SetFloat(PropertyID::_BlendSrcFactorA(), 0);
-                }
-            }
         }
     }
     return mirroredGameNoteControllerPrefab;
@@ -328,9 +217,10 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
 {
     auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
     auto& config = noteModelContainer->GetNoteConfig();
+    auto& globalConfig = Qosmetics::Notes::Config::get_config();
+    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
     // TODO: Implement global config value honoring
-    // TODO: Check settings for no debris spawning, we need to not spawn custom debris if the user wants no debris
-    if (config.get_hasDebris())
+    if (config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultDebris)
     {
         auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
 
@@ -338,11 +228,11 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
         auto actualDebris = noteModelContainer->currentNoteObject->get_transform()->Find("Debris");
         auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
         debris->set_name("Debris");
-        debris->get_transform()->set_localScale({0.4f, 0.4f, 0.4f});
+        float actualNoteSize = 0.4f * (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
+        debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * actualNoteSize);
 
-        debris->AddComponent<Qosmetics::Notes::DebrisHandler*>();
+        // debris->AddComponent<Qosmetics::Notes::DebrisHandler*>();
 
-        auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
         auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
         auto leftColor = colorScheme->dyn__saberAColor();
         auto rightColor = colorScheme->dyn__saberBColor();
@@ -355,7 +245,7 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
             child->set_localRotation(Sombrero::FastQuaternion::identity());
 
             /// add color handler and set colors
-            auto colorHandler = child->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+            auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::DebrisColorHandler*>();
             colorHandler->FetchCCMaterials();
             if (child->get_name().starts_with("Left"))
             {

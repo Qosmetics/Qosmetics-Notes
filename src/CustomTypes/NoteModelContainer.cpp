@@ -1,4 +1,6 @@
 #include "CustomTypes/NoteModelContainer.hpp"
+#include "ConstStrings.hpp"
+#include "PropertyID.hpp"
 #include "config.hpp"
 #include "logging.hpp"
 #include "qosmetics-core/shared/Utils/BundleUtils.hpp"
@@ -6,8 +8,15 @@
 #include "qosmetics-core/shared/Utils/ZipUtils.hpp"
 #include "static-defines.hpp"
 
+#include "CustomTypes/CyoobColorHandler.hpp"
+#include "CustomTypes/CyoobHandler.hpp"
+#include "CustomTypes/DebrisColorHandler.hpp"
+#include "CustomTypes/DebrisHandler.hpp"
+
 #include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "UnityEngine/Coroutine.hpp"
+#include "UnityEngine/Material.hpp"
+#include "UnityEngine/MeshRenderer.hpp"
 #include "UnityEngine/Transform.hpp"
 
 DEFINE_TYPE(Qosmetics::Notes, NoteModelContainer);
@@ -18,36 +27,26 @@ using namespace UnityEngine;
 
 void LegacyFixups(UnityEngine::GameObject* loadedObject)
 {
-    static auto Bomb = ConstString("Bomb");
-    static auto LeftArrow = ConstString("LeftArrow");
-    static auto RightArrow = ConstString("RightArrow");
-    static auto LeftDot = ConstString("LeftDot");
-    static auto RightDot = ConstString("RightDot");
-    static auto LeftDebris = ConstString("LeftDebris");
-    static auto RightDebris = ConstString("RightDebris");
-    static auto Notes = ConstString("Notes");
-
     auto t = loadedObject->get_transform();
-    auto notes = GameObject::New_ctor(Notes);
+    auto notes = GameObject::New_ctor(ConstStrings::Notes());
     auto nt = notes->get_transform();
     nt->SetParent(t, false);
 
-    auto leftArrow = t->Find(LeftArrow);
-    auto rightArrow = t->Find(RightArrow);
-    auto leftDot = t->Find(LeftDot);
-    auto rightDot = t->Find(RightDot);
+    auto leftArrow = t->Find(ConstStrings::LeftArrow());
+    auto rightArrow = t->Find(ConstStrings::RightArrow());
+    auto leftDot = t->Find(ConstStrings::LeftDot());
+    auto rightDot = t->Find(ConstStrings::RightDot());
 
     leftArrow->SetParent(nt, false);
     rightArrow->SetParent(nt, false);
     leftDot->SetParent(nt, false);
     rightDot->SetParent(nt, false);
 
-    auto leftDebris = t->Find(LeftDebris);
-    auto rightDebris = t->Find(RightDebris);
+    auto leftDebris = t->Find(ConstStrings::LeftDebris());
+    auto rightDebris = t->Find(ConstStrings::RightDebris());
     if (leftDebris && rightDebris)
     {
-        static auto Debris = ConstString("Debris");
-        auto debris = GameObject::New_ctor(Debris);
+        auto debris = GameObject::New_ctor(ConstStrings::Debris());
         auto dt = debris->get_transform();
         dt->SetParent(t, false);
         leftDebris->SetParent(dt, false);
@@ -55,6 +54,81 @@ void LegacyFixups(UnityEngine::GameObject* loadedObject)
     }
 }
 
+void SetMirrorableProperties(UnityEngine::GameObject* loadedObject, bool mirror)
+{
+    auto renderers = loadedObject->GetComponentsInChildren<UnityEngine::MeshRenderer*>(true);
+
+    for (auto renderer : renderers)
+    {
+        auto materials = renderer->get_materials();
+
+        for (auto material : materials)
+        {
+            material->set_renderQueue(mirror ? 1951 : 2004);
+            if (material->HasProperty(PropertyID::_Alpha()))
+                material->SetFloat(PropertyID::_Alpha(), mirror ? 0.05f : 1.0f);
+            if (material->HasProperty(PropertyID::_StencilRefID()))
+                material->SetFloat(PropertyID::_StencilRefID(), mirror ? 1 : 0);
+            if (material->HasProperty(PropertyID::_StencilComp()))
+                material->SetFloat(PropertyID::_StencilComp(), mirror ? 3 : 8);
+            if (material->HasProperty(PropertyID::_StencilOp()))
+                material->SetFloat(PropertyID::_StencilOp(), 0);
+
+            if (material->HasProperty(PropertyID::_BlendDstFactor()))
+                material->SetFloat(PropertyID::_BlendDstFactor(), mirror ? 10 : 0);
+            if (material->HasProperty(PropertyID::_BlendDstFactorA()))
+                material->SetFloat(PropertyID::_BlendDstFactorA(), 0);
+            if (material->HasProperty(PropertyID::_BlendSrcFactor()))
+                material->SetFloat(PropertyID::_BlendSrcFactor(), mirror ? 5 : 1);
+            if (material->HasProperty(PropertyID::_BlendSrcFactorA()))
+                material->SetFloat(PropertyID::_BlendSrcFactorA(), 0);
+        }
+    }
+}
+
+void MirrorableFixups(UnityEngine::GameObject* loadedObject)
+{
+    auto t = loadedObject->get_transform();
+    auto notes = t->Find(ConstStrings::Notes())->get_gameObject();
+    auto mirroredNotes = UnityEngine::Object::Instantiate(notes, t->get_transform());
+    mirroredNotes->set_name(ConstStrings::MirrorNotes());
+
+    SetMirrorableProperties(notes, false);
+    SetMirrorableProperties(mirroredNotes, true);
+
+    auto bomb = t->Find(ConstStrings::Bomb())->get_gameObject();
+    auto mirroredBomb = UnityEngine::Object::Instantiate(bomb, t->get_transform());
+    mirroredNotes->set_name(ConstStrings::MirrorBomb());
+    SetMirrorableProperties(bomb, false);
+    SetMirrorableProperties(mirroredBomb, true);
+}
+
+void AddHandlers(UnityEngine::GameObject* loadedObject)
+{
+    auto t = loadedObject->get_transform();
+    auto nt = t->Find(ConstStrings::Notes());
+    auto mnt = t->Find(ConstStrings::MirrorNotes());
+
+    nt->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobHandler*>();
+    if (mnt)
+        mnt->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobHandler*>();
+
+    for (int i = 0; i < 4; i++)
+    {
+        nt->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+        if (mnt)
+            mnt->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+    }
+
+    auto dbt = t->Find(ConstStrings::Debris());
+    if (dbt)
+    {
+        dbt->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisHandler*>();
+
+        dbt->GetChild(0)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+        dbt->GetChild(1)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+    }
+}
 namespace Qosmetics::Notes
 {
     NoteModelContainer* NoteModelContainer::instance = nullptr;
@@ -125,10 +199,22 @@ namespace Qosmetics::Notes
         currentNoteObject->set_layer(8);
         currentNoteObject = UnityEngine::Object::Instantiate(currentNoteObject, get_transform());
         currentNoteObject->set_name(name);
-        if (isLegacy)
-            LegacyFixups(currentNoteObject);
-
         currentNoteObject->SetActive(false);
+
+        if (isLegacy)
+        {
+            DEBUG("Executing legacy object fixups");
+            LegacyFixups(currentNoteObject);
+        }
+
+        if (currentManifest.get_config().get_isMirrorable())
+        {
+            DEBUG("Pre-Creating mirrorable objects");
+            MirrorableFixups(currentNoteObject);
+        }
+
+        DEBUG("Adding handlers to object");
+        AddHandlers(currentNoteObject);
 
         isLoading = false;
         if (onFinished)

@@ -49,6 +49,11 @@
       "id": "diglett",
       "versionRange": "^1.0.0",
       "additionalData": {}
+    },
+    {
+      "id": "chroma",
+      "versionRange": "^2.5.7",
+      "additionalData": {}
     }
   ],
   "additionalData": {}
