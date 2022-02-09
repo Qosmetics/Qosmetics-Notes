@@ -13,6 +13,7 @@ namespace Qosmetics::Notes
         bool forceDefaultDebris = false;
         bool disableReflections = false;
         bool disabled = false;
+        bool keepMissingReflections = false;
 
         static Config& get_config();
     };

@@ -77,6 +77,7 @@ namespace Qosmetics::Notes
         SET_JSON_BOOL(forceDefaultDebris);
         SET_JSON_BOOL(disableReflections);
         SET_JSON_BOOL(disabled);
+        SET_JSON_BOOL(keepMissingReflections);
         INFO("Config Saved!");
     }
 
@@ -92,6 +93,7 @@ namespace Qosmetics::Notes
         GET_JSON_BOOL(forceDefaultDebris);
         GET_JSON_BOOL(disableReflections);
         GET_JSON_BOOL(disabled);
+        GET_JSON_BOOL(keepMissingReflections);
         if (foundEverything)
             INFO("Config Loaded!");
         return foundEverything;

@@ -16,6 +16,7 @@
 #include "UnityEngine/MeshFilter.hpp"
 #include "UnityEngine/MeshRenderer.hpp"
 #include "UnityEngine/Shader.hpp"
+#include "UnityEngine/SphereCollider.hpp"
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/Vector3.hpp"
 #include "qosmetics-core/shared/RedecorationRegister.hpp"
@@ -39,18 +40,36 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
 {
     auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
     auto& config = noteModelContainer->GetNoteConfig();
+    auto& globalConfig = Qosmetics::Notes::Config::get_config();
+    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
+    auto mesh = bombNotePrefab->get_transform()->Find("Mesh");
+    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
     if (noteModelContainer->currentNoteObject && config.get_hasBomb())
     {
         // TODO: Implement global config value honoring
-        auto mesh = bombNotePrefab->get_transform()->Find("Mesh");
         auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Bomb());
         auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
         bomb->set_name(ConstStrings::Bomb());
-        bomb->get_transform()->set_localScale(UnityEngine::Vector3(0.4f, 0.4f, 0.4f));
+        bomb->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
         bomb->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
         bomb->get_transform()->set_localRotation(Sombrero::FastQuaternion::identity());
         auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
         meshRenderer->set_enabled(false);
+
+        if (globalConfig.alsoChangeHitboxes)
+        {
+            auto sphereCollider = mesh->get_gameObject()->GetComponent<UnityEngine::SphereCollider*>();
+            sphereCollider->set_radius(sphereCollider->get_radius() * noteSizeFactor);
+        }
+    }
+    else if (globalConfig.overrideNoteSize)
+    {
+        mesh->set_localScale(mesh->get_localScale() * noteSizeFactor);
+        if (!globalConfig.alsoChangeHitboxes)
+        {
+            auto sphereCollider = mesh->get_gameObject()->GetComponent<UnityEngine::SphereCollider*>();
+            sphereCollider->set_radius(sphereCollider->get_radius() / noteSizeFactor);
+        }
     }
     return bombNotePrefab;
 }
@@ -61,29 +80,29 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
     auto& config = noteModelContainer->GetNoteConfig();
     auto& globalConfig = Qosmetics::Notes::Config::get_config();
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
-    if (noteModelContainer->currentNoteObject && config.get_hasBomb() && !globalConfig.forceDefaultBombs)
+    auto mesh = mirroredBombNoteControllerPrefab->get_transform()->Find("Mesh");
+    auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
+    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
+    // if obj exists, it has bomb, we don't force default, the object is mirrorable, and we are not disabling reflections
+    if (noteModelContainer->currentNoteObject && config.get_hasBomb() && !globalConfig.forceDefaultBombs && config.get_isMirrorable() && !globalConfig.disableReflections)
     {
-        auto mesh = mirroredBombNoteControllerPrefab->get_transform()->Find("Mesh");
-        auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
-        meshRenderer->set_enabled(false);
         // TODO: Implement global config value honoring
-        if (config.get_isMirrorable())
-        {
-            auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::MirrorBomb());
-            auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
-            bomb->set_name(ConstStrings::Bomb());
+        meshRenderer->set_enabled(false);
+        auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::MirrorBomb());
+        auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
+        bomb->set_name(ConstStrings::Bomb());
 
-            float actualBombSize = 0.4f * (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
-            bomb->get_transform()->set_localScale(Sombrero::FastVector3::one() * actualBombSize);
-
-            bomb->get_transform()->set_localScale(UnityEngine::Vector3(0.4f, 0.4f, 0.4f));
-        }
-        else if (globalConfig.disableReflections)
-        {
-            auto mesh = mirroredBombNoteControllerPrefab->get_transform()->Find("Mesh");
-            auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
-            meshRenderer->set_enabled(false);
-        }
+        bomb->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
+        bomb->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
+        bomb->get_transform()->set_localRotation(Sombrero::FastQuaternion::identity());
+    }
+    else if (globalConfig.disableReflections || (!config.get_isMirrorable() && !globalConfig.keepMissingReflections))
+    {
+        meshRenderer->set_enabled(false);
+    }
+    else if (globalConfig.overrideNoteSize)
+    {
+        mesh->set_localScale(mesh->get_localScale() * noteSizeFactor);
     }
     return mirroredBombNoteControllerPrefab;
 }
@@ -95,21 +114,23 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
 {
     auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
     auto& config = noteModelContainer->GetNoteConfig();
+    auto& globalConfig = Qosmetics::Notes::Config::get_config();
+    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
+    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
+    // get the notecubetransform to edit it's children
+    auto noteCubeTransform = normalBasicNotePrefab->get_transform()->Find("NoteCube");
     if (noteModelContainer->currentNoteObject)
     {
         auto cyoobParent = normalBasicNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
-        // get the notecubetransform to edit it's children
-        auto noteCubeTransform = normalBasicNotePrefab->get_transform()->Find("NoteCube");
         auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Notes());
         // instantiate the notes prefab
         auto notes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), noteCubeTransform);
         notes->set_name("Notes");
-        notes->get_transform()->set_localScale({0.4f, 0.4f, 0.4f});
+        notes->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
 
         cyoobParent->cyoobHandler = notes->GetComponent<Qosmetics::Notes::CyoobHandler*>();
         int childCount = notes->get_transform()->get_childCount();
 
-        auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
         auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
         auto leftColor = colorScheme->dyn__saberAColor();
         auto rightColor = colorScheme->dyn__saberBColor();
@@ -134,6 +155,8 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
         }
 
         // TODO: Implement global config value honoring
+        // TODO: implement alsochangehitboxes size changing
+
         // if we don't want to show arrows, disable the arrow gameobjects
         if (!config.get_showArrows())
         {
@@ -146,6 +169,17 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
         if (!config.get_isDefault())
             noteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
     }
+    else if (globalConfig.overrideNoteSize)
+    {
+
+        noteCubeTransform->set_localScale(noteCubeTransform->get_localScale() * noteSizeFactor);
+        if (!globalConfig.alsoChangeHitboxes)
+        {
+            auto newSize = Sombrero::FastVector3::one() / noteSizeFactor;
+            noteCubeTransform->Find(ConstStrings::BigCuttable())->set_localScale(newSize);
+            noteCubeTransform->Find(ConstStrings::SmallCuttable())->set_localScale(newSize);
+        }
+    }
     return normalBasicNotePrefab;
 }
 
@@ -153,62 +187,71 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
 {
     auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
     auto& config = noteModelContainer->GetNoteConfig();
-    if (noteModelContainer->currentNoteObject)
+    auto& globalConfig = Qosmetics::Notes::Config::get_config();
+    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
+    auto mirroredNoteCubeTransform = mirroredGameNoteControllerPrefab->get_transform()->Find("NoteCube");
+    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
+    // if obj exists, and is mirrorable, and we are not disabling reflections
+    if (noteModelContainer->currentNoteObject && config.get_isMirrorable() && !globalConfig.disableReflections)
     {
-        auto mirroredNoteCubeTransform = mirroredGameNoteControllerPrefab->get_transform()->Find("NoteCube");
-        if (config.get_isMirrorable())
+        auto cyoobParent = mirroredGameNoteControllerPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
+        // get the notecubetransform to edit it's children
+        auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::MirrorNotes());
+
+        // instantiate the notes prefab
+        auto mirroredNotes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), mirroredNoteCubeTransform);
+        mirroredNotes->set_name("Notes");
+        mirroredNotes->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
+
+        cyoobParent->cyoobHandler = mirroredNotes->GetComponent<Qosmetics::Notes::CyoobHandler*>();
+
+        auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
+        auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
+        auto leftColor = colorScheme->dyn__saberAColor();
+        auto rightColor = colorScheme->dyn__saberBColor();
+
+        int childCount = mirroredNotes->get_transform()->get_childCount();
+        for (int i = 0; i < childCount; i++)
         {
-            auto cyoobParent = mirroredGameNoteControllerPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
-            // get the notecubetransform to edit it's children
-            auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::MirrorNotes());
+            auto child = mirroredNotes->get_transform()->GetChild(i);
+            child->set_localPosition(Sombrero::FastVector3::zero());
+            child->set_localRotation(Sombrero::FastQuaternion::identity());
 
-            // instantiate the notes prefab
-            auto mirroredNotes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), mirroredNoteCubeTransform);
-            mirroredNotes->set_name("Notes");
-            mirroredNotes->get_transform()->set_localScale({0.4f, 0.4f, 0.4f});
-
-            cyoobParent->cyoobHandler = mirroredNotes->GetComponent<Qosmetics::Notes::CyoobHandler*>();
-
-            auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
-            auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
-            auto leftColor = colorScheme->dyn__saberAColor();
-            auto rightColor = colorScheme->dyn__saberBColor();
-
-            int childCount = mirroredNotes->get_transform()->get_childCount();
-            for (int i = 0; i < childCount; i++)
-            {
-                auto child = mirroredNotes->get_transform()->GetChild(i);
-                child->set_localPosition(Sombrero::FastVector3::zero());
-                child->set_localRotation(Sombrero::FastQuaternion::identity());
-
-                /// add color handler and set colors
-                auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::CyoobColorHandler*>();
-                colorHandler->FetchCCMaterials();
-                if (child->get_name().starts_with("Left"))
-                {
-                    colorHandler->SetColors(leftColor, rightColor);
-                }
-                else
-                {
-                    colorHandler->SetColors(rightColor, leftColor);
-                }
-            }
-
-            // TODO: Implement global config value honoring
-            // if we don't want to show arrows, disable the arrow gameobjects
-            if (!config.get_showArrows())
-            {
-                mirroredNoteCubeTransform->Find(ConstStrings::NoteArrow())->get_gameObject()->SetActive(false);
-                mirroredNoteCubeTransform->Find(ConstStrings::NoteCircleGlow())->get_gameObject()->SetActive(false);
-            }
-
-            // if the note is not default config, set the mesh to nullptr so it can never show
-            if (!config.get_isDefault())
-                mirroredNoteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
+            /// add color handler and set colors
+            auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::CyoobColorHandler*>();
+            colorHandler->FetchCCMaterials();
+            if (child->get_name().starts_with("Left"))
+                colorHandler->SetColors(leftColor, rightColor);
+            else
+                colorHandler->SetColors(rightColor, leftColor);
         }
+
+        // TODO: Implement global config value honoring
+        // if we don't want to show arrows, disable the arrow gameobjects
+        if (!config.get_showArrows())
+        {
+            mirroredNoteCubeTransform->Find(ConstStrings::NoteArrow())->get_gameObject()->SetActive(false);
+            mirroredNoteCubeTransform->Find(ConstStrings::NoteCircleGlow())->get_gameObject()->SetActive(false);
+        }
+
+        // if the note is not default config, set the mesh to nullptr so it can never show
+        if (!config.get_isDefault())
+            mirroredNoteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
     }
+    else if (globalConfig.disableReflections || (!config.get_isMirrorable() && !globalConfig.keepMissingReflections))
+    {
+        mirroredNoteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
+        mirroredNoteCubeTransform->Find(ConstStrings::NoteArrow())->get_gameObject()->SetActive(false);
+        mirroredNoteCubeTransform->Find(ConstStrings::NoteCircleGlow())->get_gameObject()->SetActive(false);
+    }
+    else if (globalConfig.overrideNoteSize)
+    {
+        mirroredNoteCubeTransform->set_localScale(mirroredNoteCubeTransform->get_localScale() * noteSizeFactor);
+    }
+
     return mirroredGameNoteControllerPrefab;
 }
+
 #pragma endregion
 
 #pragma region debris
@@ -220,6 +263,7 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
     auto& globalConfig = Qosmetics::Notes::Config::get_config();
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
     // TODO: Implement global config value honoring
+    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
     if (config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultDebris)
     {
         auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
@@ -228,8 +272,7 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
         auto actualDebris = noteModelContainer->currentNoteObject->get_transform()->Find("Debris");
         auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
         debris->set_name("Debris");
-        float actualNoteSize = 0.4f * (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
-        debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * actualNoteSize);
+        debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
 
         // debris->AddComponent<Qosmetics::Notes::DebrisHandler*>();
 
@@ -258,6 +301,11 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
         }
 
         meshTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
+    }
+    else if (globalConfig.overrideNoteSize)
+    {
+        auto t = noteDebrisPrefab->get_transform();
+        t->set_localScale(t->get_localScale() * noteSizeFactor);
     }
     return noteDebrisPrefab;
 }

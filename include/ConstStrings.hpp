@@ -26,4 +26,7 @@ namespace ConstStrings
     CONST_STRING(MirrorNotes);
     CONST_STRING(Bomb);
     CONST_STRING(MirrorBomb);
+    CONST_STRING(BigCuttable);
+    CONST_STRING(SmallCuttable);
+
 }
