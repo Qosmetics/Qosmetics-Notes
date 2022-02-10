@@ -108,15 +108,24 @@ namespace Qosmetics::Notes
         if (cell)
         {
             auto& descriptor = cell->descriptor;
-            NoteModelContainer::get_instance()->LoadObject(descriptor, std::bind(&SelectionViewController::OnObjectLoadFinished, this));
-
-            Qosmetics::Notes::Config::get_config().lastUsedCyoob = Qosmetics::Core::FileUtils::GetFileName(descriptor.get_filePath(), true);
-            Qosmetics::Core::Config::SaveConfig();
+            if (NoteModelContainer::get_instance()->LoadObject(descriptor, std::bind(&SelectionViewController::OnObjectLoadFinished, this)))
+            {
+                previewViewController->ClearPrefab();
+                previewViewController->ShowLoading(true);
+            }
+            else
+            {
+                previewViewController->UpdatePreview(false);
+            }
         }
     }
 
     void SelectionViewController::OnObjectLoadFinished()
     {
-        // something to do after we changed the object
+        // something to do after we changed the object, like update preview
+
+        Qosmetics::Notes::Config::get_config().lastUsedCyoob = Qosmetics::Core::FileUtils::GetFileName(NoteModelContainer::get_instance()->GetDescriptor().get_filePath(), true);
+        Qosmetics::Core::Config::SaveConfig();
+        previewViewController->UpdatePreview(true);
     }
 }

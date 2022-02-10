@@ -1,5 +1,6 @@
 #include "GlobalNamespace/BeatmapObjectsInstaller.hpp"
 #include "GlobalNamespace/BombNoteController.hpp"
+#include "GlobalNamespace/BoxCuttableBySaber.hpp"
 #include "GlobalNamespace/ColorScheme.hpp"
 #include "GlobalNamespace/EffectPoolsManualInstaller.hpp"
 #include "GlobalNamespace/FakeMirrorObjectsInstaller.hpp"
@@ -43,7 +44,9 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
     auto& globalConfig = Qosmetics::Notes::Config::get_config();
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
     auto mesh = bombNotePrefab->get_transform()->Find("Mesh");
-    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
+    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
+
+    // if we have a note object, and a bomb exists on it
     if (noteModelContainer->currentNoteObject && config.get_hasBomb())
     {
         // TODO: Implement global config value honoring
@@ -56,12 +59,13 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
         auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
         meshRenderer->set_enabled(false);
 
-        if (globalConfig.alsoChangeHitboxes)
+        if (globalConfig.overrideNoteSize && globalConfig.alsoChangeHitboxes)
         {
             auto sphereCollider = mesh->get_gameObject()->GetComponent<UnityEngine::SphereCollider*>();
             sphereCollider->set_radius(sphereCollider->get_radius() * noteSizeFactor);
         }
     }
+    // bomb didn't exist, but we do want to change note size
     else if (globalConfig.overrideNoteSize)
     {
         mesh->set_localScale(mesh->get_localScale() * noteSizeFactor);
@@ -82,7 +86,7 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
     auto mesh = mirroredBombNoteControllerPrefab->get_transform()->Find("Mesh");
     auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
-    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
+    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
     // if obj exists, it has bomb, we don't force default, the object is mirrorable, and we are not disabling reflections
     if (noteModelContainer->currentNoteObject && config.get_hasBomb() && !globalConfig.forceDefaultBombs && config.get_isMirrorable() && !globalConfig.disableReflections)
     {
@@ -99,6 +103,10 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
     else if (globalConfig.disableReflections || (!config.get_isMirrorable() && !globalConfig.keepMissingReflections))
     {
         meshRenderer->set_enabled(false);
+        if (globalConfig.overrideNoteSize)
+        {
+            mesh->set_localScale(mesh->get_localScale() * noteSizeFactor);
+        }
     }
     else if (globalConfig.overrideNoteSize)
     {
@@ -116,9 +124,10 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
     auto& config = noteModelContainer->GetNoteConfig();
     auto& globalConfig = Qosmetics::Notes::Config::get_config();
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
-    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
+    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
     // get the notecubetransform to edit it's children
     auto noteCubeTransform = normalBasicNotePrefab->get_transform()->Find("NoteCube");
+    // if a custom note even exists
     if (noteModelContainer->currentNoteObject)
     {
         auto cyoobParent = normalBasicNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
@@ -154,8 +163,13 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
             }
         }
 
-        // TODO: Implement global config value honoring
-        // TODO: implement alsochangehitboxes size changing
+        if (globalConfig.overrideNoteSize && globalConfig.alsoChangeHitboxes)
+        {
+            for (auto bigCuttable : normalBasicNotePrefab->dyn__bigCuttableBySaberList())
+                bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() * noteSizeFactor);
+            for (auto smallCuttable : normalBasicNotePrefab->dyn__smallCuttableBySaberList())
+                smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() * noteSizeFactor);
+        }
 
         // if we don't want to show arrows, disable the arrow gameobjects
         if (!config.get_showArrows())
@@ -165,19 +179,21 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
             noteCubeTransform->Find(ConstStrings::NoteCircleGlow())->get_gameObject()->SetActive(false);
         }
 
-        // if the note is not default config, set the mesh to nullptr so it can never show
-        if (!config.get_isDefault())
-            noteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
+        /// don't show the normal mesh of the note
+        noteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
     }
+    // note didn't exist, but we do want to change note size
     else if (globalConfig.overrideNoteSize)
     {
-
         noteCubeTransform->set_localScale(noteCubeTransform->get_localScale() * noteSizeFactor);
+
+        // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
         if (!globalConfig.alsoChangeHitboxes)
         {
-            auto newSize = Sombrero::FastVector3::one() / noteSizeFactor;
-            noteCubeTransform->Find(ConstStrings::BigCuttable())->set_localScale(newSize);
-            noteCubeTransform->Find(ConstStrings::SmallCuttable())->set_localScale(newSize);
+            for (auto bigCuttable : normalBasicNotePrefab->dyn__bigCuttableBySaberList())
+                bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() / noteSizeFactor);
+            for (auto smallCuttable : normalBasicNotePrefab->dyn__smallCuttableBySaberList())
+                smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() / noteSizeFactor);
         }
     }
     return normalBasicNotePrefab;
@@ -190,7 +206,7 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
     auto& globalConfig = Qosmetics::Notes::Config::get_config();
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
     auto mirroredNoteCubeTransform = mirroredGameNoteControllerPrefab->get_transform()->Find("NoteCube");
-    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
+    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
     // if obj exists, and is mirrorable, and we are not disabling reflections
     if (noteModelContainer->currentNoteObject && config.get_isMirrorable() && !globalConfig.disableReflections)
     {
@@ -263,7 +279,7 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
     auto& globalConfig = Qosmetics::Notes::Config::get_config();
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
     // TODO: Implement global config value honoring
-    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * (gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_proMode() ? 0.5f : 1.0f);
+    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
     if (config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultDebris)
     {
         auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();

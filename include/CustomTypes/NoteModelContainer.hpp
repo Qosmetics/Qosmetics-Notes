@@ -12,6 +12,7 @@
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, NoteModelContainer, UnityEngine::MonoBehaviour,
                       DECLARE_INSTANCE_METHOD(void, Start);
                       DECLARE_INSTANCE_METHOD(void, OnDestroy);
+                      DECLARE_INSTANCE_METHOD(void, OnGameRestart);
                       DECLARE_INSTANCE_FIELD(UnityEngine::AssetBundle*, bundle);
                       DECLARE_INSTANCE_FIELD(bool, isLoading);
                       DECLARE_INSTANCE_FIELD(UnityEngine::GameObject*, currentNoteObject);
@@ -21,8 +22,9 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, NoteModelContainer, UnityEngine::MonoBeh
                       :
 
                       static NoteModelContainer * get_instance();
-                      void LoadObject(const Qosmetics::Core::Descriptor& descriptor, std::function<void(NoteModelContainer*)> onFinished = nullptr);
+                      bool LoadObject(const Qosmetics::Core::Descriptor& descriptor, std::function<void(NoteModelContainer*)> onFinished = nullptr);
                       const NoteObjectConfig& GetNoteConfig();
+                      const Qosmetics::Core::Descriptor& GetDescriptor();
                       void Default();
 
                       private

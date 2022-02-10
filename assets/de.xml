@@ -1,4 +1,5 @@
 <resources>
+    <string name="QosmeticsCyoobs:Preview:Default">Default Cyoob (no preview)</string>
     <string name="QosmeticsCyoobs:Settings:Settings">Cyoob Settings</string>
     <string name="QosmeticsCyoobs:Settings:OverrideNoteSize">Cyoob-Größe Ändern</string>
     <string name="QosmeticsCyoobs:Settings:OverrideNoteSizeHoverHint">Ob die konfigurierte Cyoob-Größe überhaupt verwendet wird oder nicht</string>

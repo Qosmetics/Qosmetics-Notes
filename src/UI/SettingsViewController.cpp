@@ -4,7 +4,11 @@
 #include "qosmetics-core/shared/ConfigRegister.hpp"
 #include "qosmetics-core/shared/Utils/UIUtils.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
+#include "questui/shared/CustomTypes/Components/ExternalComponents.hpp"
 #include "sombrero/shared/FastColor.hpp"
+#include "sombrero/shared/FastVector2.hpp"
+
+#include "UnityEngine/RectTransform.hpp"
 
 DEFINE_TYPE(Qosmetics::Notes, SettingsViewController);
 
@@ -12,10 +16,11 @@ using namespace QuestUI::BeatSaberUI;
 
 #define TOGGLE(name, key)                                                                   \
     auto name##Toggle = CreateToggle(containerT, localization->Get(key), globalConfig.name, \
-                                     [](auto v)                                             \
+                                     [&](auto v)                                            \
                                      {                                                      \
                                          Config::get_config().name = v;                     \
                                          Qosmetics::Core::Config::SaveConfig();             \
+                                         previewViewController->UpdatePreview(false);       \
                                      });                                                    \
     AddHoverHint(name##Toggle, localization->Get(key "HoverHint"))
 
@@ -25,16 +30,24 @@ namespace Qosmetics::Notes
     {
         if (firstActivation)
         {
+            // TODO: implement updating config toggles if config value changed due to profile being changed
+
             auto localization = Localization::GetSelected();
             Qosmetics::Core::UIUtils::AddHeader(get_transform(), localization->Get("QosmeticsCyoobs:Settings:Settings"), Sombrero::FastColor::blue());
             auto container = CreateScrollableSettingsContainer(this);
+
+            auto externalComponents = container->GetComponent<QuestUI::ExternalComponents*>();
+            auto scrollTransform = externalComponents->Get<UnityEngine::RectTransform*>();
+            scrollTransform->set_sizeDelta(Sombrero::FastVector2::zero());
+
             auto containerT = container->get_transform();
             auto& globalConfig = Config::get_config();
             TOGGLE(overrideNoteSize, "QosmeticsCyoobs:Settings:OverrideNoteSize");
-            auto noteSizeSlider = CreateSliderSetting(containerT, localization->Get("QosmeticsCyoobs:Settings:NoteSize"), 0.05f, globalConfig.noteSize, 0.05f, 5.0f, [](auto v)
+            auto noteSizeSlider = CreateSliderSetting(containerT, localization->Get("QosmeticsCyoobs:Settings:NoteSize"), 0.05f, globalConfig.noteSize, 0.05f, 5.0f, [&](auto v)
                                                       {
                                                           Config::get_config().noteSize = v;
-                                                          Qosmetics::Core::Config::SaveConfig(); });
+                                                          Qosmetics::Core::Config::SaveConfig();
+                                                          previewViewController->UpdatePreview(false); });
             AddHoverHint(noteSizeSlider, localization->Get("QosmeticsCyoobs:Settings:NoteSizeHoverHint"));
 
             TOGGLE(alsoChangeHitboxes, "QosmeticsCyoobs:Settings:AlsoChangeHitboxes");

@@ -144,11 +144,13 @@ namespace Qosmetics::Notes
 
     void NoteModelContainer::ctor()
     {
+        DEBUG("Created NoteModelContainer instance: %p", this);
         instance = this;
         bundle = nullptr;
         isLoading = false;
         currentNoteObject = nullptr;
         currentManifest = Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig>();
+        DEBUG("%p currentManifest: %p", this, &currentManifest);
     }
 
     void NoteModelContainer::Start()
@@ -161,19 +163,23 @@ namespace Qosmetics::Notes
         if (!fileexists(filePath))
             return;
         currentManifest = Qosmetics::Core::Manifest<NoteObjectConfig>(filePath);
+        currentManifest.get_descriptor();
+        DEBUG("%p currentManifest: %p", this, &currentManifest);
         INFO("Loading Note Object %s", currentManifest.get_descriptor().get_name().data());
         StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(nullptr)));
     }
 
-    void NoteModelContainer::LoadObject(const Qosmetics::Core::Descriptor& descriptor, std::function<void(NoteModelContainer*)> onFinished)
+    bool NoteModelContainer::LoadObject(const Qosmetics::Core::Descriptor& descriptor, std::function<void(NoteModelContainer*)> onFinished)
     {
         if (isLoading)
-            return;
+            return false;
         if (descriptor.get_filePath() == currentManifest.get_filePath())
-            return;
+            return false;
         INFO("Loading Note Object %s", descriptor.get_name().data());
         currentManifest = Qosmetics::Core::Manifest<NoteObjectConfig>(descriptor.get_filePath());
+        DEBUG("%p currentManifest: %p", this, &currentManifest);
         StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(onFinished)));
+        return true;
     }
 
     const NoteObjectConfig& NoteModelContainer::GetNoteConfig()
@@ -181,6 +187,20 @@ namespace Qosmetics::Notes
         return currentManifest.get_config();
     }
 
+    const Qosmetics::Core::Descriptor& NoteModelContainer::GetDescriptor()
+    {
+        return currentManifest.get_descriptor();
+    }
+
+    /*
+    const Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig>& NoteModelContainer::GetManifest()
+    {
+        DEBUG("%p currentManifest: %p", this, &currentManifest);
+        auto& descriptor = currentManifest.get_descriptor();
+        DEBUG("%p descriptor: %p", this, &descriptor);
+        return currentManifest;
+    }
+    */
     custom_types::Helpers::Coroutine NoteModelContainer::LoadBundleRoutine(std::function<void(NoteModelContainer*)> onFinished)
     {
         isLoading = true;
@@ -250,4 +270,22 @@ namespace Qosmetics::Notes
             bundle->Unload(false);
         bundle = nullptr;
     }
+
+    void NoteModelContainer::OnGameRestart()
+    {
+        if (currentNoteObject)
+        {
+            Object::DestroyImmediate(currentNoteObject);
+            currentNoteObject = nullptr;
+        }
+        if (bundle)
+        {
+            bundle->Unload(true);
+            bundle = nullptr;
+        }
+
+        UnityEngine::Object::Destroy(this->get_gameObject());
+        instance = nullptr;
+    }
+
 }
