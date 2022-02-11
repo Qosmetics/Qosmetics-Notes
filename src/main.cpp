@@ -1,3 +1,4 @@
+#include "CustomTypes/CyoobParent.hpp"
 #include "CustomTypes/NoteModelContainer.hpp"
 #include "UI/CyoobFlowCoordinator.hpp"
 #include "assets.hpp"

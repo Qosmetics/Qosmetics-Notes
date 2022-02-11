@@ -49,6 +49,11 @@
       "id": "diglett",
       "versionRange": "^1.0.0",
       "additionalData": {}
+    },
+    {
+      "id": "conditional-dependencies",
+      "versionRange": "^0.2.0",
+      "additionalData": {}
     }
   ],
   "additionalData": {}

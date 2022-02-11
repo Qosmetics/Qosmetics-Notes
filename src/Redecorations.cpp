@@ -25,6 +25,8 @@
 #include "sombrero/shared/FastVector3.hpp"
 
 #include "ConstStrings.hpp"
+#include "CustomTypes/BombColorHandler.hpp"
+#include "CustomTypes/BombParent.hpp"
 #include "CustomTypes/CyoobColorHandler.hpp"
 #include "CustomTypes/CyoobHandler.hpp"
 #include "CustomTypes/CyoobParent.hpp"
@@ -35,6 +37,13 @@
 #include "PropertyID.hpp"
 
 #include "config.hpp"
+
+#if __has_include("chroma/shared/NoteAPI.hpp")
+#include "chroma/shared/NoteAPI.hpp"
+#ifndef CHROMA_EXISTS
+#define CHROMA_EXISTS
+#endif
+#endif
 
 #pragma region bombs
 REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
@@ -49,8 +58,17 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
     // if we have a note object, and a bomb exists on it, and we don't force default
     if (noteModelContainer->currentNoteObject && config.get_hasBomb() && !globalConfig.forceDefaultBombs)
     {
+        bombNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::BombParent*>();
+
+#ifdef CHROMA_EXISTS
+        // TODO: check back to see if this exists already
+        // Chroma::NoteApi::getBombChangedColorCallbackSafe() -= &Qosmetics::Notes::BombParent::ColorizeSpecific;
+        // Chroma::NoteApi::getBombChangedColorCallbackSafe() += &Qosmetics::Notes::BombParent::ColorizeSpecific;
+#endif
+
         auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Bomb());
         auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
+        bomb->AddComponent<Qosmetics::Notes::BombColorHandler*>();
         bomb->set_name(ConstStrings::Bomb());
         bomb->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
         bomb->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
@@ -125,10 +143,19 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
     float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
     // get the notecubetransform to edit it's children
     auto noteCubeTransform = normalBasicNotePrefab->get_transform()->Find("NoteCube");
+#ifdef CHROMA_EXISTS
+    Chroma::NoteAPI::setNoteColorable(noteModelContainer->currentNoteObject == nullptr);
+#endif
     // if a custom note even exists
     if (noteModelContainer->currentNoteObject)
     {
         auto cyoobParent = normalBasicNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
+#ifdef CHROMA_EXISTS
+        // TODO: check back to see if this exists already
+        // Chroma::NoteApi::getNoteChangedColorCallbackSafe() -= &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
+        // Chroma::NoteApi::getNoteChangedColorCallbackSafe() += &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
+#endif
+
         auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Notes());
         // instantiate the notes prefab
         auto notes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), noteCubeTransform);
@@ -141,6 +168,9 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
         auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
         auto leftColor = colorScheme->dyn__saberAColor();
         auto rightColor = colorScheme->dyn__saberBColor();
+
+        Qosmetics::Notes::CyoobParent::lastLeftColor = leftColor;
+        Qosmetics::Notes::CyoobParent::lastRightColor = rightColor;
 
         for (int i = 0; i < childCount; i++)
         {
@@ -283,6 +313,7 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
     float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
     if (config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultDebris)
     {
+
         auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
 
         auto meshTransform = noteDebrisPrefab->dyn__meshTransform();

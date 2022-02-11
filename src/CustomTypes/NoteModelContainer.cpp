@@ -8,6 +8,7 @@
 #include "qosmetics-core/shared/Utils/ZipUtils.hpp"
 #include "static-defines.hpp"
 
+#include "CustomTypes/BombColorHandler.hpp"
 #include "CustomTypes/CyoobColorHandler.hpp"
 #include "CustomTypes/CyoobHandler.hpp"
 #include "CustomTypes/DebrisColorHandler.hpp"
@@ -128,6 +129,13 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
         dbt->GetChild(0)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
         dbt->GetChild(1)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
     }
+
+    auto bt = t->Find(ConstStrings::Bomb());
+    auto mbt = t->Find(ConstStrings::Bomb());
+    if (bt)
+        bt->get_gameObject()->AddComponent<Qosmetics::Notes::BombColorHandler*>();
+    if (mbt)
+        mbt->get_gameObject()->AddComponent<Qosmetics::Notes::BombColorHandler*>();
 }
 namespace Qosmetics::Notes
 {
