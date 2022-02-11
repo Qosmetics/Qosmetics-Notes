@@ -38,6 +38,8 @@ namespace Qosmetics::Notes
 
     void DebrisColorHandler::FetchCCMaterials()
     {
+        if (customColorMaterials)
+            return;
         auto renderers = GetComponentsInChildren<UnityEngine::Renderer*>(true);
 
         std::vector<UnityEngine::Material*> customColorMaterialsVec = {};

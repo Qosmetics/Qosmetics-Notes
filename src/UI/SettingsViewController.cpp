@@ -14,20 +14,23 @@ DEFINE_TYPE(Qosmetics::Notes, SettingsViewController);
 
 using namespace QuestUI::BeatSaberUI;
 
-#define TOGGLE(name, key)                                                                   \
-    auto name##Toggle = CreateToggle(containerT, localization->Get(key), globalConfig.name, \
-                                     [&](auto v)                                            \
-                                     {                                                      \
-                                         Config::get_config().name = v;                     \
-                                         Qosmetics::Core::Config::SaveConfig();             \
-                                         previewViewController->UpdatePreview(false);       \
-                                     });                                                    \
+#define TOGGLE(name, key)                                                              \
+    name##Toggle = CreateToggle(containerT, localization->Get(key), globalConfig.name, \
+                                [&](auto v)                                            \
+                                {                                                      \
+                                    Config::get_config().name = v;                     \
+                                    Qosmetics::Core::Config::SaveConfig();             \
+                                    previewViewController->UpdatePreview(false);       \
+                                });                                                    \
     AddHoverHint(name##Toggle, localization->Get(key "HoverHint"))
 
 namespace Qosmetics::Notes
 {
+    bool SettingsViewController::justChangedProfile = false;
+
     void SettingsViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
+        auto& globalConfig = Config::get_config();
         if (firstActivation)
         {
             // TODO: implement updating config toggles if config value changed due to profile being changed
@@ -41,13 +44,16 @@ namespace Qosmetics::Notes
             scrollTransform->set_sizeDelta(Sombrero::FastVector2::zero());
 
             auto containerT = container->get_transform();
-            auto& globalConfig = Config::get_config();
             TOGGLE(overrideNoteSize, "QosmeticsCyoobs:Settings:OverrideNoteSize");
-            auto noteSizeSlider = CreateSliderSetting(containerT, localization->Get("QosmeticsCyoobs:Settings:NoteSize"), 0.05f, globalConfig.noteSize, 0.05f, 5.0f, [&](auto v)
-                                                      {
+            noteSizeSlider = CreateSliderSetting(containerT, localization->Get("QosmeticsCyoobs:Settings:NoteSize"), 0.05f, globalConfig.noteSize, 0.05f, 2.0f, [&](auto v)
+                                                 {
                                                           Config::get_config().noteSize = v;
                                                           Qosmetics::Core::Config::SaveConfig();
                                                           previewViewController->UpdatePreview(false); });
+            noteSizeSlider->FormatString = [](auto v) -> std::string
+            {
+                return std::to_string(v).substr(0, 4);
+            };
             AddHoverHint(noteSizeSlider, localization->Get("QosmeticsCyoobs:Settings:NoteSizeHoverHint"));
 
             TOGGLE(alsoChangeHitboxes, "QosmeticsCyoobs:Settings:AlsoChangeHitboxes");
@@ -55,6 +61,17 @@ namespace Qosmetics::Notes
             TOGGLE(forceDefaultDebris, "QosmeticsCyoobs:Settings:ForceDefaultDebris");
             TOGGLE(disableReflections, "QosmeticsCyoobs:Settings:DisableReflections");
             TOGGLE(keepMissingReflections, "QosmeticsCyoobs:Settings:KeepMissingReflections");
+        }
+        else if (justChangedProfile)
+        {
+            justChangedProfile = false;
+            overrideNoteSizeToggle->set_isOn(globalConfig.overrideNoteSize);
+            noteSizeSlider->set_value(globalConfig.noteSize);
+            alsoChangeHitboxesToggle->set_isOn(globalConfig.alsoChangeHitboxes);
+            forceDefaultBombsToggle->set_isOn(globalConfig.forceDefaultBombs);
+            forceDefaultDebrisToggle->set_isOn(globalConfig.forceDefaultDebris);
+            disableReflectionsToggle->set_isOn(globalConfig.disableReflections);
+            keepMissingReflectionsToggle->set_isOn(globalConfig.keepMissingReflections);
         }
     }
 }

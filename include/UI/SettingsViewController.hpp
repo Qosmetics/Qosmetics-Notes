@@ -2,7 +2,9 @@
 
 #include "HMUI/ViewController.hpp"
 #include "UI/PreviewViewController.hpp"
+#include "UnityEngine/UI/Toggle.hpp"
 #include "custom-types/shared/macros.hpp"
+#include "questui/shared/CustomTypes/Components/Settings/SliderSetting.hpp"
 
 #ifndef DECLARE_OVERRIDE_METHOD_MATCH
 #define DECLARE_OVERRIDE_METHOD_MATCH(retval, name, mptr, ...) \
@@ -10,7 +12,20 @@
 #endif
 
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SettingsViewController, HMUI::ViewController,
-                        DECLARE_INSTANCE_FIELD(PreviewViewController*, previewViewController);
+                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, overrideNoteSizeToggle);
+                      DECLARE_INSTANCE_FIELD(QuestUI::SliderSetting*, noteSizeSlider);
+                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, alsoChangeHitboxesToggle);
+                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, forceDefaultBombsToggle);
+                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, forceDefaultDebrisToggle);
+                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, disableReflectionsToggle);
+                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, keepMissingReflectionsToggle);
+
+                      DECLARE_INSTANCE_FIELD(PreviewViewController*, previewViewController);
                       DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
+
+                      public
+                      :
+
+                      static bool justChangedProfile;
 
 )

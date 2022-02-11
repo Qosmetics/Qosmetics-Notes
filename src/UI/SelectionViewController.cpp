@@ -98,8 +98,6 @@ namespace Qosmetics::Notes
         auto noteModelContainer = NoteModelContainer::get_instance();
         noteModelContainer->Default();
 
-        Qosmetics::Notes::Config::get_config().lastUsedCyoob = "";
-        Qosmetics::Core::Config::SaveConfig();
         OnObjectLoadFinished();
     }
 
@@ -123,8 +121,9 @@ namespace Qosmetics::Notes
     void SelectionViewController::OnObjectLoadFinished()
     {
         // something to do after we changed the object, like update preview
+        auto noteModelContainer = NoteModelContainer::get_instance();
 
-        Qosmetics::Notes::Config::get_config().lastUsedCyoob = Qosmetics::Core::FileUtils::GetFileName(NoteModelContainer::get_instance()->GetDescriptor().get_filePath(), true);
+        Qosmetics::Notes::Config::get_config().lastUsedCyoob = noteModelContainer->GetNoteConfig().get_isDefault() ? "" : Qosmetics::Core::FileUtils::GetFileName(noteModelContainer->GetDescriptor().get_filePath(), true);
         Qosmetics::Core::Config::SaveConfig();
         previewViewController->UpdatePreview(true);
     }

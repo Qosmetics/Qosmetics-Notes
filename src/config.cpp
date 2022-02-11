@@ -1,5 +1,11 @@
 #include "config.hpp"
+#include "UI/PreviewViewController.hpp"
+#include "UI/SettingsViewController.hpp"
 #include "logging.hpp"
+#include "static-defines.hpp"
+
+#include "CustomTypes/NoteModelContainer.hpp"
+#include "qosmetics-core/shared/Data/Manifest.hpp"
 
 #define GET_JSON_STRING(identifier)                                                                                           \
     auto identifier##Itr = member.FindMember(#identifier);                                                                    \
@@ -101,18 +107,26 @@ namespace Qosmetics::Notes
 
     void NoteConfigRegistration::OnProfileSwitched() const
     {
+        Qosmetics::Notes::PreviewViewController::justChangedProfile = true;
+        Qosmetics::Notes::SettingsViewController::justChangedProfile = true;
+
+        auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
+        if (actual_config.lastUsedCyoob == "" || actual_config.lastUsedCyoob == "Default")
+        {
+            noteModelContainer->Default();
+            return;
+        }
+
+        std::string filePath = string_format("%s/%s.cyoob", cyoob_path, actual_config.lastUsedCyoob.c_str());
+        if (!fileexists(filePath))
+        {
+            noteModelContainer->Default();
+            return;
+        }
+
+        auto manifest = Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig>(filePath);
+        noteModelContainer->LoadObject(manifest, nullptr);
     }
 
     QOSMETICS_CONFIG_REGISTER(NoteConfigRegistration, "cyoobConfig");
-
-    /*
-    struct config_registration_NoteConfigRegistration : public NoteConfigRegistration
-    {
-        config_registration_NoteConfigRegistration() : NoteConfigRegistration("cyoobConfig")
-        {
-            Qosmetics::Core::Config::Register(this);
-        };
-    };
-    static config_registration_NoteConfigRegistration config_registration_NoteConfigRegistration_Instance = config_registration_NoteConfigRegistration();
-    */
 }

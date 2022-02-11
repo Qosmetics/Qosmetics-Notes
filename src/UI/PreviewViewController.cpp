@@ -1,5 +1,7 @@
 #include "UI/PreviewViewController.hpp"
 #include "ConstStrings.hpp"
+#include "CustomTypes/CyoobColorHandler.hpp"
+#include "CustomTypes/DebrisColorHandler.hpp"
 #include "CustomTypes/NoteModelContainer.hpp"
 #include "config.hpp"
 #include "diglett/shared/Diglett.hpp"
@@ -21,6 +23,13 @@ using namespace QuestUI::BeatSaberUI;
 
 namespace Qosmetics::Notes
 {
+    bool PreviewViewController::justChangedProfile = false;
+    void PreviewViewController::DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+    {
+        if (currentPrefab)
+            currentPrefab->SetActive(false);
+    }
+
     void PreviewViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
         if (firstActivation)
@@ -50,12 +59,22 @@ namespace Qosmetics::Notes
             ShowLoading(true);
             UpdatePreview(true);
         }
+        else
+        {
+            if (currentPrefab)
+                currentPrefab->SetActive(true);
+            DEBUG("Reactivating preview view controller with justChangedProfile: %s", justChangedProfile ? "true" : "false");
+            UpdatePreview(justChangedProfile);
+
+            justChangedProfile = false;
+        }
     }
 
     void PreviewViewController::SetTitleText(StringW text)
     {
         title->set_text(u"<i>" + text + u"</i>");
     }
+
     void PreviewViewController::ShowLoading(bool isLoading)
     {
         auto localization = Localization::GetSelected();
@@ -92,12 +111,12 @@ namespace Qosmetics::Notes
 
         float noteSizeFactor = globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f;
         float noteSize = noteSizeFactor * 0.4f;
+
         auto notesT = currentPrefab->get_transform()->Find(ConstStrings::Notes());
         auto mirrorNotesT = currentPrefab->get_transform()->Find(ConstStrings::MirrorNotes());
         if (mirrorNotesT)
             UnityEngine::Object::DestroyImmediate(mirrorNotesT->get_gameObject());
 
-        // TODO: Do some funky size and position offsets if the notes are scaled a certain way
         auto bombT = currentPrefab->get_transform()->Find(ConstStrings::Bomb());
         auto mirrorBombT = currentPrefab->get_transform()->Find(ConstStrings::MirrorBomb());
         if (mirrorBombT)
@@ -110,22 +129,41 @@ namespace Qosmetics::Notes
         auto leftDotT = notesT->Find(ConstStrings::LeftDot());
         auto rightDotT = notesT->Find(ConstStrings::RightDot());
 
+        // TODO: fetch colors from proper place somewhere
+        Sombrero::FastColor leftColor(1.0f, 0.0f, 0.0f, 1.0f);
+        Sombrero::FastColor rightColor(0.0f, 0.0f, 1.0f, 1.0f);
+
+        float distance = 0.4f * (noteSizeFactor > 1.0f ? noteSizeFactor : 1.0f);
+        float offset = 0.15f;
+
         leftArrowT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-        leftArrowT->set_localPosition(Sombrero::FastVector3(0.5f, 1.0f, 0.0f));
+        leftArrowT->set_localPosition(Sombrero::FastVector3(-distance - offset, distance + offset, 0.0f));
+        auto leftArrowColorHandler = leftArrowT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+        leftArrowColorHandler->FetchCCMaterials();
+        leftArrowColorHandler->SetColors(leftColor, rightColor);
 
         rightArrowT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-        rightArrowT->set_localPosition(Sombrero::FastVector3(-0.5f, 1.0f, 0.0f));
+        rightArrowT->set_localPosition(Sombrero::FastVector3(0.0f, distance + offset, 0.0f));
+        auto rightArrowColorHandler = rightArrowT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+        rightArrowColorHandler->FetchCCMaterials();
+        rightArrowColorHandler->SetColors(rightColor, leftColor);
 
         leftDotT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-        leftDotT->set_localPosition(Sombrero::FastVector3(0.5f, 0.0f, 0.0f));
+        leftDotT->set_localPosition(Sombrero::FastVector3(-distance - offset, 0.0f, 0.0f));
+        auto leftDotColorHandler = leftDotT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+        leftDotColorHandler->FetchCCMaterials();
+        leftDotColorHandler->SetColors(leftColor, rightColor);
 
         rightDotT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-        rightDotT->set_localPosition(Sombrero::FastVector3(-0.5f, 0.0f, 0.0f));
+        rightDotT->set_localPosition(Sombrero::FastVector3(0.0f, 0.0f, 0.0f));
+        auto rightDotColorHandler = rightDotT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+        rightDotColorHandler->FetchCCMaterials();
+        rightDotColorHandler->SetColors(rightColor, leftColor);
 
         if (bombT)
         {
             bombT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-            bombT->set_localPosition(Sombrero::FastVector3(1.0f, 0.0f, 0.0f));
+            bombT->set_localPosition(Sombrero::FastVector3(distance + offset, 0.0f, 0.0f));
 
             bombT->get_gameObject()->SetActive(!globalConfig.forceDefaultBombs);
         }
@@ -138,13 +176,19 @@ namespace Qosmetics::Notes
             if (leftDebrisT)
             {
                 leftDebrisT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-                leftDebrisT->set_localPosition(Sombrero::FastVector3(0.5f, -1.0f, 0.0f));
+                leftDebrisT->set_localPosition(Sombrero::FastVector3(-distance - offset, -distance - offset, 0.0f));
+                auto leftDebrisColorHandler = leftDebrisT->get_gameObject()->GetComponent<DebrisColorHandler*>();
+                leftDebrisColorHandler->FetchCCMaterials();
+                leftDebrisColorHandler->SetColors(leftColor, rightColor);
             }
 
             if (rightDebrisT)
             {
                 rightDebrisT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-                rightDebrisT->set_localPosition(Sombrero::FastVector3(-0.5f, -1.0f, 0.0f));
+                rightDebrisT->set_localPosition(Sombrero::FastVector3(0.0f, -distance - offset, 0.0f));
+                auto rightDebrisColorHandler = rightDebrisT->get_gameObject()->GetComponent<DebrisColorHandler*>();
+                rightDebrisColorHandler->FetchCCMaterials();
+                rightDebrisColorHandler->SetColors(rightColor, leftColor);
             }
 
             debrisT->get_gameObject()->SetActive(!globalConfig.forceDefaultDebris);
@@ -156,11 +200,11 @@ namespace Qosmetics::Notes
         auto noteModelContainer = NoteModelContainer::get_instance();
         if (noteModelContainer->currentNoteObject)
         {
-            // TODO: improve default values as they are not 100% right
+            DEBUG("Found a new note object, instantiating it! name: %s", static_cast<std::string>(noteModelContainer->currentNoteObject->get_name()).c_str());
             currentPrefab = UnityEngine::Object::Instantiate(noteModelContainer->currentNoteObject, get_transform());
             currentPrefab->SetActive(true);
             auto t = currentPrefab->get_transform();
-            t->set_localScale(Sombrero::FastVector3::one() * 12.5f);
+            t->set_localScale(Sombrero::FastVector3::one() * 30.0f);
             t->set_localPosition(Sombrero::FastVector3(-30.0f, 0.0f, -75.0f));
             t->set_localEulerAngles(Sombrero::FastVector3(0.0f, 60.0f, 0.0f));
         }
@@ -172,8 +216,12 @@ namespace Qosmetics::Notes
 
     void PreviewViewController::ClearPrefab()
     {
+        DEBUG("Clearing Prefab...");
         if (currentPrefab)
+        {
+            DEBUG("Prefab existed!");
             UnityEngine::Object::DestroyImmediate(currentPrefab);
+        }
         currentPrefab = nullptr;
     }
 

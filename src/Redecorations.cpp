@@ -46,10 +46,9 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
     auto mesh = bombNotePrefab->get_transform()->Find("Mesh");
     float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
 
-    // if we have a note object, and a bomb exists on it
-    if (noteModelContainer->currentNoteObject && config.get_hasBomb())
+    // if we have a note object, and a bomb exists on it, and we don't force default
+    if (noteModelContainer->currentNoteObject && config.get_hasBomb() && !globalConfig.forceDefaultBombs)
     {
-        // TODO: Implement global config value honoring
         auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Bomb());
         auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
         bomb->set_name(ConstStrings::Bomb());
@@ -90,7 +89,6 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
     // if obj exists, it has bomb, we don't force default, the object is mirrorable, and we are not disabling reflections
     if (noteModelContainer->currentNoteObject && config.get_hasBomb() && !globalConfig.forceDefaultBombs && config.get_isMirrorable() && !globalConfig.disableReflections)
     {
-        // TODO: Implement global config value honoring
         meshRenderer->set_enabled(false);
         auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::MirrorBomb());
         auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
@@ -242,7 +240,6 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
                 colorHandler->SetColors(rightColor, leftColor);
         }
 
-        // TODO: Implement global config value honoring
         // if we don't want to show arrows, disable the arrow gameobjects
         if (!config.get_showArrows())
         {
@@ -259,6 +256,11 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
         mirroredNoteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
         mirroredNoteCubeTransform->Find(ConstStrings::NoteArrow())->get_gameObject()->SetActive(false);
         mirroredNoteCubeTransform->Find(ConstStrings::NoteCircleGlow())->get_gameObject()->SetActive(false);
+
+        if (globalConfig.overrideNoteSize)
+        {
+            mirroredNoteCubeTransform->set_localScale(mirroredNoteCubeTransform->get_localScale() * noteSizeFactor);
+        }
     }
     else if (globalConfig.overrideNoteSize)
     {
@@ -278,7 +280,6 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
     auto& config = noteModelContainer->GetNoteConfig();
     auto& globalConfig = Qosmetics::Notes::Config::get_config();
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
-    // TODO: Implement global config value honoring
     float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
     if (config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultDebris)
     {
@@ -289,8 +290,6 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
         auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
         debris->set_name("Debris");
         debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
-
-        // debris->AddComponent<Qosmetics::Notes::DebrisHandler*>();
 
         auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
         auto leftColor = colorScheme->dyn__saberAColor();

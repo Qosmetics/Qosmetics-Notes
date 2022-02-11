@@ -3,6 +3,7 @@
 #include "HMUI/ViewController.hpp"
 #include "TMPro/TextMeshProUGUI.hpp"
 #include "UnityEngine/GameObject.hpp"
+
 #include "custom-types/shared/macros.hpp"
 
 #ifndef DECLARE_OVERRIDE_METHOD_MATCH
@@ -18,9 +19,12 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, PreviewViewController, HMUI::ViewControl
                       DECLARE_INSTANCE_METHOD(void, SetTitleText, StringW text);
 
                       DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
+                      DECLARE_OVERRIDE_METHOD_MATCH(void, DidDeactivate, &HMUI::ViewController::DidDeactivate, bool removedFromHierarchy, bool screenSystemDisabling);
 
                       public
                       :
+
+                      static bool justChangedProfile;
 
                       void ShowLoading(bool isLoading = true);
                       void UpdatePreview(bool reinstantiate = false);

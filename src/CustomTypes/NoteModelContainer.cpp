@@ -169,6 +169,17 @@ namespace Qosmetics::Notes
         StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(nullptr)));
     }
 
+    bool NoteModelContainer::LoadObject(const Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig>& manifest, std::function<void(NoteModelContainer*)> onFinished)
+    {
+        if (isLoading)
+            return false;
+        if (manifest.get_filePath() == currentManifest.get_filePath())
+            return false;
+        currentManifest = manifest;
+        StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(onFinished)));
+        return true;
+    }
+
     bool NoteModelContainer::LoadObject(const Qosmetics::Core::Descriptor& descriptor, std::function<void(NoteModelContainer*)> onFinished)
     {
         if (isLoading)
@@ -257,7 +268,10 @@ namespace Qosmetics::Notes
             bundle->Unload(true);
             bundle = nullptr;
         }
+
+        currentManifest = decltype(currentManifest)();
     }
+
     void NoteModelContainer::OnDestroy()
     {
         instance = nullptr;
