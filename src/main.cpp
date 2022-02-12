@@ -18,6 +18,8 @@
 
 #include "GlobalNamespace/MainFlowCoordinator.hpp"
 
+bool useChroma = false;
+
 QOSMETICS_FLOWCOORDINATOR_REGISTER(Cyoobs, Qosmetics::Notes::CyoobFlowCoordinator*)
 {
     auto inactive_data = NoteIcon_png::getData();
@@ -27,7 +29,7 @@ QOSMETICS_FLOWCOORDINATOR_REGISTER(Cyoobs, Qosmetics::Notes::CyoobFlowCoordinato
     return std::make_pair(inactive, active);
 }
 
-ModInfo modInfo = {ID, VERSION};
+ModInfo modInfo = {MOD_ID, VERSION};
 
 extern "C" void setup(ModInfo& info)
 {
@@ -42,6 +44,9 @@ extern "C" void load()
     auto& logger = Qosmetics::Notes::Logging::getLogger();
     Hooks::InstallHooks(logger);
     custom_types::Register::AutoRegister();
+
+    // check if chroma exists
+    useChroma = Modloader::requireMod("Chroma");
 
     Diglett::Register::RegisterLocales<Diglett::Languages::German>(logger, ASSET_TO_XML(de_xml));
     Diglett::Register::RegisterLocales<Diglett::Languages::English>(logger, ASSET_TO_XML(en_xml));

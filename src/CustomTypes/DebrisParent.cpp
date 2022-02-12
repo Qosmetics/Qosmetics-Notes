@@ -1,6 +1,7 @@
 #include "CustomTypes/DebrisParent.hpp"
 #include "GlobalNamespace/ColorManager.hpp"
 #include "logging.hpp"
+#include <fmt/format.h>
 #include <unordered_map>
 
 DEFINE_TYPE(Qosmetics::Notes, DebrisParent);
@@ -32,7 +33,7 @@ namespace Qosmetics::Notes
 
     void DebrisParent::SetSliceProperties(GlobalNamespace::ColorType colorType, UnityEngine::Vector3 cutPoint, UnityEngine::Vector3 cutNormal)
     {
-        DEBUG("%p: Setting slice properties", this);
+        DEBUG("{}: Setting slice properties", fmt::ptr(this));
         debrisHandler->ShowDebris(colorType);
         debrisHandler->SetSliceProperties(cutPoint, cutNormal);
 

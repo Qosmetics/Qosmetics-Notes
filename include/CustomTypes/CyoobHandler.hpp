@@ -17,7 +17,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, CyoobHandler, UnityEngine::MonoBehaviour
 
                       void ShowNote(bool right, bool dot);
                       void ShowNote(int obj);
-                      void SetColors(UnityEngine::Color thisColor, UnityEngine::Color thatColor);
+                      void SetColors(UnityEngine::Color leftColor, UnityEngine::Color rightColor);
 
                       void FindNotes();
 

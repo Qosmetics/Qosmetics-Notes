@@ -20,6 +20,8 @@
 #include "UnityEngine/MeshRenderer.hpp"
 #include "UnityEngine/Transform.hpp"
 
+#include <fmt/format.h>
+
 DEFINE_TYPE(Qosmetics::Notes, NoteModelContainer);
 
 #define STARTCOROUTINE(routine) GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(routine)
@@ -152,13 +154,12 @@ namespace Qosmetics::Notes
 
     void NoteModelContainer::ctor()
     {
-        DEBUG("Created NoteModelContainer instance: %p", this);
+        DEBUG("Created NoteModelContainer instance: {}", fmt::ptr(this));
         instance = this;
         bundle = nullptr;
         isLoading = false;
         currentNoteObject = nullptr;
         currentManifest = Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig>();
-        DEBUG("%p currentManifest: %p", this, &currentManifest);
     }
 
     void NoteModelContainer::Start()
@@ -167,13 +168,12 @@ namespace Qosmetics::Notes
         if (lastUsedCyoob == "" || lastUsedCyoob == "Default")
             return;
 
-        std::string filePath = string_format("%s/%s.cyoob", cyoob_path, lastUsedCyoob.c_str());
+        std::string filePath = fmt::format("{}/{}.cyoob", cyoob_path, lastUsedCyoob);
         if (!fileexists(filePath))
             return;
         currentManifest = Qosmetics::Core::Manifest<NoteObjectConfig>(filePath);
         currentManifest.get_descriptor();
-        DEBUG("%p currentManifest: %p", this, &currentManifest);
-        INFO("Loading Note Object %s", currentManifest.get_descriptor().get_name().data());
+        INFO("Loading Note Object {}", currentManifest.get_descriptor().get_name());
         StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(nullptr)));
     }
 
@@ -194,9 +194,8 @@ namespace Qosmetics::Notes
             return false;
         if (descriptor.get_filePath() == currentManifest.get_filePath())
             return false;
-        INFO("Loading Note Object %s", descriptor.get_name().data());
+        INFO("Loading Note Object {}", descriptor.get_name());
         currentManifest = Qosmetics::Core::Manifest<NoteObjectConfig>(descriptor.get_filePath());
-        DEBUG("%p currentManifest: %p", this, &currentManifest);
         StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(onFinished)));
         return true;
     }
@@ -214,9 +213,9 @@ namespace Qosmetics::Notes
     /*
     const Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig>& NoteModelContainer::GetManifest()
     {
-        DEBUG("%p currentManifest: %p", this, &currentManifest);
+        DEBUG("{} currentManifest: {}", this, &currentManifest);
         auto& descriptor = currentManifest.get_descriptor();
-        DEBUG("%p descriptor: %p", this, &descriptor);
+        DEBUG("{} descriptor: {}", this, &descriptor);
         return currentManifest;
     }
     */
@@ -231,7 +230,7 @@ namespace Qosmetics::Notes
         co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadBundleFromZipAsync(currentManifest.get_filePath(), currentManifest.get_fileName(), bundle));
 
         bool isLegacy = currentManifest.get_config().get_isLegacy();
-        DEBUG("Loading %sCyoob", isLegacy ? "legacy " : "");
+        DEBUG("Loading {}Cyoob", isLegacy ? "legacy " : "");
         co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadAssetFromBundleAsync<UnityEngine::GameObject*>(bundle, isLegacy ? "_CustomBloq" : "_Cyoob", currentNoteObject));
 
         auto name = currentNoteObject->get_name();

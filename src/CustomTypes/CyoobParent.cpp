@@ -21,9 +21,12 @@
 
 DEFINE_TYPE(Qosmetics::Notes, CyoobParent);
 
+extern bool useChroma;
 namespace Qosmetics::Notes
 {
     std::unordered_map<GlobalNamespace::NoteControllerBase*, CyoobParent*> CyoobParent::noteControllerToParentMap = {};
+    Sombrero::FastColor CyoobParent::globalRightColor = Sombrero::FastColor::black();
+    Sombrero::FastColor CyoobParent::globalLeftColor = Sombrero::FastColor::black();
     Sombrero::FastColor CyoobParent::lastRightColor = Sombrero::FastColor::black();
     Sombrero::FastColor CyoobParent::lastLeftColor = Sombrero::FastColor::black();
 
@@ -52,31 +55,37 @@ namespace Qosmetics::Notes
             bool dot = noteData->get_cutDirection() >= 8;
 
             cyoobHandler->ShowNote(right, dot);
+
+            if (useChroma)
+            {
+
+                auto leftColor = right ? globalLeftColor : Chroma::NoteAPI::getNoteControllerColorSafe(gameNoteController).value_or(globalLeftColor);
+                auto rightColor = right ? Chroma::NoteAPI::getNoteControllerColorSafe(gameNoteController).value_or(globalRightColor) : globalRightColor;
+                Colorize(leftColor, rightColor);
+            }
         }
     }
 
-    void CyoobParent::ColorizeSpecific(GlobalNamespace::GameNoteController* noteController, Sombrero::FastColor color)
+    void CyoobParent::ColorizeSpecific(GlobalNamespace::NoteControllerBase* noteController, const Sombrero::FastColor& color, GlobalNamespace::ColorType colorType)
     {
+        if (!noteController)
+            return;
         auto cyoobparentItr = noteControllerToParentMap.find(noteController);
         if (cyoobparentItr != noteControllerToParentMap.end())
         {
-            bool right = currentColorType == GlobalNamespace::ColorType::ColorB;
-
-            if (right)
-            {
+            if (colorType == GlobalNamespace::ColorType::ColorB)
                 lastRightColor = color;
-                cyoobparentItr->second->Colorize(color, lastLeftColor);
-            }
             else
-            {
                 lastLeftColor = color;
-                cyoobparentItr->second->Colorize(color, lastRightColor);
-            }
+            cyoobparentItr->second->Colorize(lastLeftColor, lastRightColor);
         }
+        else
+            ERROR("Couldn't find notecontroller in the map, thus not able to colorize Cyoob!");
     }
 
-    void CyoobParent::Colorize(Sombrero::FastColor thisColor, Sombrero::FastColor thatColor)
+    void CyoobParent::Colorize(Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)
     {
-        cyoobHandler->SetColors(thisColor, thatColor);
+        if (cyoobHandler)
+            cyoobHandler->SetColors(leftColor, rightColor);
     }
 }

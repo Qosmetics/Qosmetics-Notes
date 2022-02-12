@@ -39,31 +39,43 @@ namespace Qosmetics::Notes
         previouslyActive = obj;
     }
 
-    void CyoobHandler::SetColors(UnityEngine::Color thisColor, UnityEngine::Color thatColor)
+    void CyoobHandler::SetColors(UnityEngine::Color leftColor, UnityEngine::Color rightColor)
     {
-        if (previouslyActive != -1)
-            colorHandlers[previouslyActive]->SetColors(thisColor, thatColor);
+        if (!colorHandlers)
+            FindNotes();
+        // leftArrow
+        colorHandlers[0]->SetColors(leftColor, rightColor);
+        // rightArrow
+        colorHandlers[1]->SetColors(rightColor, leftColor);
+        // leftDot
+        colorHandlers[2]->SetColors(leftColor, rightColor);
+        // rightDot
+        colorHandlers[3]->SetColors(rightColor, leftColor);
     }
 
     void CyoobHandler::FindNotes()
     {
         // create array
         if (!objects)
+        {
+            // cache local transform ptr
+            auto t = get_transform();
+            // find the different objects
             objects = ArrayW<UnityEngine::GameObject*>(4);
-        if (!colorHandlers)
-            colorHandlers = ArrayW<CyoobColorHandler*>(4);
-        // cache local transform ptr
-        auto t = get_transform();
+            objects[0] = t->Find("LeftArrow")->get_gameObject();
+            objects[1] = t->Find("RightArrow")->get_gameObject();
+            objects[2] = t->Find("LeftDot")->get_gameObject();
+            objects[3] = t->Find("RightDot")->get_gameObject();
+        }
 
-        // find the different objects
-        objects[0] = t->Find("LeftArrow")->get_gameObject();
-        colorHandlers[0] = objects[0]->GetComponent<CyoobColorHandler*>();
-        objects[1] = t->Find("RightArrow")->get_gameObject();
-        colorHandlers[1] = objects[1]->GetComponent<CyoobColorHandler*>();
-        objects[2] = t->Find("LeftDot")->get_gameObject();
-        colorHandlers[2] = objects[2]->GetComponent<CyoobColorHandler*>();
-        objects[3] = t->Find("RightDot")->get_gameObject();
-        colorHandlers[3] = objects[3]->GetComponent<CyoobColorHandler*>();
+        if (!colorHandlers)
+        {
+            colorHandlers = ArrayW<CyoobColorHandler*>(4);
+            colorHandlers[0] = objects[0]->GetComponent<CyoobColorHandler*>();
+            colorHandlers[1] = objects[1]->GetComponent<CyoobColorHandler*>();
+            colorHandlers[2] = objects[2]->GetComponent<CyoobColorHandler*>();
+            colorHandlers[3] = objects[3]->GetComponent<CyoobColorHandler*>();
+        }
     }
 
 }

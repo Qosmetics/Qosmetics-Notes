@@ -117,7 +117,7 @@ namespace Qosmetics::Notes
             return;
         }
 
-        std::string filePath = string_format("%s/%s.cyoob", cyoob_path, actual_config.lastUsedCyoob.c_str());
+        std::string filePath = fmt::format("{}/{}.cyoob", cyoob_path, actual_config.lastUsedCyoob);
         if (!fileexists(filePath))
         {
             noteModelContainer->Default();

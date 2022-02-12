@@ -25,7 +25,6 @@ DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, CyoobParent, UnityEngine::Mon
                                  DECLARE_INSTANCE_METHOD(void, Awake);
                                  DECLARE_INSTANCE_METHOD(void, OnDestroy);
                                  DECLARE_INSTANCE_METHOD(void, Colorize, Sombrero::FastColor thisColor, Sombrero::FastColor otherColor);
-                                 DECLARE_INSTANCE_METHOD(void, ColorizeSpecific, GlobalNamespace::GameNoteController* noteController, Sombrero::FastColor color);
                                  DECLARE_OVERRIDE_METHOD_MATCH(void, HandleNoteControllerDidInit, &GlobalNamespace::INoteControllerDidInitEvent::HandleNoteControllerDidInit, GlobalNamespace::NoteControllerBase* noteController);
 
                                  public
@@ -33,8 +32,10 @@ DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, CyoobParent, UnityEngine::Mon
 
                                  static Sombrero::FastColor lastRightColor;
                                  static Sombrero::FastColor lastLeftColor;
+                                 static Sombrero::FastColor globalRightColor;
+                                 static Sombrero::FastColor globalLeftColor;
 
-                                 static std::unordered_map<GlobalNamespace::NoteControllerBase*, CyoobParent*>
-                                     noteControllerToParentMap;
+                                 static void ColorizeSpecific(GlobalNamespace::NoteControllerBase* noteController, const Sombrero::FastColor& color, GlobalNamespace::ColorType colorType);
+                                 static std::unordered_map<GlobalNamespace::NoteControllerBase*, CyoobParent*> noteControllerToParentMap;
 
 )

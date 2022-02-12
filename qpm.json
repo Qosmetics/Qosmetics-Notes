@@ -54,6 +54,11 @@
       "id": "conditional-dependencies",
       "versionRange": "^0.2.0",
       "additionalData": {}
+    },
+    {
+      "id": "fmt",
+      "versionRange": "^8.0.5",
+      "additionalData": {}
     }
   ],
   "additionalData": {}

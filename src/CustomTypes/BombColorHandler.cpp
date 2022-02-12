@@ -46,7 +46,7 @@ namespace Qosmetics::Notes
                     customColorMaterialsVec.push_back(material);
             }
         }
-        DEBUG("Found %lu custom colors materials", customColorMaterialsVec.size());
+        DEBUG("Found {} custom colors materials", customColorMaterialsVec.size());
         customColorMaterials = il2cpp_utils::vectorToArray(customColorMaterialsVec);
     }
 

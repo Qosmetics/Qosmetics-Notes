@@ -6,6 +6,8 @@
 #include "UnityEngine/Renderer.hpp"
 #include "UnityEngine/Shader.hpp"
 
+#include <fmt/format.h>
+
 DEFINE_TYPE(Qosmetics::Notes, CyoobColorHandler);
 
 namespace Qosmetics::Notes
@@ -19,9 +21,9 @@ namespace Qosmetics::Notes
     {
         if (lastThisColor == thisColor && lastThatColor == thatColor)
             return;
-        DEBUG("%p: setting colors!", this);
-        DEBUG("thisColor: %.2f, %.2f, %.2f, %.2f", thisColor.r, thisColor.g, thisColor.b, thisColor.a);
-        DEBUG("thatColor: %.2f, %.2f, %.2f, %.2f", thatColor.r, thatColor.g, thatColor.b, thatColor.a);
+        DEBUG("{}: setting colors!", fmt::ptr(this));
+        DEBUG("thisColor: {:.2f}, {:.2f}, {:.2f}, {:.2f}", thisColor.r, thisColor.g, thisColor.b, thisColor.a);
+        DEBUG("thatColor: {:.2f}, {:.2f}, {:.2f}, {:.2f}", thatColor.r, thatColor.g, thatColor.b, thatColor.a);
 
         lastThisColor = thisColor;
         lastThatColor = thatColor;
@@ -52,7 +54,7 @@ namespace Qosmetics::Notes
                     customColorMaterialsVec.push_back(material);
             }
         }
-        DEBUG("Found %lu custom colors materials", customColorMaterialsVec.size());
+        DEBUG("Found {} custom colors materials", customColorMaterialsVec.size());
         customColorMaterials = il2cpp_utils::vectorToArray(customColorMaterialsVec);
     }
 

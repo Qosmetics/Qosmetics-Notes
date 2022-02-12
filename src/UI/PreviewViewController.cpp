@@ -63,7 +63,7 @@ namespace Qosmetics::Notes
         {
             if (currentPrefab)
                 currentPrefab->SetActive(true);
-            DEBUG("Reactivating preview view controller with justChangedProfile: %s", justChangedProfile ? "true" : "false");
+            DEBUG("Reactivating preview view controller with justChangedProfile: {}", justChangedProfile ? "true" : "false");
             UpdatePreview(justChangedProfile);
 
             justChangedProfile = false;
@@ -200,7 +200,7 @@ namespace Qosmetics::Notes
         auto noteModelContainer = NoteModelContainer::get_instance();
         if (noteModelContainer->currentNoteObject)
         {
-            DEBUG("Found a new note object, instantiating it! name: %s", static_cast<std::string>(noteModelContainer->currentNoteObject->get_name()).c_str());
+            DEBUG("Found a new note object, instantiating it! name: {}", static_cast<std::string>(noteModelContainer->currentNoteObject->get_name()));
             currentPrefab = UnityEngine::Object::Instantiate(noteModelContainer->currentNoteObject, get_transform());
             currentPrefab->SetActive(true);
             auto t = currentPrefab->get_transform();

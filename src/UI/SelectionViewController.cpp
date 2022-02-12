@@ -52,7 +52,7 @@ namespace Qosmetics::Notes
         for (auto& cyoob : cyoobs)
         {
             current++;
-            std::string filePath = string_format("%s/%s", cyoob_path, cyoob.c_str());
+            std::string filePath = fmt::format("{}/{}", cyoob_path, cyoob);
             auto orig = std::find_if(descriptorSet.begin(), descriptorSet.end(), [filePath](auto& d)
                                      { return d.get_filePath() == filePath; });
             // check if the cyoob was already parsed
@@ -63,7 +63,7 @@ namespace Qosmetics::Notes
             std::vector<uint8_t> packageData;
             if (Qosmetics::Core::ZipUtils::GetBytesFromZipFile(filePath, "package.json", packageData))
             {
-                DEBUG("Got package: %s", std::string(packageData.begin(), packageData.end()).c_str());
+                DEBUG("Got package: {}", std::string(packageData.begin(), packageData.end()).c_str());
                 rapidjson::Document doc;
                 doc.Parse(std::string(packageData.begin(), packageData.end()));
                 // add to the set
@@ -73,7 +73,7 @@ namespace Qosmetics::Notes
                 }
                 catch (const std::runtime_error& e)
                 {
-                    ERROR("error thrown while parsing descriptor from package: %s", e.what());
+                    ERROR("error thrown while parsing descriptor from package: {}", e.what());
                 }
             }
         }
