@@ -59,6 +59,11 @@
       "id": "fmt",
       "versionRange": "^8.0.5",
       "additionalData": {}
+    },
+    {
+      "id": "bs-utils",
+      "versionRange": "^0.6.4",
+      "additionalData": {}
     }
   ],
   "additionalData": {}

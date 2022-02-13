@@ -33,8 +33,6 @@ namespace Qosmetics::Notes
         auto& globalConfig = Config::get_config();
         if (firstActivation)
         {
-            // TODO: implement updating config toggles if config value changed due to profile being changed
-
             auto localization = Localization::GetSelected();
             Qosmetics::Core::UIUtils::AddHeader(get_transform(), localization->Get("QosmeticsCyoobs:Settings:Settings"), Sombrero::FastColor::blue());
             auto container = CreateScrollableSettingsContainer(this);

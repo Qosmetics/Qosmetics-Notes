@@ -34,6 +34,7 @@
 #include "CustomTypes/DebrisHandler.hpp"
 #include "CustomTypes/DebrisParent.hpp"
 #include "CustomTypes/NoteModelContainer.hpp"
+#include "MaterialUtils.hpp"
 #include "PropertyID.hpp"
 
 #include "config.hpp"
@@ -46,6 +47,8 @@
 #define CHROMA_EXISTS
 #endif
 #endif
+
+// TODO: disable scores if hitboxes get edited (blocked bc bs utils not available)
 
 #pragma region bombs
 REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
@@ -67,7 +70,6 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
             bombNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::BombParent*>();
 
 #ifdef CHROMA_EXISTS
-            // TODO: check back to see if this works
             auto bombCallbackOpt = Chroma::BombAPI::getBombChangedColorCallbackSafe();
             if (bombCallbackOpt)
             {
@@ -80,6 +82,8 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
 
             auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Bomb());
             auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
+            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(bomb);
+
             bomb->AddComponent<Qosmetics::Notes::BombColorHandler*>();
             bomb->set_name(ConstStrings::Bomb());
             bomb->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
@@ -129,6 +133,7 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
             meshRenderer->set_enabled(false);
             auto bombPrefab = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::MirrorBomb());
             auto bomb = UnityEngine::Object::Instantiate(bombPrefab->get_gameObject(), mesh);
+            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(bomb);
             bomb->set_name(ConstStrings::Bomb());
 
             bomb->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
@@ -191,6 +196,7 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
             auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Notes());
             // instantiate the notes prefab
             auto notes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), noteCubeTransform);
+            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(notes);
             notes->set_name("Notes");
             notes->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
 
@@ -288,6 +294,7 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
 
             // instantiate the notes prefab
             auto mirroredNotes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), mirroredNoteCubeTransform);
+            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(mirroredNotes);
             mirroredNotes->set_name("Notes");
             mirroredNotes->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
 
@@ -369,6 +376,7 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
             auto meshTransform = noteDebrisPrefab->dyn__meshTransform();
             auto actualDebris = noteModelContainer->currentNoteObject->get_transform()->Find("Debris");
             auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
+            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(debris);
             debris->set_name("Debris");
             debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
 

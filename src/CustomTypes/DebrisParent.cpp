@@ -6,6 +6,7 @@
 
 DEFINE_TYPE(Qosmetics::Notes, DebrisParent);
 
+extern bool useChroma;
 namespace Qosmetics::Notes
 {
     std::unordered_map<GlobalNamespace::NoteDebris*, DebrisParent*> noteDebrisCache;
@@ -37,11 +38,12 @@ namespace Qosmetics::Notes
         debrisHandler->ShowDebris(colorType);
         debrisHandler->SetSliceProperties(cutPoint, cutNormal);
 
-        /*
-        UnityEngine::Color thisColor = colorManager->ColorForType(colorType);
-        UnityEngine::Color thatColor = colorManager->ColorForType(1 - colorType);
+        if (useChroma)
+        {
+            UnityEngine::Color thisColor = colorManager->ColorForType(colorType);
+            UnityEngine::Color thatColor = colorManager->ColorForType(1 - colorType);
 
-        debrisHandler->SetColors(thisColor, thatColor);
-        */
+            debrisHandler->SetColors(thisColor, thatColor);
+        }
     }
 }

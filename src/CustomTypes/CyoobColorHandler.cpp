@@ -10,6 +10,7 @@
 
 DEFINE_TYPE(Qosmetics::Notes, CyoobColorHandler);
 
+// TODO: Implement colornotevisuals meshrenderer addition (how to check what to add? (replacemenet notehd / notelw materials obv))
 namespace Qosmetics::Notes
 {
     void CyoobColorHandler::Awake()
