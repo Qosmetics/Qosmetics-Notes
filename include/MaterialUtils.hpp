@@ -7,6 +7,7 @@
 namespace Qosmetics::Notes::MaterialUtils
 {
     bool ShouldCC(UnityEngine::Material* material);
+    bool ShouldReplaceExtraCC(UnityEngine::Material* material);
 
     void ReplaceMaterialsForGameObject(UnityEngine::GameObject* object);
     void ReplaceMaterialForGameObjectChildren(UnityEngine::GameObject* gameObject, UnityEngine::Material* material, std::u16string_view materialToReplaceName);

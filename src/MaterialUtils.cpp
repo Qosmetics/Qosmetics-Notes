@@ -1,24 +1,39 @@
 #include "MaterialUtils.hpp"
 #include "PropertyID.hpp"
+#include "logging.hpp"
 
 #include "UnityEngine/Resources.hpp"
 #include "UnityEngine/Shader.hpp"
 
-#define CHECK_FLOAT(theFloat) material->HasProperty(PropertyID::theFloat()) && (material->GetFloat(PropertyID::theFloat()) > 0)
+#include <fmt/format.h>
+
+#define HAS_FLOAT(theFloat) material->HasProperty(PropertyID::theFloat())
+#define CHECK_FLOAT(theFloat) (material->GetFloat(PropertyID::theFloat()) > 0)
 
 using namespace UnityEngine;
 namespace Qosmetics::Notes::MaterialUtils
 {
+    bool ShouldReplaceExtraCC(Material* material)
+    {
+        if (!material)
+            return false;
+        else if (static_cast<std::u16string_view>(material->get_name()).find(u"_replace") == std::u16string::npos)
+            return false;
+        else if (static_cast<std::u16string_view>(material->get_name()).find(u"_noCC") == std::u16string::npos)
+            return true;
+        return false;
+    }
+
     bool ShouldCC(Material* material)
     {
         if (!material)
             return false;
-        else if (CHECK_FLOAT(_CustomColors))
-            return true;
-        else if (CHECK_FLOAT(_Glow))
-            return true;
-        else if (CHECK_FLOAT(_Bloom))
-            return true;
+        else if (HAS_FLOAT(_CustomColors))
+            return CHECK_FLOAT(_CustomColors);
+        else if (HAS_FLOAT(_Glow))
+            return CHECK_FLOAT(_Glow);
+        else if (HAS_FLOAT(_Bloom))
+            return CHECK_FLOAT(_Bloom);
         return false;
     }
 
@@ -38,6 +53,8 @@ namespace Qosmetics::Notes::MaterialUtils
         for (auto& mat : allMaterials)
         {
             std::u16string materialName = toLower(mat->get_name());
+            if (materialName.empty())
+                continue;
             if (materialName.find(u"_replace") != std::u16string::npos)
                 continue;
 
@@ -45,18 +62,20 @@ namespace Qosmetics::Notes::MaterialUtils
         }
     }
 
-    void ReplaceMaterialForGameObjectChildren(GameObject* gameObject, Material* material, std::u16string_view materialToReplaceName)
+    void ReplaceMaterialForGameObjectChildren(GameObject* gameObject, Material* replacingMaterial, std::u16string_view materialToReplaceName)
     {
         ArrayW<Renderer*> renderers = gameObject->GetComponentsInChildren<Renderer*>(true);
 
         for (auto renderer : renderers)
-            ReplaceMaterialForRenderer(renderer, material, materialToReplaceName);
+            ReplaceMaterialForRenderer(renderer, replacingMaterial, materialToReplaceName);
     }
 
     void ReplaceMaterialForRenderer(Renderer* renderer, Material* replacingMaterial, std::u16string_view materialToReplaceName)
     {
-        ArrayW<Material*> materials = renderer->GetMaterialArray();
+        ArrayW<Material*> materials = renderer->get_materials();
+
         int length = materials.Length();
+        ArrayW<Material*> materialsCopy(length);
         bool materialsDidChange = false;
         for (int i = 0; i < length; i++)
         {
@@ -72,18 +91,24 @@ namespace Qosmetics::Notes::MaterialUtils
                 // now we have the new material name, as well as being sure that this material is the one that needs to be replaced;
                 auto oldColor = mat->get_color();
 
-                Material* newMat = Object::Instantiate(replacingMaterial);
+                DEBUG("Instantiating new material from old material {}", static_cast<std::string>(replacingMaterial->get_name()));
+                Material* newMat = UnityEngine::Object::Instantiate(replacingMaterial);
+                DEBUG("Old Material: {}, New Material {}", fmt::ptr(replacingMaterial), fmt::ptr(newMat));
                 newMat->set_color(oldColor);
                 newMat->set_name(materialName);
-                materials[i] = newMat;
+                materialsCopy[i] = newMat;
 
                 materialsDidChange = true;
+            }
+            else
+            {
+                materialsCopy[i] = mat;
             }
         }
 
         if (materialsDidChange)
         {
-            renderer->SetMaterialArray(materials);
+            renderer->set_materials(materialsCopy);
         }
     }
 

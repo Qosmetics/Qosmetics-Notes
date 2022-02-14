@@ -39,10 +39,15 @@ namespace Qosmetics::Notes
         previouslyActive = obj;
     }
 
-    void CyoobHandler::SetColors(UnityEngine::Color leftColor, UnityEngine::Color rightColor)
+    void CyoobHandler::SetColors(UnityEngine::Color thisColor, UnityEngine::Color thatColor)
     {
         if (!colorHandlers)
             FindNotes();
+
+        if (previouslyActive != -1)
+            colorHandlers[previouslyActive]->SetColors(thisColor, thatColor);
+
+        /*
         // leftArrow
         colorHandlers[0]->SetColors(leftColor, rightColor);
         // rightArrow
@@ -51,6 +56,7 @@ namespace Qosmetics::Notes
         colorHandlers[2]->SetColors(leftColor, rightColor);
         // rightDot
         colorHandlers[3]->SetColors(rightColor, leftColor);
+        */
     }
 
     void CyoobHandler::FindNotes()

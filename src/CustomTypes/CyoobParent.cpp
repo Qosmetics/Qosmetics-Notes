@@ -58,10 +58,10 @@ namespace Qosmetics::Notes
 
             if (useChroma)
             {
+                auto thisColor = Chroma::NoteAPI::getNoteControllerColorSafe(gameNoteController).value_or(right ? globalRightColor : globalLeftColor);
+                auto thatColor = right ? globalLeftColor : globalRightColor;
 
-                auto leftColor = right ? globalLeftColor : Chroma::NoteAPI::getNoteControllerColorSafe(gameNoteController).value_or(globalLeftColor);
-                auto rightColor = right ? Chroma::NoteAPI::getNoteControllerColorSafe(gameNoteController).value_or(globalRightColor) : globalRightColor;
-                Colorize(leftColor, rightColor);
+                Colorize(thisColor, thatColor);
             }
         }
     }
@@ -74,10 +74,16 @@ namespace Qosmetics::Notes
         if (cyoobparentItr != noteControllerToParentMap.end())
         {
             if (colorType == GlobalNamespace::ColorType::ColorB)
+            {
+                // == right
                 lastRightColor = color;
+                cyoobparentItr->second->Colorize(lastRightColor, lastLeftColor);
+            }
             else
+            {
                 lastLeftColor = color;
-            cyoobparentItr->second->Colorize(lastLeftColor, lastRightColor);
+                cyoobparentItr->second->Colorize(lastLeftColor, lastRightColor);
+            }
         }
         else
             ERROR("Couldn't find notecontroller in the map, thus not able to colorize Cyoob!");
