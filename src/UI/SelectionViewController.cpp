@@ -1,5 +1,6 @@
 #include "UI/SelectionViewController.hpp"
 #include "CustomTypes/NoteModelContainer.hpp"
+#include "assets.hpp"
 #include "config.hpp"
 #include "diglett/shared/Diglett.hpp"
 #include "logging.hpp"
@@ -33,9 +34,10 @@ namespace Qosmetics::Notes
             auto refreshBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->Get("QosmeticsCore:QosmeticsTable:Refresh"), std::bind(&SelectionViewController::ReloadDescriptorList, this));
 
             deletionConfirmationModal = Qosmetics::Core::DeletionConfirmationModal::Create(get_transform());
-            descriptorList = CreateScrollableCustomSourceList<Qosmetics::Core::QosmeticObjectTableData*>(vertical->get_transform(), UnityEngine::Vector2(0.0f, 0.0f), UnityEngine::Vector2(100.0f, 80.0f), nullptr);
+            descriptorList = CreateScrollableCustomSourceList<Qosmetics::Core::QosmeticObjectTableData*>(vertical->get_transform(), UnityEngine::Vector2(0.0f, 0.0f), UnityEngine::Vector2(100.0f, 76.0f), nullptr);
             descriptorList->deletionConfirmationModal = deletionConfirmationModal;
             descriptorList->onSelect = std::bind(reinterpret_cast<void (SelectionViewController::*)(HMUI::TableCell*)>(&SelectionViewController::OnSelectDescriptor), this, std::placeholders::_1);
+            descriptorList->defaultSprite = VectorToSprite(std::vector<uint8_t>(_binary_PlaceholderIcon_png_start, _binary_PlaceholderIcon_png_end));
             ReloadDescriptorList();
         }
     }
