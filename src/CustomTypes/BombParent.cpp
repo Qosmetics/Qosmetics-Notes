@@ -1,21 +1,39 @@
 #include "CustomTypes/BombParent.hpp"
 
+#include "GlobalNamespace/ILazyCopyHashSet_1.hpp"
 #include "UnityEngine/GameObject.hpp"
+
+#include "chroma/shared/BombAPI.hpp"
 
 DEFINE_TYPE(Qosmetics::Notes, BombParent);
 
+extern bool useChroma;
 namespace Qosmetics::Notes
 {
     std::unordered_map<GlobalNamespace::NoteControllerBase*, BombParent*> BombParent::noteControllerToParentMap = {};
     void BombParent::Awake()
     {
         noteController = get_gameObject()->GetComponent<GlobalNamespace::NoteControllerBase*>();
+        if (useChroma)
+            noteController->get_didInitEvent()->Add(reinterpret_cast<GlobalNamespace::INoteControllerDidInitEvent*>(this));
+
         colorHandler = get_gameObject()->GetComponentInChildren<BombColorHandler*>();
         noteControllerToParentMap[noteController] = this;
     }
 
+    void BombParent::HandleNoteControllerDidInit(GlobalNamespace::NoteControllerBase* noteController)
+    {
+        auto bombNoteController = reinterpret_cast<GlobalNamespace::BombNoteController*>(noteController);
+
+        auto color = Chroma::BombAPI::getBombNoteControllerOverrideColorSafe(bombNoteController);
+        if (color.has_value())
+            Colorize(color.value());
+    }
+
     void BombParent::OnDestroy()
     {
+        if (useChroma)
+            noteController->get_didInitEvent()->Remove(reinterpret_cast<GlobalNamespace::INoteControllerDidInitEvent*>(this));
         noteControllerToParentMap.erase(noteController);
     }
 
