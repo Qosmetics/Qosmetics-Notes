@@ -101,7 +101,7 @@ void MirrorableFixups(UnityEngine::GameObject* loadedObject)
 
     auto bomb = t->Find(ConstStrings::Bomb())->get_gameObject();
     auto mirroredBomb = UnityEngine::Object::Instantiate(bomb, t->get_transform());
-    mirroredNotes->set_name(ConstStrings::MirrorBomb());
+    mirroredBomb->set_name(ConstStrings::MirrorBomb());
     SetMirrorableProperties(bomb, false);
     SetMirrorableProperties(mirroredBomb, true);
 }
