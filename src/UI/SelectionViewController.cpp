@@ -20,6 +20,7 @@ DEFINE_TYPE(Qosmetics::Notes, SelectionViewController);
 
 using namespace QuestUI::BeatSaberUI;
 
+// TODO: Refresh does weird stuff when not at the top of the list?
 namespace Qosmetics::Notes
 {
     void SelectionViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -92,7 +93,6 @@ namespace Qosmetics::Notes
 
         tableView->ReloadData();
         tableView->RefreshCells(true, true);
-        tableView->ScrollToCellWithIdx(std::clamp(scrolledRow, 0, (int)descriptorSet.size()), HMUI::TableView::ScrollPositionType::Beginning, true);
     }
 
     void SelectionViewController::OnSelectDefault()
