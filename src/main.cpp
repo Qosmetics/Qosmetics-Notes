@@ -7,6 +7,7 @@
 #include "hooks.hpp"
 #include "logging.hpp"
 #include "modloader/shared/modloader.hpp"
+#include "static-defines.hpp"
 
 #include "HMUI/CurvedTextMeshPro.hpp"
 #include "HMUI/ImageView.hpp"
@@ -41,6 +42,7 @@ extern "C" void load()
     il2cpp_functions::Class_Init(classof(HMUI::ImageView*));
     il2cpp_functions::Class_Init(classof(HMUI::CurvedTextMeshPro*));
 
+    mkpath(cyoob_path);
     auto& logger = Qosmetics::Notes::Logging::getLogger();
     Hooks::InstallHooks(logger);
     custom_types::Register::AutoRegister();
