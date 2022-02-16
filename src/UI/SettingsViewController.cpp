@@ -43,7 +43,7 @@ namespace Qosmetics::Notes
 
             auto containerT = container->get_transform();
             TOGGLE(overrideNoteSize, "QosmeticsCyoobs:Settings:OverrideNoteSize");
-            noteSizeSlider = CreateSliderSetting(containerT, localization->Get("QosmeticsCyoobs:Settings:NoteSize"), 0.05f, globalConfig.noteSize, 0.05f, 2.0f, [&](auto v)
+            noteSizeSlider = CreateSliderSetting(containerT, localization->Get("QosmeticsCyoobs:Settings:NoteSize"), 0.05f, globalConfig.noteSize, 0.05f, 2.0f, 0.2f, [&](auto v)
                                                  {
                                                           Config::get_config().noteSize = v;
                                                           Qosmetics::Core::Config::SaveConfig();
