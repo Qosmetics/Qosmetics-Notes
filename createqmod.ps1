@@ -1,8 +1,15 @@
 Param(
     [String]$qmodname="",
     [Parameter(Mandatory=$false)]
-    [Switch]$clean
+    [Switch]$clean,
+    [Parameter(Mandatory=$false)]
+    [Switch]$build
 )
+
+if ($build.IsPresent)
+{
+    ./build.ps1
+}
 
 if ($qmodName -eq "")
 {
