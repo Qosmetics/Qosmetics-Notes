@@ -93,13 +93,12 @@ namespace Qosmetics::Notes
             InstantiatePrefab();
         }
 
+        ShowLoading(false);
         if (!currentPrefab)
         {
             SetTitleText(Localization::GetSelected()->Get("QosmeticsCyoobs:Preview:Default"));
             return;
         }
-
-        ShowLoading(false);
 
         auto noteModelContainer = NoteModelContainer::get_instance();
         auto config = noteModelContainer->GetNoteConfig();
