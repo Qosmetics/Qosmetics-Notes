@@ -30,5 +30,5 @@ namespace Qosmetics::Notes
         bool disableReflections;
         bool disabled;
         bool keepMissingReflections;
-    }
+    };
 }

@@ -15,7 +15,6 @@
 #pragma GCC diagnostic ignored "-Wreturn-type-c-linkage"
 
 #define GET_NOTEMODELCONTAINER() auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance()
-// TODO: Implement methods here lol
 EXPOSE_API(GetActiveDescriptor, Qosmetics::Core::Descriptor)
 {
     return Qosmetics::Notes::NoteModelContainer::get_instance()->GetDescriptor();

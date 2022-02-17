@@ -2,6 +2,13 @@
 #include "logging.hpp"
 #include <set>
 
+bool operator<(const ModInfo& lhs, const ModInfo& rhs)
+{
+    if (lhs.id == rhs.id)
+        return lhs.version < rhs.version;
+    return lhs.id < rhs.id;
+}
+
 namespace Qosmetics::Notes::Disabling
 {
     std::set<ModInfo> disablingModInfos = {};

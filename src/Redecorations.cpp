@@ -25,6 +25,7 @@
 #include "sombrero/shared/FastVector3.hpp"
 
 #include "ConstStrings.hpp"
+#include "CustomTypes/BasicNoteScaler.hpp"
 #include "CustomTypes/BombColorHandler.hpp"
 #include "CustomTypes/BombParent.hpp"
 #include "CustomTypes/CyoobColorHandler.hpp"
@@ -48,6 +49,17 @@
 #endif
 #endif
 
+// just a macro to quickly get all the relevant config stuff because it was redundant to type every time and it's the same across everywhere but I can't cahce it into a method or something cause it's like 10 things
+#define GET_CONFIG()                                                                                                                    \
+    auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();                                                     \
+    auto& config = noteModelContainer->GetNoteConfig();                                                                                 \
+    auto& globalConfig = Qosmetics::Notes::Config::get_config();                                                                        \
+    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();                            \
+    auto gameplayModifiers = gameplayCoreSceneSetupData->dyn_gameplayModifiers();                                                       \
+    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayModifiers->get_notesUniformScale(); \
+    bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                              \
+    bool disappearingArrows = gameplayModifiers->get_disappearingArrows();
+
 // TODO: disable scores if hitboxes get edited (blocked bc bs utils not available)
 
 #pragma region bombs
@@ -55,12 +67,8 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
 {
     try
     {
-        auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
-        auto& config = noteModelContainer->GetNoteConfig();
-        auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
+        GET_CONFIG()
         auto mesh = bombNotePrefab->get_transform()->Find("Mesh");
-        float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
 
         // if we have a note object, and a bomb exists on it, and we don't force default
         bool flag = noteModelContainer->currentNoteObject && config.get_hasBomb() && !globalConfig.forceDefaultBombs;
@@ -101,6 +109,7 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
         // bomb didn't exist, but we do want to change note size
         else if (globalConfig.overrideNoteSize)
         {
+
             mesh->set_localScale(mesh->get_localScale() * noteSizeFactor);
             if (!globalConfig.alsoChangeHitboxes)
             {
@@ -120,13 +129,9 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
 {
     try
     {
-        auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
-        auto& config = noteModelContainer->GetNoteConfig();
-        auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
+        GET_CONFIG()
         auto mesh = mirroredBombNoteControllerPrefab->get_transform()->Find("Mesh");
         auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
-        float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
         // if obj exists, it has bomb, we don't force default, the object is mirrorable, and we are not disabling reflections
         if (noteModelContainer->currentNoteObject && config.get_hasBomb() && !globalConfig.forceDefaultBombs && config.get_isMirrorable() && !globalConfig.disableReflections)
         {
@@ -164,24 +169,23 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
 #pragma endregion
 
 #pragma region normalNotes
-REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::GameNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
+
+GlobalNamespace::GameNoteController* RedecorateGameNoteController(GlobalNamespace::GameNoteController* notePrefab, Zenject::DiContainer* container)
 {
     try
     {
-        auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
-        auto& config = noteModelContainer->GetNoteConfig();
-        auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
-        float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
+        GET_CONFIG()
         // get the notecubetransform to edit it's children
-        auto noteCubeTransform = normalBasicNotePrefab->get_transform()->Find("NoteCube");
-#ifdef CHROMA_EXISTS
-        Chroma::NoteAPI::setNoteColorable(noteModelContainer->currentNoteObject == nullptr);
-#endif
+        auto noteCubeTransform = notePrefab->get_transform()->Find("NoteCube");
         // if a custom note even exists
-        if (noteModelContainer->currentNoteObject)
+        bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows;
+#ifdef CHROMA_EXISTS
+        // set the note colorable by chroma to the opposite of if we are replacing the entire contents of the prefab
+        Chroma::NoteAPI::setNoteColorable(addCustomPrefab);
+#endif
+        if (addCustomPrefab)
         {
-            auto cyoobParent = normalBasicNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
+            auto cyoobParent = notePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
 #ifdef CHROMA_EXISTS
             auto noteCallbackOpt = Chroma::NoteAPI::getNoteChangedColorCallbackSafe();
             if (noteCallbackOpt.has_value())
@@ -235,9 +239,9 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
 
             if (globalConfig.overrideNoteSize && globalConfig.alsoChangeHitboxes)
             {
-                for (auto bigCuttable : normalBasicNotePrefab->dyn__bigCuttableBySaberList())
+                for (auto bigCuttable : notePrefab->dyn__bigCuttableBySaberList())
                     bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() * noteSizeFactor);
-                for (auto smallCuttable : normalBasicNotePrefab->dyn__smallCuttableBySaberList())
+                for (auto smallCuttable : notePrefab->dyn__smallCuttableBySaberList())
                     smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() * noteSizeFactor);
             }
 
@@ -255,14 +259,16 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
         // note didn't exist, but we do want to change note size
         else if (globalConfig.overrideNoteSize)
         {
-            noteCubeTransform->set_localScale(noteCubeTransform->get_localScale() * noteSizeFactor);
+            auto localScale = noteCubeTransform->get_localScale() * noteSizeFactor;
+            DEBUG("Setting default note local scale to {:.2f}, {:.2f}, {:.2f}", localScale.x, localScale.y, localScale.z);
+            noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
 
             // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
             if (!globalConfig.alsoChangeHitboxes)
             {
-                for (auto bigCuttable : normalBasicNotePrefab->dyn__bigCuttableBySaberList())
+                for (auto bigCuttable : notePrefab->dyn__bigCuttableBySaberList())
                     bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() / noteSizeFactor);
-                for (auto smallCuttable : normalBasicNotePrefab->dyn__smallCuttableBySaberList())
+                for (auto smallCuttable : notePrefab->dyn__smallCuttableBySaberList())
                     smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() / noteSizeFactor);
             }
         }
@@ -272,21 +278,28 @@ REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::Game
         ERROR("{}", e.what());
     }
 
-    return normalBasicNotePrefab;
+    return notePrefab;
+}
+
+REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::GameNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
+{
+    return RedecorateGameNoteController(normalBasicNotePrefab, container);
+}
+
+REDECORATION_REGISTRATION(proModeNotePrefab, 10, true, GlobalNamespace::GameNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
+{
+    return RedecorateGameNoteController(proModeNotePrefab, container);
 }
 
 REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalNamespace::MirroredCubeNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*)
 {
     try
     {
-        auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
-        auto& config = noteModelContainer->GetNoteConfig();
-        auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
+        GET_CONFIG();
         auto mirroredNoteCubeTransform = mirroredGameNoteControllerPrefab->get_transform()->Find("NoteCube");
-        float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
+        bool replacePrefab = noteModelContainer->currentNoteObject && config.get_isMirrorable() && !globalConfig.disableReflections;
         // if obj exists, and is mirrorable, and we are not disabling reflections
-        if (noteModelContainer->currentNoteObject && config.get_isMirrorable() && !globalConfig.disableReflections)
+        if (replacePrefab)
         {
             auto cyoobParent = mirroredGameNoteControllerPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
             // get the notecubetransform to edit it's children
@@ -332,7 +345,10 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
             if (!config.get_isDefault())
                 mirroredNoteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
         }
-        else if (globalConfig.disableReflections || (!config.get_isMirrorable() && !globalConfig.keepMissingReflections))
+        // we want to remove existing reflections when:
+        // disable reflectiosn is on OR
+        // we have an object, and our object is not mirrorable && we don't want to keep the missing reflections
+        else if (globalConfig.disableReflections || (noteModelContainer->currentNoteObject && !config.get_isMirrorable() && !globalConfig.keepMissingReflections))
         {
             mirroredNoteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
             mirroredNoteCubeTransform->Find(ConstStrings::NoteArrow())->get_gameObject()->SetActive(false);
@@ -363,11 +379,8 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
 {
     try
     {
-        auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();
-        auto& config = noteModelContainer->GetNoteConfig();
-        auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
-        float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayCoreSceneSetupData->dyn_gameplayModifiers()->get_notesUniformScale();
+        GET_CONFIG();
+
         if (config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultDebris)
         {
 
