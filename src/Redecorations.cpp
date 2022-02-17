@@ -41,6 +41,8 @@
 #include "config.hpp"
 #include "logging.hpp"
 
+#include "Disabling.hpp"
+
 #if __has_include("chroma/shared/NoteAPI.hpp")
 #include "chroma/shared/BombAPI.hpp"
 #include "chroma/shared/NoteAPI.hpp"
@@ -65,6 +67,8 @@
 #pragma region bombs
 REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
 {
+    if (Qosmetics::Notes::Disabling::GetAnyDisabling())
+        return bombNotePrefab;
     try
     {
         GET_CONFIG()
@@ -127,6 +131,8 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
 
 REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalNamespace::MirroredBombNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*)
 {
+    if (Qosmetics::Notes::Disabling::GetAnyDisabling())
+        return mirroredBombNoteControllerPrefab;
     try
     {
         GET_CONFIG()
@@ -172,6 +178,8 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
 
 GlobalNamespace::GameNoteController* RedecorateGameNoteController(GlobalNamespace::GameNoteController* notePrefab, Zenject::DiContainer* container)
 {
+    if (Qosmetics::Notes::Disabling::GetAnyDisabling())
+        return notePrefab;
     try
     {
         GET_CONFIG()
@@ -293,6 +301,8 @@ REDECORATION_REGISTRATION(proModeNotePrefab, 10, true, GlobalNamespace::GameNote
 
 REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalNamespace::MirroredCubeNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*)
 {
+    if (Qosmetics::Notes::Disabling::GetAnyDisabling())
+        return mirroredGameNoteControllerPrefab;
     try
     {
         GET_CONFIG();
@@ -377,6 +387,8 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
 
 GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container)
 {
+    if (Qosmetics::Notes::Disabling::GetAnyDisabling())
+        return noteDebrisPrefab;
     try
     {
         GET_CONFIG();
