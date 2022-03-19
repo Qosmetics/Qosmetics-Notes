@@ -56,6 +56,7 @@ namespace Qosmetics::Notes
 
             cyoobHandler->ShowNote(right, dot);
 
+#ifdef CHROMA_EXISTS
             if (useChroma)
             {
                 auto thisColor = Chroma::NoteAPI::getNoteControllerColorSafe(gameNoteController).value_or(right ? globalRightColor : globalLeftColor);
@@ -63,6 +64,7 @@ namespace Qosmetics::Notes
 
                 Colorize(thisColor, thatColor);
             }
+#endif
         }
     }
 

@@ -28,5 +28,11 @@ namespace ConstStrings
     CONST_STRING(MirrorBomb);
     CONST_STRING(BigCuttable);
     CONST_STRING(SmallCuttable);
+    CONST_STRING(Chains);
+    CONST_STRING(MirrorChains);
+    CONST_STRING(LeftHead);
+    CONST_STRING(RightHead);
+    CONST_STRING(LeftLink);
+    CONST_STRING(RightLink);
 
 }

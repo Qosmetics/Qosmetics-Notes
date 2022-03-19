@@ -2,7 +2,8 @@
 #include "CustomTypes/NoteModelContainer.hpp"
 #include "assets.hpp"
 #include "config.hpp"
-#include "diglett/shared/Diglett.hpp"
+#include "diglett/shared/Localization.hpp"
+#include "diglett/shared/Util.hpp"
 #include "logging.hpp"
 #include "qosmetics-core/shared/ConfigRegister.hpp"
 #include "qosmetics-core/shared/Utils/FileUtils.hpp"
@@ -29,9 +30,9 @@ namespace Qosmetics::Notes
             auto vertical = CreateVerticalLayoutGroup(get_transform());
             auto buttonHorizontal = CreateHorizontalLayoutGroup(vertical->get_transform());
 
-            auto localization = Localization::GetSelected();
-            auto defaultObjectBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->Get("QosmeticsCore:QosmeticsTable:Default"), std::bind(&SelectionViewController::OnSelectDefault, this));
-            auto refreshBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->Get("QosmeticsCore:QosmeticsTable:Refresh"), std::bind(&SelectionViewController::ReloadDescriptorList, this));
+            auto localization = Diglett::Localization::get_instance();
+            auto defaultObjectBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->get("QosmeticsCore:QosmeticsTable:Default"), std::bind(&SelectionViewController::OnSelectDefault, this));
+            auto refreshBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->get("QosmeticsCore:QosmeticsTable:Refresh"), std::bind(&SelectionViewController::ReloadDescriptorList, this));
 
             deletionConfirmationModal = Qosmetics::Core::DeletionConfirmationModal::Create(get_transform());
             descriptorList = CreateScrollableCustomSourceList<Qosmetics::Core::QosmeticObjectTableData*>(vertical->get_transform(), UnityEngine::Vector2(0.0f, 0.0f), UnityEngine::Vector2(100.0f, 76.0f), nullptr);

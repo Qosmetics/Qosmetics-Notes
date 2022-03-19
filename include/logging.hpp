@@ -1,7 +1,8 @@
 #pragma once
 #include "beatsaber-hook/shared/utils/logging.hpp"
-#include <fmt/core.h>
 #include <string_view>
+
+#include "paper/shared/logger.hpp"
 
 namespace Qosmetics::Notes
 {
@@ -9,18 +10,13 @@ namespace Qosmetics::Notes
     {
     public:
         static Logger& getLogger();
-        static LoggerContextObject& getContextLogger(const char* fun, const char* file, int line);
-
-        template <typename... TArgs>
-        constexpr static void fmtLog(LoggerContextObject& logger, ::Logging::Level lvl, fmt::format_string<TArgs...> str, TArgs&&... args) noexcept
-        {
-            logger.log(lvl, fmt::format<TArgs...>(str, std::forward<TArgs>(args)...));
-        }
+        [[deprecated]] static LoggerContextObject& getContextLogger(const char* fun, const char* file, int line);
     };
 }
-#define INFO(...) ::Qosmetics::Notes::Logging::fmtLog(::Qosmetics::Notes::Logging::getContextLogger(__PRETTY_FUNCTION__, __FILE__, __LINE__), ::Logging::Level::INFO, __VA_ARGS__)
-#define ERROR(...) ::Qosmetics::Notes::Logging::fmtLog(::Qosmetics::Notes::Logging::getContextLogger(__PRETTY_FUNCTION__, __FILE__, __LINE__), ::Logging::Level::ERROR, __VA_ARGS__)
-#define WARNING(...) ::Qosmetics::Notes::Logging::fmtLog(::Qosmetics::Notes::Logging::getContextLogger(__PRETTY_FUNCTION__, __FILE__, __LINE__), ::Logging::Level::WARNING, __VA_ARGS__)
-#define CRITICAL(...) ::Qosmetics::Notes::Logging::fmtLog(::Qosmetics::Notes::Logging::getContextLogger(__PRETTY_FUNCTION__, __FILE__, __LINE__), ::Logging::Level::CRITICAL, __VA_ARGS__)
-#define DEBUG(...) ::Qosmetics::Notes::Logging::fmtLog(::Qosmetics::Notes::Logging::getContextLogger(__PRETTY_FUNCTION__, __FILE__, __LINE__), ::Logging::Level::DEBUG, __VA_ARGS__)
+#define INFO(...) Paper::Logger::fmtLog<Paper::LogLevel::INF>(__VA_ARGS__)
+#define ERROR(...) Paper::Logger::fmtLog<Paper::LogLevel::ERR>(__VA_ARGS__)
+#define WARNING(...) Paper::Logger::fmtLog<Paper::LogLevel::WRN>(__VA_ARGS__)
+#define CRITICAL(...) Paper::Logger::fmtLog<Paper::LogLevel::CRIT>(__VA_ARGS__)
+#define DEBUG(...) Paper::Logger::fmtLog<Paper::LogLevel::DBG>(__VA_ARGS__)
+
 //#define DEBUG(...)

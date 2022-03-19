@@ -1,6 +1,7 @@
 #include "UI/SettingsViewController.hpp"
 #include "config.hpp"
-#include "diglett/shared/Diglett.hpp"
+#include "diglett/shared/Localization.hpp"
+#include "diglett/shared/Util.hpp"
 #include "qosmetics-core/shared/ConfigRegister.hpp"
 #include "qosmetics-core/shared/Utils/UIUtils.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
@@ -15,14 +16,14 @@ DEFINE_TYPE(Qosmetics::Notes, SettingsViewController);
 using namespace QuestUI::BeatSaberUI;
 
 #define TOGGLE(name, key)                                                              \
-    name##Toggle = CreateToggle(containerT, localization->Get(key), globalConfig.name, \
+    name##Toggle = CreateToggle(containerT, localization->get(key), globalConfig.name, \
                                 [&](auto v)                                            \
                                 {                                                      \
                                     Config::get_config().name = v;                     \
                                     Qosmetics::Core::Config::SaveConfig();             \
                                     previewViewController->UpdatePreview(false);       \
                                 });                                                    \
-    AddHoverHint(name##Toggle, localization->Get(key "HoverHint"))
+    AddHoverHint(name##Toggle, localization->get(key "HoverHint"))
 
 namespace Qosmetics::Notes
 {
@@ -33,8 +34,8 @@ namespace Qosmetics::Notes
         auto& globalConfig = Config::get_config();
         if (firstActivation)
         {
-            auto localization = Localization::GetSelected();
-            Qosmetics::Core::UIUtils::AddHeader(get_transform(), localization->Get("QosmeticsCyoobs:Settings:Settings"), Sombrero::FastColor::blue());
+            auto localization = Diglett::Localization::get_instance();
+            Qosmetics::Core::UIUtils::AddHeader(get_transform(), localization->get("QosmeticsCyoobs:Settings:Settings"), Sombrero::FastColor::blue());
             auto container = CreateScrollableSettingsContainer(this);
 
             auto externalComponents = container->GetComponent<QuestUI::ExternalComponents*>();
@@ -43,7 +44,7 @@ namespace Qosmetics::Notes
 
             auto containerT = container->get_transform();
             TOGGLE(overrideNoteSize, "QosmeticsCyoobs:Settings:OverrideNoteSize");
-            noteSizeSlider = CreateSliderSetting(containerT, localization->Get("QosmeticsCyoobs:Settings:NoteSize"), 0.05f, globalConfig.noteSize, 0.05f, 2.0f, 0.2f, [&](auto v)
+            noteSizeSlider = CreateSliderSetting(containerT, localization->get("QosmeticsCyoobs:Settings:NoteSize"), 0.05f, globalConfig.noteSize, 0.05f, 2.0f, 0.2f, [&](auto v)
                                                  {
                                                           Config::get_config().noteSize = v;
                                                           Qosmetics::Core::Config::SaveConfig();
@@ -52,7 +53,7 @@ namespace Qosmetics::Notes
             {
                 return std::to_string(v).substr(0, 4);
             };
-            AddHoverHint(noteSizeSlider, localization->Get("QosmeticsCyoobs:Settings:NoteSizeHoverHint"));
+            AddHoverHint(noteSizeSlider, localization->get("QosmeticsCyoobs:Settings:NoteSizeHoverHint"));
 
             TOGGLE(alsoChangeHitboxes, "QosmeticsCyoobs:Settings:AlsoChangeHitboxes");
             TOGGLE(forceDefaultBombs, "QosmeticsCyoobs:Settings:ForceDefaultBombs");

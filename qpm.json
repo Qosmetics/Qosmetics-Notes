@@ -22,17 +22,17 @@
     },
     {
       "id": "codegen",
-      "versionRange": "^0.19.3",
+      "versionRange": "^0.21.0",
       "additionalData": {}
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.15.6",
+      "versionRange": "^0.15.8",
       "additionalData": {}
     },
     {
       "id": "questui",
-      "versionRange": "^0.13.0",
+      "versionRange": "^0.13.3",
       "additionalData": {}
     },
     {
@@ -42,12 +42,7 @@
     },
     {
       "id": "sombrero",
-      "versionRange": "^0.1.28",
-      "additionalData": {}
-    },
-    {
-      "id": "diglett",
-      "versionRange": "^1.0.0",
+      "versionRange": "^0.1.30",
       "additionalData": {}
     },
     {
@@ -62,7 +57,12 @@
     },
     {
       "id": "bs-utils",
-      "versionRange": "^0.6.4",
+      "versionRange": "^0.7.0",
+      "additionalData": {}
+    },
+    {
+      "id": "paper",
+      "versionRange": "^1.0.5",
       "additionalData": {}
     }
   ],

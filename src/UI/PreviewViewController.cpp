@@ -4,7 +4,8 @@
 #include "CustomTypes/DebrisColorHandler.hpp"
 #include "CustomTypes/NoteModelContainer.hpp"
 #include "config.hpp"
-#include "diglett/shared/Diglett.hpp"
+#include "diglett/shared/Localization.hpp"
+#include "diglett/shared/Util.hpp"
 #include "logging.hpp"
 #include "qosmetics-core/shared/Utils/UIUtils.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
@@ -34,7 +35,6 @@ namespace Qosmetics::Notes
     {
         if (firstActivation)
         {
-            auto localization = Localization::GetSelected();
             title = Qosmetics::Core::UIUtils::AddHeader(get_transform(), "", Sombrero::FastColor::blue());
 
             auto backgroundLayout = CreateVerticalLayoutGroup(this);
@@ -77,11 +77,10 @@ namespace Qosmetics::Notes
 
     void PreviewViewController::ShowLoading(bool isLoading)
     {
-        auto localization = Localization::GetSelected();
         loadingIndicator->SetActive(isLoading);
         if (isLoading)
         {
-            SetTitleText(localization->Get("QosmeticsCore:Misc:Loading") + u"...");
+            SetTitleText(Diglett::Localization::get_instance()->get("QosmeticsCore:Misc:Loading") + u"...");
         }
     }
 
@@ -96,7 +95,7 @@ namespace Qosmetics::Notes
         ShowLoading(false);
         if (!currentPrefab)
         {
-            SetTitleText(Localization::GetSelected()->Get("QosmeticsCyoobs:Preview:Default"));
+            SetTitleText(Diglett::Localization::get_instance()->get("QosmeticsCyoobs:Preview:Default"));
             return;
         }
 
@@ -121,12 +120,22 @@ namespace Qosmetics::Notes
         if (mirrorBombT)
             UnityEngine::Object::DestroyImmediate(mirrorBombT->get_gameObject());
 
+        auto chainsT = currentPrefab->get_transform()->Find(ConstStrings::Chains());
+        auto mirrorChainT = currentPrefab->get_transform()->Find(ConstStrings::MirrorChains());
+        if (mirrorChainT)
+            UnityEngine::Object::DestroyImmediate(mirrorChainT->get_gameObject());
+
         auto debrisT = currentPrefab->get_transform()->Find(ConstStrings::Debris());
 
         auto leftArrowT = notesT->Find(ConstStrings::LeftArrow());
         auto rightArrowT = notesT->Find(ConstStrings::RightArrow());
         auto leftDotT = notesT->Find(ConstStrings::LeftDot());
         auto rightDotT = notesT->Find(ConstStrings::RightDot());
+
+        auto leftHeadT = chainsT->Find(ConstStrings::LeftHead());
+        auto rightHeadT = chainsT->Find(ConstStrings::RightHead());
+        auto leftLinkT = chainsT->Find(ConstStrings::LeftLink());
+        auto rightLinkT = chainsT->Find(ConstStrings::RightLink());
 
         // TODO: fetch colors from proper place somewhere
         Sombrero::FastColor leftColor(1.0f, 0.0f, 0.0f, 1.0f);
@@ -158,6 +167,33 @@ namespace Qosmetics::Notes
         auto rightDotColorHandler = rightDotT->get_gameObject()->GetComponent<CyoobColorHandler*>();
         rightDotColorHandler->FetchCCMaterials();
         rightDotColorHandler->SetColors(rightColor, leftColor);
+
+        auto headSize = Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.75f, 1.0f);
+        auto linkSize = Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.2f, 1.0f);
+
+        leftHeadT->set_localScale(headSize * noteSize);
+        leftHeadT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 3, distance + offset, 0.0f));
+        auto leftHeadColorHandler = leftHeadT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+        leftHeadColorHandler->FetchCCMaterials();
+        leftHeadColorHandler->SetColors(leftColor, rightColor);
+
+        rightHeadT->set_localScale(headSize * noteSize);
+        rightHeadT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 2, distance + offset, 0.0f));
+        auto rightHeadColorHandler = rightHeadT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+        rightHeadColorHandler->FetchCCMaterials();
+        rightHeadColorHandler->SetColors(rightColor, leftColor);
+
+        leftLinkT->set_localScale(linkSize * noteSize);
+        leftLinkT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 3, 0.0f, 0.0f));
+        auto leftLinkColorHandler = leftLinkT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+        leftLinkColorHandler->FetchCCMaterials();
+        leftLinkColorHandler->SetColors(leftColor, rightColor);
+
+        rightLinkT->set_localScale(linkSize * noteSize);
+        rightLinkT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 2, 0.0f, 0.0f));
+        auto rightLinkColorHandler = rightLinkT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+        rightLinkColorHandler->FetchCCMaterials();
+        rightLinkColorHandler->SetColors(rightColor, leftColor);
 
         if (bombT)
         {

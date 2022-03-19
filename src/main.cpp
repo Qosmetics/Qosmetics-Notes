@@ -3,7 +3,6 @@
 #include "UI/CyoobFlowCoordinator.hpp"
 #include "assets.hpp"
 #include "custom-types/shared/register.hpp"
-#include "diglett/shared/Register.hpp"
 #include "hooks.hpp"
 #include "logging.hpp"
 #include "modloader/shared/modloader.hpp"
@@ -14,6 +13,9 @@
 
 #include "qosmetics-core/shared/FlowCoordinatorRegister.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
+
+#include "diglett/shared/Conversions.hpp"
+#include "diglett/shared/Register.hpp"
 
 #include <vector>
 
@@ -50,10 +52,10 @@ extern "C" void load()
     // check if chroma exists
     useChroma = Modloader::requireMod("Chroma");
 
-    Diglett::Register::RegisterLocales<Diglett::Languages::German>(logger, ASSET_TO_XML(de_xml));
-    Diglett::Register::RegisterLocales<Diglett::Languages::English>(logger, ASSET_TO_XML(en_xml));
-    Diglett::Register::RegisterLocales<Diglett::Languages::Spanish>(logger, ASSET_TO_XML(es_xml));
-    Diglett::Register::RegisterLocales<Diglett::Languages::French>(logger, ASSET_TO_XML(fr_xml));
-    Diglett::Register::RegisterLocales<Diglett::Languages::Japanese>(logger, ASSET_TO_XML(ja_xml));
-    Diglett::Register::RegisterLocales<Diglett::Languages::Korean>(logger, ASSET_TO_XML(ko_xml));
+    Diglett::RegisterAsset(ASSET_TO_STR(de_xml), Diglett::Language::GERMAN);
+    Diglett::RegisterAsset(ASSET_TO_STR(en_xml), Diglett::Language::ENGLISH);
+    Diglett::RegisterAsset(ASSET_TO_STR(es_xml), Diglett::Language::SPANISH);
+    Diglett::RegisterAsset(ASSET_TO_STR(fr_xml), Diglett::Language::FRENCH);
+    Diglett::RegisterAsset(ASSET_TO_STR(ja_xml), Diglett::Language::JAPANESE);
+    Diglett::RegisterAsset(ASSET_TO_STR(ko_xml), Diglett::Language::KOREAN);
 }

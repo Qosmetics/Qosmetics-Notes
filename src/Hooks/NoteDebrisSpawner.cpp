@@ -24,6 +24,8 @@ static constexpr Sombrero::FastVector3 Cross(const Sombrero::FastVector3& lhs, c
 
 // this method is orig because it does not call orig
 // it does not call orig because we need access to the spawned notedebris which is not possible in any other way
+// FIXME: reimplement this from the original source, dnspy style ✨
+/*
 MAKE_AUTO_HOOK_ORIG_MATCH(NoteDebrisSpawner_SpawnDebris, &GlobalNamespace::NoteDebrisSpawner::SpawnDebris, void, GlobalNamespace::NoteDebrisSpawner* self, UnityEngine::Vector3 cutPoint, UnityEngine::Vector3 cutNormal, float saberSpeed, UnityEngine::Vector3 saberDir, UnityEngine::Vector3 notePos, UnityEngine::Quaternion noteRotation, UnityEngine::Vector3 noteScale, GlobalNamespace::ColorType colorType, float timeToNextColorNote, UnityEngine::Vector3 moveVec)
 {
     GlobalNamespace::NoteDebris* noteDebris = self->dyn__noteDebrisPool()->Spawn();
@@ -61,3 +63,4 @@ MAKE_AUTO_HOOK_ORIG_MATCH(NoteDebrisSpawner_SpawnDebris, &GlobalNamespace::NoteD
         noteDebrisParent2->SetSliceProperties(colorType, cutPoint, cutNormal);
     }
 }
+*/

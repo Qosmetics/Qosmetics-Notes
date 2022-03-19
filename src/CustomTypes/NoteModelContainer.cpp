@@ -92,6 +92,8 @@ void SetMirrorableProperties(UnityEngine::GameObject* loadedObject, bool mirror)
 void MirrorableFixups(UnityEngine::GameObject* loadedObject)
 {
     auto t = loadedObject->get_transform();
+
+    // Notes
     auto notes = t->Find(ConstStrings::Notes())->get_gameObject();
     auto mirroredNotes = UnityEngine::Object::Instantiate(notes, t->get_transform());
     mirroredNotes->set_name(ConstStrings::MirrorNotes());
@@ -99,11 +101,71 @@ void MirrorableFixups(UnityEngine::GameObject* loadedObject)
     SetMirrorableProperties(notes, false);
     SetMirrorableProperties(mirroredNotes, true);
 
+    // Bombs
     auto bomb = t->Find(ConstStrings::Bomb())->get_gameObject();
     auto mirroredBomb = UnityEngine::Object::Instantiate(bomb, t->get_transform());
     mirroredBomb->set_name(ConstStrings::MirrorBomb());
     SetMirrorableProperties(bomb, false);
     SetMirrorableProperties(mirroredBomb, true);
+
+    // Chains
+    auto chains = t->Find(ConstStrings::Chains())->get_gameObject();
+    auto mirroredChains = UnityEngine::Object::Instantiate(chains, t->get_transform());
+    mirroredChains->set_name(ConstStrings::MirrorChains());
+
+    SetMirrorableProperties(chains, false);
+    SetMirrorableProperties(mirroredChains, true);
+}
+
+void SliderFixups(UnityEngine::GameObject* loadedObject)
+{
+    auto t = loadedObject->get_transform();
+
+    auto notes = t->Find(ConstStrings::Notes());
+    auto leftArrow = notes->Find(ConstStrings::LeftArrow());
+    auto rightArrow = notes->Find(ConstStrings::RightArrow());
+    auto leftDot = notes->Find(ConstStrings::LeftDot());
+    auto rightDot = notes->Find(ConstStrings::RightDot());
+
+    auto chains = t->Find(ConstStrings::Chains());
+    if (!chains)
+    {
+        chains = GameObject::New_ctor(ConstStrings::Chains())->get_transform();
+        chains->SetParent(t);
+    }
+
+    auto leftHead = chains->Find(ConstStrings::LeftHead());
+    auto rightHead = chains->Find(ConstStrings::RightHead());
+    auto leftLink = chains->Find(ConstStrings::LeftLink());
+    auto rightLink = chains->Find(ConstStrings::RightLink());
+
+    if (!leftHead)
+    {
+        auto leftHead = Object::Instantiate(leftArrow->get_gameObject(), chains)->get_transform();
+        leftHead->set_name(ConstStrings::LeftHead());
+        leftHead->set_localScale({1.0f, 0.75f, 1.0f});
+    }
+
+    if (!rightHead)
+    {
+        auto rightHead = Object::Instantiate(rightArrow->get_gameObject(), chains)->get_transform();
+        rightHead->set_name(ConstStrings::RightHead());
+        rightHead->set_localScale({1.0f, 0.75f, 1.0f});
+    }
+
+    if (!leftLink)
+    {
+        auto leftLink = Object::Instantiate(leftDot->get_gameObject(), chains)->get_transform();
+        leftLink->set_name(ConstStrings::LeftLink());
+        leftLink->set_localScale({1.0f, 0.2f, 1.0f});
+    }
+
+    if (!rightLink)
+    {
+        auto rightLink = Object::Instantiate(rightDot->get_gameObject(), chains)->get_transform();
+        rightLink->set_name(ConstStrings::RightLink());
+        rightLink->set_localScale({1.0f, 0.2f, 1.0f});
+    }
 }
 
 void AddHandlers(UnityEngine::GameObject* loadedObject)
@@ -123,6 +185,16 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
             mnt->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
     }
 
+    /// TODO: Add some kind of handler for the overarching chain type
+    auto ct = t->Find(ConstStrings::Chains());
+    auto mct = t->Find(ConstStrings::MirrorChains());
+    for (int i = 0; i < 4; i++)
+    {
+        ct->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+        if (mct)
+            mct->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
+    }
+
     auto dbt = t->Find(ConstStrings::Debris());
     if (dbt)
     {
@@ -133,7 +205,7 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
     }
 
     auto bt = t->Find(ConstStrings::Bomb());
-    auto mbt = t->Find(ConstStrings::Bomb());
+    auto mbt = t->Find(ConstStrings::MirrorBomb());
     if (bt)
         bt->get_gameObject()->AddComponent<Qosmetics::Notes::BombColorHandler*>();
     if (mbt)
@@ -243,6 +315,12 @@ namespace Qosmetics::Notes
         {
             DEBUG("Executing legacy object fixups");
             LegacyFixups(currentNoteObject);
+        }
+
+        if (!currentManifest.get_config().get_hasSlider())
+        {
+            DEBUG("Fixing missing sliders due to the model not having them");
+            SliderFixups(currentNoteObject);
         }
 
         if (currentManifest.get_config().get_isMirrorable())

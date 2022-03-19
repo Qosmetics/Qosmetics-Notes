@@ -3,7 +3,12 @@
 #include "GlobalNamespace/ILazyCopyHashSet_1.hpp"
 #include "UnityEngine/GameObject.hpp"
 
+#if __has_include("chroma/shared/BombAPI.hpp")
 #include "chroma/shared/BombAPI.hpp"
+#ifndef CHROMA_EXISTS
+#define CHROMA_EXISTS
+#endif
+#endif
 
 DEFINE_TYPE(Qosmetics::Notes, BombParent);
 
@@ -23,11 +28,13 @@ namespace Qosmetics::Notes
 
     void BombParent::HandleNoteControllerDidInit(GlobalNamespace::NoteControllerBase* noteController)
     {
+#ifdef CHROMA_EXISTS
         auto bombNoteController = reinterpret_cast<GlobalNamespace::BombNoteController*>(noteController);
 
         auto color = Chroma::BombAPI::getBombNoteControllerOverrideColorSafe(bombNoteController);
         if (color.has_value())
             Colorize(color.value());
+#endif
     }
 
     void BombParent::OnDestroy()

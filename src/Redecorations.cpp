@@ -8,8 +8,10 @@
 #include "GlobalNamespace/GameplayCoreSceneSetupData.hpp"
 #include "GlobalNamespace/GameplayModifiers.hpp"
 #include "GlobalNamespace/MirroredBombNoteController.hpp"
-#include "GlobalNamespace/MirroredCubeNoteController.hpp"
+#include "GlobalNamespace/MirroredGameNoteController.hpp"
+#include "GlobalNamespace/MirroredSliderController.hpp"
 #include "GlobalNamespace/NoteDebris.hpp"
+#include "GlobalNamespace/NoteDebrisPoolInstaller.hpp"
 #include "GlobalNamespace/PlayerSpecificSettings.hpp"
 
 #include "UnityEngine/GameObject.hpp"
@@ -76,7 +78,9 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
 
         // if we have a note object, and a bomb exists on it, and we don't force default
         bool flag = noteModelContainer->currentNoteObject && config.get_hasBomb() && !globalConfig.forceDefaultBombs;
+#ifdef CHROMA_EXISTS
         Chroma::BombAPI::setBombColorable(flag);
+#endif
         if (flag)
         {
             bombNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::BombParent*>();
@@ -299,7 +303,7 @@ REDECORATION_REGISTRATION(proModeNotePrefab, 10, true, GlobalNamespace::GameNote
     return RedecorateGameNoteController(proModeNotePrefab, container);
 }
 
-REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalNamespace::MirroredCubeNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*)
+REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalNamespace::MirroredGameNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*)
 {
     if (Qosmetics::Notes::Disabling::GetAnyDisabling())
         return mirroredGameNoteControllerPrefab;
@@ -307,7 +311,7 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
     {
         GET_CONFIG();
         auto mirroredNoteCubeTransform = mirroredGameNoteControllerPrefab->get_transform()->Find("NoteCube");
-        bool replacePrefab = noteModelContainer->currentNoteObject && config.get_isMirrorable() && !globalConfig.disableReflections;
+        bool replacePrefab = noteModelContainer->currentNoteObject && config.get_isMirrorable() && !globalConfig.disableReflections && !ghostNotes && !disappearingArrows;
         // if obj exists, and is mirrorable, and we are not disabling reflections
         if (replacePrefab)
         {
@@ -444,14 +448,46 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
     return noteDebrisPrefab;
 }
 
-REDECORATION_REGISTRATION(noteDebrisHDPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::EffectPoolsManualInstaller*)
+GlobalNamespace::NoteDebris* RedecorateHeadNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container)
 {
-    return RedecorateNoteDebris(noteDebrisHDPrefab, container);
+    // TODO: implement head debris
+    return noteDebrisPrefab;
 }
 
-REDECORATION_REGISTRATION(noteDebrisLWPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::EffectPoolsManualInstaller*)
+GlobalNamespace::NoteDebris* RedecorateElementNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container)
 {
-    return RedecorateNoteDebris(noteDebrisLWPrefab, container);
+    // TODO: implement element debris
+    return noteDebrisPrefab;
+}
+
+REDECORATION_REGISTRATION(normalNoteDebrisHDPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*)
+{
+    return RedecorateNoteDebris(normalNoteDebrisHDPrefab, container);
+}
+
+REDECORATION_REGISTRATION(normalNoteDebrisLWPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*)
+{
+    return RedecorateNoteDebris(normalNoteDebrisLWPrefab, container);
+}
+
+REDECORATION_REGISTRATION(burstSliderHeadNoteDebrisHDPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*)
+{
+    return RedecorateHeadNoteDebris(burstSliderHeadNoteDebrisHDPrefab, container);
+}
+
+REDECORATION_REGISTRATION(burstSliderHeadNoteDebrisLWPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*)
+{
+    return RedecorateHeadNoteDebris(burstSliderHeadNoteDebrisLWPrefab, container);
+}
+
+REDECORATION_REGISTRATION(burstSliderElementNoteHDPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*)
+{
+    return RedecorateElementNoteDebris(burstSliderElementNoteHDPrefab, container);
+}
+
+REDECORATION_REGISTRATION(burstSliderElementNoteLWPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*)
+{
+    return RedecorateElementNoteDebris(burstSliderElementNoteLWPrefab, container);
 }
 
 #pragma endregion
