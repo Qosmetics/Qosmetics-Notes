@@ -26,6 +26,8 @@
 
 #include "ConstStrings.hpp"
 #include "CustomTypes/BasicNoteScaler.hpp"
+#include "CustomTypes/ChainHandler.hpp"
+#include "CustomTypes/ChainParent.hpp"
 #include "CustomTypes/CyoobColorHandler.hpp"
 #include "CustomTypes/CyoobHandler.hpp"
 #include "CustomTypes/CyoobParent.hpp"
@@ -259,11 +261,229 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
 
 REDECORATION_REGISTRATION(burstSliderHeadNotePrefab, 10, true, GlobalNamespace::GameNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
 {
+    if (Qosmetics::Notes::Disabling::GetAnyDisabling())
+        return burstSliderHeadNotePrefab;
+
+    try
+    {
+        GET_CONFIG()
+        // get the notecubetransform to edit it's children
+        auto noteCubeTransform = burstSliderHeadNotePrefab->get_transform()->Find("NoteCube");
+        // if a custom note even exists
+        bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows;
+#ifdef CHROMA_EXISTS
+        // set the note colorable by chroma to the opposite of if we are replacing the entire contents of the prefab
+        Chroma::NoteAPI::setNoteColorable(addCustomPrefab);
+#endif
+        if (addCustomPrefab)
+        {
+            auto chainParent = burstSliderHeadNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::ChainParent*>();
+#ifdef CHROMA_EXISTS
+            auto noteCallbackOpt = Chroma::NoteAPI::getNoteChangedColorCallbackSafe();
+            if (noteCallbackOpt.has_value())
+            {
+                INFO("Adding to note color callback!");
+                auto& noteCallback = noteCallbackOpt.value().get();
+                noteCallback -= &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
+                noteCallback += &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
+            }
+#endif
+
+            auto actualChains = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Chains());
+            // instantiate the notes prefab
+            auto chains = UnityEngine::Object::Instantiate(actualChains->get_gameObject(), noteCubeTransform);
+            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(chains);
+            chains->set_name("Chains");
+            chains->get_transform()->set_localScale((config.get_hasSlider() ? Sombrero::FastVector3::one() : Sombrero::FastVector3(1.0f, 0.75f, 1.0f)) * noteSizeFactor * 0.4f);
+            chains->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
+
+            chainParent->chainHandler = chains->GetComponent<Qosmetics::Notes::ChainHandler*>();
+            int childCount = chains->get_transform()->get_childCount();
+
+            auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
+            auto leftColor = colorScheme->dyn__saberAColor();
+            auto rightColor = colorScheme->dyn__saberBColor();
+
+#ifdef CHROMA_EXISTS
+            Qosmetics::Notes::CyoobParent::lastLeftColor = leftColor;
+            Qosmetics::Notes::CyoobParent::lastRightColor = rightColor;
+            Qosmetics::Notes::CyoobParent::globalRightColor = Chroma::NoteAPI::getGlobalNoteColorSafe(1).value_or(rightColor);
+            Qosmetics::Notes::CyoobParent::globalLeftColor = Chroma::NoteAPI::getGlobalNoteColorSafe(0).value_or(leftColor);
+#endif
+
+            for (int i = 0; i < childCount; i++)
+            {
+                auto child = chains->get_transform()->GetChild(i);
+                child->set_localPosition(Sombrero::FastVector3::zero());
+                child->set_localRotation(Sombrero::FastQuaternion::identity());
+
+                /// add color handler and set colors
+                auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::CyoobColorHandler*>();
+                colorHandler->FetchCCMaterials();
+
+                if (child->get_name().starts_with("Left"))
+                {
+                    colorHandler->SetColors(leftColor, rightColor);
+                }
+                else
+                {
+                    colorHandler->SetColors(rightColor, leftColor);
+                }
+            }
+
+            if (globalConfig.overrideNoteSize && globalConfig.alsoChangeHitboxes)
+            {
+                for (auto bigCuttable : burstSliderHeadNotePrefab->dyn__bigCuttableBySaberList())
+                    bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() * noteSizeFactor);
+                for (auto smallCuttable : burstSliderHeadNotePrefab->dyn__smallCuttableBySaberList())
+                    smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() * noteSizeFactor);
+            }
+
+            // if we don't want to show arrows, disable the arrow gameobjects
+            if (!config.get_showArrows())
+            {
+                noteCubeTransform->Find(ConstStrings::NoteArrow())->get_gameObject()->SetActive(false);
+                noteCubeTransform->Find(ConstStrings::NoteArrowGlow())->get_gameObject()->SetActive(false);
+                noteCubeTransform->Find(ConstStrings::NoteCircleGlow())->get_gameObject()->SetActive(false);
+            }
+
+            /// don't show the normal mesh of the note
+            noteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
+        }
+        // note didn't exist, but we do want to change note size
+        else if (globalConfig.overrideNoteSize)
+        {
+            auto localScale = noteCubeTransform->get_localScale() * noteSizeFactor;
+            DEBUG("Setting default note local scale to {:.2f}, {:.2f}, {:.2f}", localScale.x, localScale.y, localScale.z);
+            noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+
+            // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
+            if (!globalConfig.alsoChangeHitboxes)
+            {
+                for (auto bigCuttable : burstSliderHeadNotePrefab->dyn__bigCuttableBySaberList())
+                    bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() / noteSizeFactor);
+                for (auto smallCuttable : burstSliderHeadNotePrefab->dyn__smallCuttableBySaberList())
+                    smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() / noteSizeFactor);
+            }
+        }
+    }
+    catch (il2cpp_utils::RunMethodException const& e)
+    {
+        ERROR("{}", e.what());
+    }
     return burstSliderHeadNotePrefab;
 }
 
 REDECORATION_REGISTRATION(burstSliderNotePrefab, 10, true, GlobalNamespace::BurstSliderGameNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
 {
+    if (Qosmetics::Notes::Disabling::GetAnyDisabling())
+        return burstSliderNotePrefab;
+
+    try
+    {
+        GET_CONFIG()
+        // get the notecubetransform to edit it's children
+        auto noteCubeTransform = burstSliderNotePrefab->get_transform()->Find("NoteCube");
+        // if a custom note even exists
+        bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows;
+#ifdef CHROMA_EXISTS
+        // set the note colorable by chroma to the opposite of if we are replacing the entire contents of the prefab
+        Chroma::NoteAPI::setNoteColorable(addCustomPrefab);
+#endif
+        if (addCustomPrefab)
+        {
+            auto chainParent = burstSliderNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::ChainParent*>();
+#ifdef CHROMA_EXISTS
+            auto noteCallbackOpt = Chroma::NoteAPI::getNoteChangedColorCallbackSafe();
+            if (noteCallbackOpt.has_value())
+            {
+                INFO("Adding to note color callback!");
+                auto& noteCallback = noteCallbackOpt.value().get();
+                noteCallback -= &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
+                noteCallback += &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
+            }
+#endif
+
+            auto actualChains = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Chains());
+            // instantiate the notes prefab
+            auto chains = UnityEngine::Object::Instantiate(actualChains->get_gameObject(), noteCubeTransform);
+            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(chains);
+            chains->set_name("Chains");
+            chains->get_transform()->set_localScale((config.get_hasSlider() ? Sombrero::FastVector3::one() : Sombrero::FastVector3(1.0f, 0.2f, 1.0f)) * noteSizeFactor * 0.4f);
+            chains->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
+
+            chainParent->chainHandler = chains->GetComponent<Qosmetics::Notes::ChainHandler*>();
+            int childCount = chains->get_transform()->get_childCount();
+
+            auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
+            auto leftColor = colorScheme->dyn__saberAColor();
+            auto rightColor = colorScheme->dyn__saberBColor();
+
+#ifdef CHROMA_EXISTS
+            Qosmetics::Notes::CyoobParent::lastLeftColor = leftColor;
+            Qosmetics::Notes::CyoobParent::lastRightColor = rightColor;
+            Qosmetics::Notes::CyoobParent::globalRightColor = Chroma::NoteAPI::getGlobalNoteColorSafe(1).value_or(rightColor);
+            Qosmetics::Notes::CyoobParent::globalLeftColor = Chroma::NoteAPI::getGlobalNoteColorSafe(0).value_or(leftColor);
+#endif
+
+            for (int i = 0; i < childCount; i++)
+            {
+                auto child = chains->get_transform()->GetChild(i);
+                child->set_localPosition(Sombrero::FastVector3::zero());
+                child->set_localRotation(Sombrero::FastQuaternion::identity());
+
+                /// add color handler and set colors
+                auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::CyoobColorHandler*>();
+                colorHandler->FetchCCMaterials();
+
+                if (child->get_name().starts_with("Left"))
+                {
+                    colorHandler->SetColors(leftColor, rightColor);
+                }
+                else
+                {
+                    colorHandler->SetColors(rightColor, leftColor);
+                }
+            }
+
+            if (globalConfig.overrideNoteSize && globalConfig.alsoChangeHitboxes)
+            {
+                for (auto bigCuttable : burstSliderNotePrefab->dyn__bigCuttableBySaberList())
+                    bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() * noteSizeFactor);
+                for (auto smallCuttable : burstSliderNotePrefab->dyn__smallCuttableBySaberList())
+                    smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() * noteSizeFactor);
+            }
+
+            // if we don't want to show arrows, disable the arrow gameobjects
+            if (!config.get_showArrows())
+            {
+                noteCubeTransform->Find(ConstStrings::Circle())->get_gameObject()->SetActive(false);
+            }
+
+            /// don't show the normal mesh of the note
+            noteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
+        }
+        // note didn't exist, but we do want to change note size
+        else if (globalConfig.overrideNoteSize)
+        {
+            auto localScale = noteCubeTransform->get_localScale() * noteSizeFactor;
+            DEBUG("Setting default note local scale to {:.2f}, {:.2f}, {:.2f}", localScale.x, localScale.y, localScale.z);
+            noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+
+            // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
+            if (!globalConfig.alsoChangeHitboxes)
+            {
+                for (auto bigCuttable : burstSliderNotePrefab->dyn__bigCuttableBySaberList())
+                    bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() / noteSizeFactor);
+                for (auto smallCuttable : burstSliderNotePrefab->dyn__smallCuttableBySaberList())
+                    smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() / noteSizeFactor);
+            }
+        }
+    }
+    catch (il2cpp_utils::RunMethodException const& e)
+    {
+        ERROR("{}", e.what());
+    }
     return burstSliderNotePrefab;
 }
 

@@ -9,6 +9,7 @@
 #include "static-defines.hpp"
 
 #include "CustomTypes/BombColorHandler.hpp"
+#include "CustomTypes/ChainHandler.hpp"
 #include "CustomTypes/CyoobColorHandler.hpp"
 #include "CustomTypes/CyoobHandler.hpp"
 #include "CustomTypes/DebrisColorHandler.hpp"
@@ -187,7 +188,10 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
 
     /// TODO: Add some kind of handler for the overarching chain type
     auto ct = t->Find(ConstStrings::Chains());
+    ct->get_gameObject()->AddComponent<Qosmetics::Notes::ChainHandler*>();
     auto mct = t->Find(ConstStrings::MirrorChains());
+    if (mct)
+        mct->get_gameObject()->AddComponent<Qosmetics::Notes::ChainHandler*>();
     for (int i = 0; i < 4; i++)
     {
         ct->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();

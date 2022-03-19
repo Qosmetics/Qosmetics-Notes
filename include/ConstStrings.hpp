@@ -15,6 +15,7 @@ namespace ConstStrings
     CONST_STRING(NoteArrow);
     CONST_STRING(NoteCircleGlow);
     CONST_STRING(NoteArrowGlow);
+    CONST_STRING(Circle);
     CONST_STRING(LeftArrow);
     CONST_STRING(RightArrow);
     CONST_STRING(LeftDot);

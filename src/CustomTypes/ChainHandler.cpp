@@ -1,37 +1,34 @@
-#include "CustomTypes/CyoobHandler.hpp"
+#include "CustomTypes/ChainHandler.hpp"
 #include "ConstStrings.hpp"
 #include "UnityEngine/Transform.hpp"
 #include "logging.hpp"
 
-DEFINE_TYPE(Qosmetics::Notes, CyoobHandler);
+DEFINE_TYPE(Qosmetics::Notes, ChainHandler);
 
 namespace Qosmetics::Notes
 {
-    void CyoobHandler::ctor()
+    void ChainHandler::ctor()
     {
         INVOKE_CTOR();
         previouslyActive = -1;
     }
 
-    void CyoobHandler::ShowNote(bool right, bool dot)
+    void ChainHandler::ShowNote(bool right, bool head)
     {
-        // bools map to ints and the way they do is crucial here to do the calculation
-        ShowNote(right + dot * 2);
+        ShowNote(right + (!head) * 2);
     }
 
-    void CyoobHandler::ShowNote(int obj)
+    void ChainHandler::ShowNote(int obj)
     {
-        // if we are not changing which one is active, just return
         if (previouslyActive == obj)
         {
             DEBUG("Skipping showing specific note due to it being the same one as already active");
             return;
         }
-        // if we have not cached the note objects yet, we should do that
+
         if (!objects)
             FindNotes();
 
-        // for each of the 4 possibilities, check if they are the correct one
         for (int i = 0; i < 4; i++)
         {
             objects[i]->SetActive(obj == i);
@@ -40,7 +37,7 @@ namespace Qosmetics::Notes
         previouslyActive = obj;
     }
 
-    void CyoobHandler::SetColors(UnityEngine::Color thisColor, UnityEngine::Color thatColor)
+    void ChainHandler::SetColors(UnityEngine::Color thisColor, UnityEngine::Color thatColor)
     {
         if (!colorHandlers)
             FindNotes();
@@ -60,7 +57,7 @@ namespace Qosmetics::Notes
         */
     }
 
-    void CyoobHandler::FindNotes()
+    void ChainHandler::FindNotes()
     {
         // create array
         if (!objects)
@@ -69,10 +66,10 @@ namespace Qosmetics::Notes
             auto t = get_transform();
             // find the different objects
             objects = ArrayW<UnityEngine::GameObject*>(4);
-            objects[0] = t->Find(ConstStrings::LeftArrow())->get_gameObject();
-            objects[1] = t->Find(ConstStrings::RightArrow())->get_gameObject();
-            objects[2] = t->Find(ConstStrings::LeftDot())->get_gameObject();
-            objects[3] = t->Find(ConstStrings::RightDot())->get_gameObject();
+            objects[0] = t->Find(ConstStrings::LeftHead())->get_gameObject();
+            objects[1] = t->Find(ConstStrings::RightHead())->get_gameObject();
+            objects[2] = t->Find(ConstStrings::LeftLink())->get_gameObject();
+            objects[3] = t->Find(ConstStrings::RightLink())->get_gameObject();
         }
 
         if (!colorHandlers)
