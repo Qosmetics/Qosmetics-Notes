@@ -49,6 +49,34 @@
     bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                              \
     bool disappearingArrows = gameplayModifiers->get_disappearingArrows();
 
+static void SetAndFixObjectChildren(UnityEngine::Transform* obj, Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)
+{
+    int childCount = obj->get_childCount();
+    for (int i = 0; i < childCount; i++)
+    {
+        auto child = obj->get_transform()->GetChild(i);
+        child->set_localScale(Sombrero::FastVector3::one());
+        child->set_localPosition(Sombrero::FastVector3::zero());
+        child->set_localRotation(Sombrero::FastQuaternion::identity());
+
+        /// add color handler and set colors
+        auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::CyoobColorHandler*>();
+        if (colorHandler)
+        {
+            colorHandler->FetchCCMaterials();
+
+            if (child->get_name().starts_with("Left"))
+            {
+                colorHandler->SetColors(leftColor, rightColor);
+            }
+            else
+            {
+                colorHandler->SetColors(rightColor, leftColor);
+            }
+        }
+    }
+}
+
 #pragma region normalNotes
 GlobalNamespace::GameNoteController* RedecorateGameNoteController(GlobalNamespace::GameNoteController* notePrefab, Zenject::DiContainer* container)
 {
@@ -67,7 +95,10 @@ GlobalNamespace::GameNoteController* RedecorateGameNoteController(GlobalNamespac
 #endif
         if (addCustomPrefab)
         {
-            auto cyoobParent = notePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
+            auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
+            auto leftColor = colorScheme->dyn__saberAColor();
+            auto rightColor = colorScheme->dyn__saberBColor();
+
 #ifdef CHROMA_EXISTS
             auto noteCallbackOpt = Chroma::NoteAPI::getNoteChangedColorCallbackSafe();
             if (noteCallbackOpt.has_value())
@@ -77,54 +108,37 @@ GlobalNamespace::GameNoteController* RedecorateGameNoteController(GlobalNamespac
                 noteCallback -= &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
                 noteCallback += &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
             }
-#endif
 
-            auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Notes());
-            // instantiate the notes prefab
-            auto notes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), noteCubeTransform);
-            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(notes);
-            notes->set_name("Notes");
-            notes->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
-
-            cyoobParent->cyoobHandler = notes->GetComponent<Qosmetics::Notes::CyoobHandler*>();
-            int childCount = notes->get_transform()->get_childCount();
-
-            auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
-            auto leftColor = colorScheme->dyn__saberAColor();
-            auto rightColor = colorScheme->dyn__saberBColor();
-
-#ifdef CHROMA_EXISTS
             Qosmetics::Notes::CyoobParent::lastLeftColor = leftColor;
             Qosmetics::Notes::CyoobParent::lastRightColor = rightColor;
             Qosmetics::Notes::CyoobParent::globalRightColor = Chroma::NoteAPI::getGlobalNoteColorSafe(1).value_or(rightColor);
             Qosmetics::Notes::CyoobParent::globalLeftColor = Chroma::NoteAPI::getGlobalNoteColorSafe(0).value_or(leftColor);
 #endif
+            auto cyoobParent = notePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobParent*>();
+            auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Notes());
+            // instantiate the notes prefab
+            auto notes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), noteCubeTransform);
+            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(notes);
+            notes->set_name("Notes");
+            notes->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
 
-            for (int i = 0; i < childCount; i++)
+            cyoobParent->cyoobHandler = notes->GetComponent<Qosmetics::Notes::CyoobHandler*>();
+            int childCount = notes->get_transform()->get_childCount();
+
+            SetAndFixObjectChildren(notes->get_transform(), leftColor, rightColor);
+
+            // Update note sizes
+            if (globalConfig.overrideNoteSize)
             {
-                auto child = notes->get_transform()->GetChild(i);
-                child->set_localPosition(Sombrero::FastVector3::zero());
-                child->set_localRotation(Sombrero::FastQuaternion::identity());
+                noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
 
-                /// add color handler and set colors
-                auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::CyoobColorHandler*>();
-                colorHandler->FetchCCMaterials();
-                if (child->get_name().starts_with("Left"))
+                if (!globalConfig.alsoChangeHitboxes)
                 {
-                    colorHandler->SetColors(leftColor, rightColor);
+                    for (auto bigCuttable : notePrefab->dyn__bigCuttableBySaberList())
+                        bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() / noteSizeFactor);
+                    for (auto smallCuttable : notePrefab->dyn__smallCuttableBySaberList())
+                        smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() / noteSizeFactor);
                 }
-                else
-                {
-                    colorHandler->SetColors(rightColor, leftColor);
-                }
-            }
-
-            if (globalConfig.overrideNoteSize && globalConfig.alsoChangeHitboxes)
-            {
-                for (auto bigCuttable : notePrefab->dyn__bigCuttableBySaberList())
-                    bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() * noteSizeFactor);
-                for (auto smallCuttable : notePrefab->dyn__smallCuttableBySaberList())
-                    smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() * noteSizeFactor);
             }
 
             // if we don't want to show arrows, disable the arrow gameobjects
@@ -193,7 +207,7 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
             auto mirroredNotes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), mirroredNoteCubeTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(mirroredNotes);
             mirroredNotes->set_name("Notes");
-            mirroredNotes->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
+            mirroredNotes->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
 
             cyoobParent->cyoobHandler = mirroredNotes->GetComponent<Qosmetics::Notes::CyoobHandler*>();
 
@@ -202,21 +216,11 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
             auto leftColor = colorScheme->dyn__saberAColor();
             auto rightColor = colorScheme->dyn__saberBColor();
 
-            int childCount = mirroredNotes->get_transform()->get_childCount();
-            for (int i = 0; i < childCount; i++)
-            {
-                auto child = mirroredNotes->get_transform()->GetChild(i);
-                child->set_localPosition(Sombrero::FastVector3::zero());
-                child->set_localRotation(Sombrero::FastQuaternion::identity());
+            SetAndFixObjectChildren(mirroredNotes->get_transform(), leftColor, rightColor);
 
-                /// add color handler and set colors
-                auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::CyoobColorHandler*>();
-                colorHandler->FetchCCMaterials();
-                if (child->get_name().starts_with("Left"))
-                    colorHandler->SetColors(leftColor, rightColor);
-                else
-                    colorHandler->SetColors(rightColor, leftColor);
-            }
+            // Update note sizes
+            if (globalConfig.overrideNoteSize)
+                mirroredNoteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
 
             // if we don't want to show arrows, disable the arrow gameobjects
             if (!config.get_showArrows())
@@ -239,13 +243,11 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
             mirroredNoteCubeTransform->Find(ConstStrings::NoteCircleGlow())->get_gameObject()->SetActive(false);
 
             if (globalConfig.overrideNoteSize)
-            {
-                mirroredNoteCubeTransform->set_localScale(mirroredNoteCubeTransform->get_localScale() * noteSizeFactor);
-            }
+                mirroredNoteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
         }
         else if (globalConfig.overrideNoteSize)
         {
-            mirroredNoteCubeTransform->set_localScale(mirroredNoteCubeTransform->get_localScale() * noteSizeFactor);
+            mirroredNoteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
         }
     }
     catch (il2cpp_utils::RunMethodException const& e)
@@ -277,66 +279,52 @@ REDECORATION_REGISTRATION(burstSliderHeadNotePrefab, 10, true, GlobalNamespace::
 #endif
         if (addCustomPrefab)
         {
-            auto chainParent = burstSliderHeadNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::ChainParent*>();
-#ifdef CHROMA_EXISTS
-            auto noteCallbackOpt = Chroma::NoteAPI::getNoteChangedColorCallbackSafe();
-            if (noteCallbackOpt.has_value())
-            {
-                INFO("Adding to note color callback!");
-                auto& noteCallback = noteCallbackOpt.value().get();
-                noteCallback -= &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
-                noteCallback += &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
-            }
-#endif
-
-            auto actualChains = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Chains());
-            // instantiate the notes prefab
-            auto chains = UnityEngine::Object::Instantiate(actualChains->get_gameObject(), noteCubeTransform);
-            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(chains);
-            chains->set_name("Chains");
-            chains->get_transform()->set_localScale((config.get_hasSlider() ? Sombrero::FastVector3::one() : Sombrero::FastVector3(1.0f, 0.75f, 1.0f)) * noteSizeFactor * 0.4f);
-            chains->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
-
-            chainParent->chainHandler = chains->GetComponent<Qosmetics::Notes::ChainHandler*>();
-            int childCount = chains->get_transform()->get_childCount();
 
             auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
             auto leftColor = colorScheme->dyn__saberAColor();
             auto rightColor = colorScheme->dyn__saberBColor();
 
 #ifdef CHROMA_EXISTS
-            Qosmetics::Notes::CyoobParent::lastLeftColor = leftColor;
-            Qosmetics::Notes::CyoobParent::lastRightColor = rightColor;
-            Qosmetics::Notes::CyoobParent::globalRightColor = Chroma::NoteAPI::getGlobalNoteColorSafe(1).value_or(rightColor);
-            Qosmetics::Notes::CyoobParent::globalLeftColor = Chroma::NoteAPI::getGlobalNoteColorSafe(0).value_or(leftColor);
-#endif
-
-            for (int i = 0; i < childCount; i++)
+            auto noteCallbackOpt = Chroma::NoteAPI::getNoteChangedColorCallbackSafe();
+            if (noteCallbackOpt.has_value())
             {
-                auto child = chains->get_transform()->GetChild(i);
-                child->set_localPosition(Sombrero::FastVector3::zero());
-                child->set_localRotation(Sombrero::FastQuaternion::identity());
-
-                /// add color handler and set colors
-                auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::CyoobColorHandler*>();
-                colorHandler->FetchCCMaterials();
-
-                if (child->get_name().starts_with("Left"))
-                {
-                    colorHandler->SetColors(leftColor, rightColor);
-                }
-                else
-                {
-                    colorHandler->SetColors(rightColor, leftColor);
-                }
+                INFO("Adding to note color callback!");
+                auto& noteCallback = noteCallbackOpt.value().get();
+                noteCallback -= &Qosmetics::Notes::ChainParent::ColorizeSpecific;
+                noteCallback += &Qosmetics::Notes::ChainParent::ColorizeSpecific;
             }
 
-            if (globalConfig.overrideNoteSize && globalConfig.alsoChangeHitboxes)
+            Qosmetics::Notes::ChainParent::lastLeftColor = leftColor;
+            Qosmetics::Notes::ChainParent::lastRightColor = rightColor;
+            Qosmetics::Notes::ChainParent::globalRightColor = Chroma::NoteAPI::getGlobalNoteColorSafe(1).value_or(rightColor);
+            Qosmetics::Notes::ChainParent::globalLeftColor = Chroma::NoteAPI::getGlobalNoteColorSafe(0).value_or(leftColor);
+#endif
+            auto chainParent = burstSliderHeadNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::ChainParent*>();
+
+            auto actualChains = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Chains());
+            // instantiate the notes prefab
+            auto chains = UnityEngine::Object::Instantiate(actualChains->get_gameObject(), noteCubeTransform);
+            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(chains);
+            chains->set_name("Chains");
+            chains->get_transform()->set_localScale(Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.75f, 1.0f) * 0.4f);
+            chains->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
+
+            chainParent->chainHandler = chains->GetComponent<Qosmetics::Notes::ChainHandler*>();
+            int childCount = chains->get_transform()->get_childCount();
+
+            SetAndFixObjectChildren(chains->get_transform(), leftColor, rightColor);
+
+            if (globalConfig.overrideNoteSize)
             {
-                for (auto bigCuttable : burstSliderHeadNotePrefab->dyn__bigCuttableBySaberList())
-                    bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() * noteSizeFactor);
-                for (auto smallCuttable : burstSliderHeadNotePrefab->dyn__smallCuttableBySaberList())
-                    smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() * noteSizeFactor);
+                noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+
+                if (!globalConfig.alsoChangeHitboxes)
+                {
+                    for (auto bigCuttable : burstSliderHeadNotePrefab->dyn__bigCuttableBySaberList())
+                        bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() / noteSizeFactor);
+                    for (auto smallCuttable : burstSliderHeadNotePrefab->dyn__smallCuttableBySaberList())
+                        smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() / noteSizeFactor);
+                }
             }
 
             // if we don't want to show arrows, disable the arrow gameobjects
@@ -353,8 +341,6 @@ REDECORATION_REGISTRATION(burstSliderHeadNotePrefab, 10, true, GlobalNamespace::
         // note didn't exist, but we do want to change note size
         else if (globalConfig.overrideNoteSize)
         {
-            auto localScale = noteCubeTransform->get_localScale() * noteSizeFactor;
-            DEBUG("Setting default note local scale to {:.2f}, {:.2f}, {:.2f}", localScale.x, localScale.y, localScale.z);
             noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
 
             // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
@@ -386,72 +372,39 @@ REDECORATION_REGISTRATION(burstSliderNotePrefab, 10, true, GlobalNamespace::Burs
         auto noteCubeTransform = burstSliderNotePrefab->get_transform()->Find("NoteCube");
         // if a custom note even exists
         bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows;
-#ifdef CHROMA_EXISTS
-        // set the note colorable by chroma to the opposite of if we are replacing the entire contents of the prefab
-        Chroma::NoteAPI::setNoteColorable(addCustomPrefab);
-#endif
+
         if (addCustomPrefab)
         {
             auto chainParent = burstSliderNotePrefab->get_gameObject()->AddComponent<Qosmetics::Notes::ChainParent*>();
-#ifdef CHROMA_EXISTS
-            auto noteCallbackOpt = Chroma::NoteAPI::getNoteChangedColorCallbackSafe();
-            if (noteCallbackOpt.has_value())
-            {
-                INFO("Adding to note color callback!");
-                auto& noteCallback = noteCallbackOpt.value().get();
-                noteCallback -= &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
-                noteCallback += &Qosmetics::Notes::CyoobParent::ColorizeSpecific;
-            }
-#endif
 
             auto actualChains = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Chains());
             // instantiate the notes prefab
             auto chains = UnityEngine::Object::Instantiate(actualChains->get_gameObject(), noteCubeTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(chains);
             chains->set_name("Chains");
-            chains->get_transform()->set_localScale((config.get_hasSlider() ? Sombrero::FastVector3::one() : Sombrero::FastVector3(1.0f, 0.2f, 1.0f)) * noteSizeFactor * 0.4f);
+            chains->get_transform()->set_localScale(Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.2f, 1.0f) * 0.4f);
             chains->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
 
             chainParent->chainHandler = chains->GetComponent<Qosmetics::Notes::ChainHandler*>();
-            int childCount = chains->get_transform()->get_childCount();
 
             auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
             auto leftColor = colorScheme->dyn__saberAColor();
             auto rightColor = colorScheme->dyn__saberBColor();
 
-#ifdef CHROMA_EXISTS
-            Qosmetics::Notes::CyoobParent::lastLeftColor = leftColor;
-            Qosmetics::Notes::CyoobParent::lastRightColor = rightColor;
-            Qosmetics::Notes::CyoobParent::globalRightColor = Chroma::NoteAPI::getGlobalNoteColorSafe(1).value_or(rightColor);
-            Qosmetics::Notes::CyoobParent::globalLeftColor = Chroma::NoteAPI::getGlobalNoteColorSafe(0).value_or(leftColor);
-#endif
+            SetAndFixObjectChildren(chains->get_transform(), leftColor, rightColor);
 
-            for (int i = 0; i < childCount; i++)
+            // Update note sizes
+            if (globalConfig.overrideNoteSize)
             {
-                auto child = chains->get_transform()->GetChild(i);
-                child->set_localPosition(Sombrero::FastVector3::zero());
-                child->set_localRotation(Sombrero::FastQuaternion::identity());
+                noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
 
-                /// add color handler and set colors
-                auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::CyoobColorHandler*>();
-                colorHandler->FetchCCMaterials();
-
-                if (child->get_name().starts_with("Left"))
+                if (!globalConfig.alsoChangeHitboxes)
                 {
-                    colorHandler->SetColors(leftColor, rightColor);
+                    for (auto bigCuttable : burstSliderNotePrefab->dyn__bigCuttableBySaberList())
+                        bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() / noteSizeFactor);
+                    for (auto smallCuttable : burstSliderNotePrefab->dyn__smallCuttableBySaberList())
+                        smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() / noteSizeFactor);
                 }
-                else
-                {
-                    colorHandler->SetColors(rightColor, leftColor);
-                }
-            }
-
-            if (globalConfig.overrideNoteSize && globalConfig.alsoChangeHitboxes)
-            {
-                for (auto bigCuttable : burstSliderNotePrefab->dyn__bigCuttableBySaberList())
-                    bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() * noteSizeFactor);
-                for (auto smallCuttable : burstSliderNotePrefab->dyn__smallCuttableBySaberList())
-                    smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() * noteSizeFactor);
             }
 
             // if we don't want to show arrows, disable the arrow gameobjects
@@ -466,8 +419,6 @@ REDECORATION_REGISTRATION(burstSliderNotePrefab, 10, true, GlobalNamespace::Burs
         // note didn't exist, but we do want to change note size
         else if (globalConfig.overrideNoteSize)
         {
-            auto localScale = noteCubeTransform->get_localScale() * noteSizeFactor;
-            DEBUG("Setting default note local scale to {:.2f}, {:.2f}, {:.2f}", localScale.x, localScale.y, localScale.z);
             noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
 
             // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size

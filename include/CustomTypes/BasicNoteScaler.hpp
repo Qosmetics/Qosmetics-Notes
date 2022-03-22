@@ -4,6 +4,7 @@
 #include "GlobalNamespace/NoteControllerBase.hpp"
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "custom-types/shared/macros.hpp"
+#include "sombrero/shared/FastVector3.hpp"
 
 #ifndef DECLARE_OVERRIDE_METHOD_MATCH
 #define DECLARE_OVERRIDE_METHOD_MATCH(retval, method, mptr, ...) \

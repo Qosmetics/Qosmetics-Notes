@@ -44,17 +44,6 @@ namespace Qosmetics::Notes
 
         if (previouslyActive != -1)
             colorHandlers[previouslyActive]->SetColors(thisColor, thatColor);
-
-        /*
-        // leftArrow
-        colorHandlers[0]->SetColors(leftColor, rightColor);
-        // rightArrow
-        colorHandlers[1]->SetColors(rightColor, leftColor);
-        // leftDot
-        colorHandlers[2]->SetColors(leftColor, rightColor);
-        // rightDot
-        colorHandlers[3]->SetColors(rightColor, leftColor);
-        */
     }
 
     void ChainHandler::FindNotes()
