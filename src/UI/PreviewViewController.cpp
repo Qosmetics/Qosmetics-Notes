@@ -86,147 +86,177 @@ namespace Qosmetics::Notes
 
     void PreviewViewController::UpdatePreview(bool reinstantiate)
     {
-        if (!currentPrefab || reinstantiate)
+        try
         {
-            ClearPrefab();
-            InstantiatePrefab();
-        }
-
-        ShowLoading(false);
-        if (!currentPrefab)
-        {
-            SetTitleText(Diglett::Localization::get_instance()->get("QosmeticsCyoobs:Preview:Default"));
-            return;
-        }
-
-        auto noteModelContainer = NoteModelContainer::get_instance();
-        auto config = noteModelContainer->GetNoteConfig();
-        auto& globalConfig = Config::get_config();
-
-        auto& descriptor = noteModelContainer->GetDescriptor();
-        auto name = descriptor.get_name();
-        SetTitleText(name);
-
-        float noteSizeFactor = globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f;
-        float noteSize = noteSizeFactor * 0.4f;
-
-        auto notesT = currentPrefab->get_transform()->Find(ConstStrings::Notes());
-        auto mirrorNotesT = currentPrefab->get_transform()->Find(ConstStrings::MirrorNotes());
-        if (mirrorNotesT)
-            UnityEngine::Object::DestroyImmediate(mirrorNotesT->get_gameObject());
-
-        auto bombT = currentPrefab->get_transform()->Find(ConstStrings::Bomb());
-        auto mirrorBombT = currentPrefab->get_transform()->Find(ConstStrings::MirrorBomb());
-        if (mirrorBombT)
-            UnityEngine::Object::DestroyImmediate(mirrorBombT->get_gameObject());
-
-        auto chainsT = currentPrefab->get_transform()->Find(ConstStrings::Chains());
-        auto mirrorChainT = currentPrefab->get_transform()->Find(ConstStrings::MirrorChains());
-        if (mirrorChainT)
-            UnityEngine::Object::DestroyImmediate(mirrorChainT->get_gameObject());
-
-        auto debrisT = currentPrefab->get_transform()->Find(ConstStrings::Debris());
-
-        auto leftArrowT = notesT->Find(ConstStrings::LeftArrow());
-        auto rightArrowT = notesT->Find(ConstStrings::RightArrow());
-        auto leftDotT = notesT->Find(ConstStrings::LeftDot());
-        auto rightDotT = notesT->Find(ConstStrings::RightDot());
-
-        auto leftHeadT = chainsT->Find(ConstStrings::LeftHead());
-        auto rightHeadT = chainsT->Find(ConstStrings::RightHead());
-        auto leftLinkT = chainsT->Find(ConstStrings::LeftLink());
-        auto rightLinkT = chainsT->Find(ConstStrings::RightLink());
-
-        // TODO: fetch colors from proper place somewhere
-        Sombrero::FastColor leftColor(1.0f, 0.0f, 0.0f, 1.0f);
-        Sombrero::FastColor rightColor(0.0f, 0.0f, 1.0f, 1.0f);
-
-        float distance = 0.4f * (noteSizeFactor > 1.0f ? noteSizeFactor : 1.0f);
-        float offset = 0.15f;
-
-        leftArrowT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-        leftArrowT->set_localPosition(Sombrero::FastVector3(-distance - offset, distance + offset, 0.0f));
-        auto leftArrowColorHandler = leftArrowT->get_gameObject()->GetComponent<CyoobColorHandler*>();
-        leftArrowColorHandler->FetchCCMaterials();
-        leftArrowColorHandler->SetColors(leftColor, rightColor);
-
-        rightArrowT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-        rightArrowT->set_localPosition(Sombrero::FastVector3(0.0f, distance + offset, 0.0f));
-        auto rightArrowColorHandler = rightArrowT->get_gameObject()->GetComponent<CyoobColorHandler*>();
-        rightArrowColorHandler->FetchCCMaterials();
-        rightArrowColorHandler->SetColors(rightColor, leftColor);
-
-        leftDotT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-        leftDotT->set_localPosition(Sombrero::FastVector3(-distance - offset, 0.0f, 0.0f));
-        auto leftDotColorHandler = leftDotT->get_gameObject()->GetComponent<CyoobColorHandler*>();
-        leftDotColorHandler->FetchCCMaterials();
-        leftDotColorHandler->SetColors(leftColor, rightColor);
-
-        rightDotT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-        rightDotT->set_localPosition(Sombrero::FastVector3(0.0f, 0.0f, 0.0f));
-        auto rightDotColorHandler = rightDotT->get_gameObject()->GetComponent<CyoobColorHandler*>();
-        rightDotColorHandler->FetchCCMaterials();
-        rightDotColorHandler->SetColors(rightColor, leftColor);
-
-        auto headSize = Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.75f, 1.0f);
-        auto linkSize = Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.2f, 1.0f);
-
-        leftHeadT->set_localScale(headSize * noteSize);
-        leftHeadT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 3, distance + offset, 0.0f));
-        auto leftHeadColorHandler = leftHeadT->get_gameObject()->GetComponent<CyoobColorHandler*>();
-        leftHeadColorHandler->FetchCCMaterials();
-        leftHeadColorHandler->SetColors(leftColor, rightColor);
-
-        rightHeadT->set_localScale(headSize * noteSize);
-        rightHeadT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 2, distance + offset, 0.0f));
-        auto rightHeadColorHandler = rightHeadT->get_gameObject()->GetComponent<CyoobColorHandler*>();
-        rightHeadColorHandler->FetchCCMaterials();
-        rightHeadColorHandler->SetColors(rightColor, leftColor);
-
-        leftLinkT->set_localScale(linkSize * noteSize);
-        leftLinkT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 3, 0.0f, 0.0f));
-        auto leftLinkColorHandler = leftLinkT->get_gameObject()->GetComponent<CyoobColorHandler*>();
-        leftLinkColorHandler->FetchCCMaterials();
-        leftLinkColorHandler->SetColors(leftColor, rightColor);
-
-        rightLinkT->set_localScale(linkSize * noteSize);
-        rightLinkT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 2, 0.0f, 0.0f));
-        auto rightLinkColorHandler = rightLinkT->get_gameObject()->GetComponent<CyoobColorHandler*>();
-        rightLinkColorHandler->FetchCCMaterials();
-        rightLinkColorHandler->SetColors(rightColor, leftColor);
-
-        if (bombT)
-        {
-            bombT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-            bombT->set_localPosition(Sombrero::FastVector3(distance + offset, 0.0f, 0.0f));
-
-            bombT->get_gameObject()->SetActive(!globalConfig.forceDefaultBombs);
-        }
-
-        if (debrisT)
-        {
-            auto leftDebrisT = debrisT->Find(ConstStrings::LeftDebris());
-            auto rightDebrisT = debrisT->Find(ConstStrings::RightDebris());
-
-            if (leftDebrisT)
+            if (!currentPrefab || reinstantiate)
             {
-                leftDebrisT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-                leftDebrisT->set_localPosition(Sombrero::FastVector3(-distance - offset, -distance - offset, 0.0f));
-                auto leftDebrisColorHandler = leftDebrisT->get_gameObject()->GetComponent<DebrisColorHandler*>();
-                leftDebrisColorHandler->FetchCCMaterials();
-                leftDebrisColorHandler->SetColors(leftColor, rightColor);
+                DEBUG("Reinstantiating prefab");
+                ClearPrefab();
+                InstantiatePrefab();
             }
 
-            if (rightDebrisT)
+            ShowLoading(false);
+            if (!currentPrefab)
             {
-                rightDebrisT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-                rightDebrisT->set_localPosition(Sombrero::FastVector3(0.0f, -distance - offset, 0.0f));
-                auto rightDebrisColorHandler = rightDebrisT->get_gameObject()->GetComponent<DebrisColorHandler*>();
-                rightDebrisColorHandler->FetchCCMaterials();
-                rightDebrisColorHandler->SetColors(rightColor, leftColor);
+                DEBUG("No prefab found, must be default!");
+                SetTitleText(Diglett::Localization::get_instance()->get("QosmeticsCyoobs:Preview:Default"));
+                return;
             }
 
-            debrisT->get_gameObject()->SetActive(!globalConfig.forceDefaultDebris);
+            DEBUG("Getting variables");
+            auto noteModelContainer = NoteModelContainer::get_instance();
+            auto config = noteModelContainer->GetNoteConfig();
+            auto& globalConfig = Config::get_config();
+
+            auto& descriptor = noteModelContainer->GetDescriptor();
+            auto name = descriptor.get_name();
+            SetTitleText(name);
+
+            float noteSizeFactor = globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f;
+            float noteSize = noteSizeFactor * 0.4f;
+
+            DEBUG("Cleaning up mirrorables");
+            auto notesT = currentPrefab->get_transform()->Find(ConstStrings::Notes());
+            auto mirrorNotesT = currentPrefab->get_transform()->Find(ConstStrings::MirrorNotes());
+            if (mirrorNotesT)
+                UnityEngine::Object::DestroyImmediate(mirrorNotesT->get_gameObject());
+
+            auto bombT = currentPrefab->get_transform()->Find(ConstStrings::Bomb());
+            auto mirrorBombT = currentPrefab->get_transform()->Find(ConstStrings::MirrorBomb());
+            if (mirrorBombT)
+                UnityEngine::Object::DestroyImmediate(mirrorBombT->get_gameObject());
+
+            auto chainsT = currentPrefab->get_transform()->Find(ConstStrings::Chains());
+            auto mirrorChainT = currentPrefab->get_transform()->Find(ConstStrings::MirrorChains());
+            if (mirrorChainT)
+                UnityEngine::Object::DestroyImmediate(mirrorChainT->get_gameObject());
+
+            DEBUG("Getting lots of transforms");
+            auto debrisT = currentPrefab->get_transform()->Find(ConstStrings::Debris());
+            auto chainHeadDebrisT = currentPrefab->get_transform()->Find(ConstStrings::ChainHeadDebris());
+            auto chainLinkDebrisT = currentPrefab->get_transform()->Find(ConstStrings::ChainLinkDebris());
+
+            auto leftArrowT = notesT->Find(ConstStrings::LeftArrow());
+            auto rightArrowT = notesT->Find(ConstStrings::RightArrow());
+            auto leftDotT = notesT->Find(ConstStrings::LeftDot());
+            auto rightDotT = notesT->Find(ConstStrings::RightDot());
+
+            auto leftHeadT = chainsT->Find(ConstStrings::LeftHead());
+            auto rightHeadT = chainsT->Find(ConstStrings::RightHead());
+            auto leftLinkT = chainsT->Find(ConstStrings::LeftLink());
+            auto rightLinkT = chainsT->Find(ConstStrings::RightLink());
+
+            // TODO: fetch colors from proper place somewhere
+            Sombrero::FastColor leftColor(1.0f, 0.0f, 0.0f, 1.0f);
+            Sombrero::FastColor rightColor(0.0f, 0.0f, 1.0f, 1.0f);
+
+            float distance = 0.4f * (noteSizeFactor > 1.0f ? noteSizeFactor : 1.0f);
+            float offset = 0.15f;
+
+            DEBUG("Setting size & colors for normal notes");
+            leftArrowT->set_localScale(Sombrero::FastVector3::one() * noteSize);
+            leftArrowT->set_localPosition(Sombrero::FastVector3(-distance - offset, distance + offset, 0.0f));
+            auto leftArrowColorHandler = leftArrowT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+            leftArrowColorHandler->FetchCCMaterials();
+            leftArrowColorHandler->SetColors(leftColor, rightColor);
+
+            rightArrowT->set_localScale(Sombrero::FastVector3::one() * noteSize);
+            rightArrowT->set_localPosition(Sombrero::FastVector3(0.0f, distance + offset, 0.0f));
+            auto rightArrowColorHandler = rightArrowT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+            rightArrowColorHandler->FetchCCMaterials();
+            rightArrowColorHandler->SetColors(rightColor, leftColor);
+
+            leftDotT->set_localScale(Sombrero::FastVector3::one() * noteSize);
+            leftDotT->set_localPosition(Sombrero::FastVector3(-distance - offset, 0.0f, 0.0f));
+            auto leftDotColorHandler = leftDotT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+            leftDotColorHandler->FetchCCMaterials();
+            leftDotColorHandler->SetColors(leftColor, rightColor);
+
+            rightDotT->set_localScale(Sombrero::FastVector3::one() * noteSize);
+            rightDotT->set_localPosition(Sombrero::FastVector3(0.0f, 0.0f, 0.0f));
+            auto rightDotColorHandler = rightDotT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+            rightDotColorHandler->FetchCCMaterials();
+            rightDotColorHandler->SetColors(rightColor, leftColor);
+
+            DEBUG("Setting size & colors for chain notes");
+            auto headSize = Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.75f, 1.0f);
+            auto linkSize = Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.2f, 1.0f);
+
+            leftHeadT->set_localScale(headSize * noteSize);
+            leftHeadT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 3, distance + offset, 0.0f));
+            auto leftHeadColorHandler = leftHeadT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+            leftHeadColorHandler->FetchCCMaterials();
+            leftHeadColorHandler->SetColors(leftColor, rightColor);
+
+            rightHeadT->set_localScale(headSize * noteSize);
+            rightHeadT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 2, distance + offset, 0.0f));
+            auto rightHeadColorHandler = rightHeadT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+            rightHeadColorHandler->FetchCCMaterials();
+            rightHeadColorHandler->SetColors(rightColor, leftColor);
+
+            leftLinkT->set_localScale(linkSize * noteSize);
+            leftLinkT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 3, 0.0f, 0.0f));
+            auto leftLinkColorHandler = leftLinkT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+            leftLinkColorHandler->FetchCCMaterials();
+            leftLinkColorHandler->SetColors(leftColor, rightColor);
+
+            rightLinkT->set_localScale(linkSize * noteSize);
+            rightLinkT->set_localPosition(Sombrero::FastVector3((-distance - offset) * 2, 0.0f, 0.0f));
+            auto rightLinkColorHandler = rightLinkT->get_gameObject()->GetComponent<CyoobColorHandler*>();
+            rightLinkColorHandler->FetchCCMaterials();
+            rightLinkColorHandler->SetColors(rightColor, leftColor);
+
+            if (bombT)
+            {
+                DEBUG("Setting size & colors for bombs");
+                bombT->set_localScale(Sombrero::FastVector3::one() * noteSize);
+                bombT->set_localPosition(Sombrero::FastVector3(distance + offset, 0.0f, 0.0f));
+
+                bombT->get_gameObject()->SetActive(!globalConfig.forceDefaultBombs);
+            }
+
+            if (debrisT)
+            {
+                DEBUG("Setting size & colors for regular debris");
+                auto leftDebrisT = debrisT->Find(ConstStrings::LeftDebris());
+                auto rightDebrisT = debrisT->Find(ConstStrings::RightDebris());
+
+                if (leftDebrisT)
+                {
+                    leftDebrisT->set_localScale(Sombrero::FastVector3::one() * noteSize);
+                    leftDebrisT->set_localPosition(Sombrero::FastVector3(-distance - offset, -distance - offset, 0.0f));
+                    auto leftDebrisColorHandler = leftDebrisT->get_gameObject()->GetComponent<DebrisColorHandler*>();
+                    leftDebrisColorHandler->FetchCCMaterials();
+                    leftDebrisColorHandler->SetColors(leftColor, rightColor);
+                }
+
+                if (rightDebrisT)
+                {
+                    rightDebrisT->set_localScale(Sombrero::FastVector3::one() * noteSize);
+                    rightDebrisT->set_localPosition(Sombrero::FastVector3(0.0f, -distance - offset, 0.0f));
+                    auto rightDebrisColorHandler = rightDebrisT->get_gameObject()->GetComponent<DebrisColorHandler*>();
+                    rightDebrisColorHandler->FetchCCMaterials();
+                    rightDebrisColorHandler->SetColors(rightColor, leftColor);
+                }
+
+                debrisT->get_gameObject()->SetActive(!globalConfig.forceDefaultDebris);
+            }
+
+            if (chainHeadDebrisT)
+            {
+                DEBUG("Setting size & colors for chain head debris");
+                // TODO chain head debris stuff
+            }
+
+            if (chainLinkDebrisT)
+            {
+                DEBUG("Setting size & colors for chain link debris");
+                // TODO chain link debris stuff
+            }
+        }
+        catch (const il2cpp_utils::RunMethodException& e)
+        {
+            ERROR("{}", e.what());
         }
     }
 
@@ -235,13 +265,14 @@ namespace Qosmetics::Notes
         auto noteModelContainer = NoteModelContainer::get_instance();
         if (noteModelContainer->currentNoteObject)
         {
-            DEBUG("Found a new note object, instantiating it! name: {}", static_cast<std::string>(noteModelContainer->currentNoteObject->get_name()));
+            DEBUG("Found a new note object, instantiating it! name: {}", noteModelContainer->currentNoteObject->get_name());
             currentPrefab = UnityEngine::Object::Instantiate(noteModelContainer->currentNoteObject, get_transform());
             currentPrefab->SetActive(true);
             auto t = currentPrefab->get_transform();
             t->set_localScale(Sombrero::FastVector3::one() * 30.0f);
             t->set_localPosition(Sombrero::FastVector3(-30.0f, 0.0f, -75.0f));
             t->set_localEulerAngles(Sombrero::FastVector3(0.0f, 60.0f, 0.0f));
+            DEBUG("Instantiated and inited new prefab!");
         }
         else
         {

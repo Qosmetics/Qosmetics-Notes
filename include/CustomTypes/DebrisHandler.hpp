@@ -27,4 +27,9 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, DebrisHandler, UnityEngine::MonoBehaviou
                       DECLARE_INSTANCE_METHOD(void, ShowDebris, bool right);
                       DECLARE_INSTANCE_METHOD(void, SetSliceProperties, Sombrero::FastVector3 cutPoint, Sombrero::FastVector3 cutNormal);
 
+                      public
+                      :
+
+                      void FindObjects();
+
 );

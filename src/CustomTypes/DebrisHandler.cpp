@@ -32,20 +32,13 @@ namespace Qosmetics::Notes
     void DebrisHandler::Awake()
     {
         previouslyActive = -1;
+
         objects = ArrayW<UnityEngine::GameObject*>(2);
         colorHandlers = ArrayW<DebrisColorHandler*>(2);
         sliceMaterials = ArrayW<UnityEngine::Material*>(2);
         anySliceMaterials = ArrayW<bool>(2);
 
-        objects[0] = get_transform()->Find("LeftDebris")->get_gameObject();
-        colorHandlers[0] = objects[0]->GetComponent<DebrisColorHandler*>();
-        sliceMaterials[0] = GetSlicableMaterials(objects[0]);
-        anySliceMaterials[0] = sliceMaterials[0].size() > 0;
-
-        objects[1] = get_transform()->Find("RightDebris")->get_gameObject();
-        colorHandlers[1] = objects[1]->GetComponent<DebrisColorHandler*>();
-        sliceMaterials[1] = GetSlicableMaterials(objects[1]);
-        anySliceMaterials[1] = sliceMaterials[1].size() > 0;
+        FindObjects();
     }
 
     void DebrisHandler::SetColors(Sombrero::FastColor thisColor, Sombrero::FastColor thatColor)
@@ -98,6 +91,19 @@ namespace Qosmetics::Notes
             material->SetVector(PropertyID::_CutPlane(), cutPlane);
             material->SetVector(PropertyID::_TransformOffset(), transformOffset);
         }
+    }
+
+    void DebrisHandler::FindObjects()
+    {
+        objects[0] = get_transform()->Find("LeftDebris")->get_gameObject();
+        colorHandlers[0] = objects[0]->GetComponent<DebrisColorHandler*>();
+        sliceMaterials[0] = GetSlicableMaterials(objects[0]);
+        anySliceMaterials[0] = sliceMaterials[0].size() > 0;
+
+        objects[1] = get_transform()->Find("RightDebris")->get_gameObject();
+        colorHandlers[1] = objects[1]->GetComponent<DebrisColorHandler*>();
+        sliceMaterials[1] = GetSlicableMaterials(objects[1]);
+        anySliceMaterials[1] = sliceMaterials[1].size() > 0;
     }
 
 }

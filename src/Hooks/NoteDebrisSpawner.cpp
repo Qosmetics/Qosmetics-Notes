@@ -1,4 +1,5 @@
 #include "GlobalNamespace/NoteDebrisSpawner.hpp"
+#include "GlobalNamespace/BeatmapObjectData.hpp"
 #include "GlobalNamespace/ILazyCopyHashSet_1.hpp"
 #include "GlobalNamespace/INoteDebrisDidFinishEvent.hpp"
 #include "GlobalNamespace/NoteDebris.hpp"
@@ -25,15 +26,24 @@ static constexpr Sombrero::FastVector3 Cross(const Sombrero::FastVector3& lhs, c
 // this method is orig because it does not call orig
 // it does not call orig because we need access to the spawned notedebris which is not possible in any other way
 // FIXME: reimplement this from the original source, dnspy style ✨
-/*
-MAKE_AUTO_HOOK_ORIG_MATCH(NoteDebrisSpawner_SpawnDebris, &GlobalNamespace::NoteDebrisSpawner::SpawnDebris, void, GlobalNamespace::NoteDebrisSpawner* self, UnityEngine::Vector3 cutPoint, UnityEngine::Vector3 cutNormal, float saberSpeed, UnityEngine::Vector3 saberDir, UnityEngine::Vector3 notePos, UnityEngine::Quaternion noteRotation, UnityEngine::Vector3 noteScale, GlobalNamespace::ColorType colorType, float timeToNextColorNote, UnityEngine::Vector3 moveVec)
+
+MAKE_AUTO_HOOK_ORIG_MATCH(NoteDebrisSpawner_SpawnDebris, &GlobalNamespace::NoteDebrisSpawner::SpawnDebris, void, GlobalNamespace::NoteDebrisSpawner* self, ::GlobalNamespace::NoteData::GameplayType noteGameplayType, ::UnityEngine::Vector3 cutPoint, ::UnityEngine::Vector3 cutNormal, float saberSpeed, ::UnityEngine::Vector3 saberDir, ::UnityEngine::Vector3 notePos, ::UnityEngine::Quaternion noteRotation, ::UnityEngine::Vector3 noteScale, ::GlobalNamespace::ColorType colorType, float timeToNextColorNote, ::UnityEngine::Vector3 moveVec)
 {
-    GlobalNamespace::NoteDebris* noteDebris = self->dyn__noteDebrisPool()->Spawn();
+    GlobalNamespace::NoteDebris* noteDebris;
+    GlobalNamespace::NoteDebris* noteDebris2;
+
+    self->SpawnNoteDebris(noteGameplayType, byref(noteDebris), byref(noteDebris2));
+
+    if (!noteDebris || !noteDebris2)
+    {
+        return;
+    }
+
     noteDebris->get_didFinishEvent()->Add(reinterpret_cast<GlobalNamespace::INoteDebrisDidFinishEvent*>(self));
     noteDebris->get_transform()->SetPositionAndRotation(Sombrero::FastVector3::zero(), Sombrero::FastQuaternion::identity());
-    GlobalNamespace::NoteDebris* noteDebris2 = self->dyn__noteDebrisPool()->Spawn();
     noteDebris2->get_didFinishEvent()->Add(reinterpret_cast<GlobalNamespace::INoteDebrisDidFinishEvent*>(self));
     noteDebris2->get_transform()->SetPositionAndRotation(Sombrero::FastVector3::zero(), Sombrero::FastQuaternion::identity());
+
     float magnitude = Sombrero::sqroot(double(moveVec.x * moveVec.x) + double(moveVec.y * moveVec.y) + double(moveVec.z * moveVec.z));
     float lifeTime = std::clamp(timeToNextColorNote + 0.05f, 0.2f, 2.0f);
     Sombrero::FastVector3 vector = UnityEngine::Vector3::ProjectOnPlane(saberDir, moveVec / magnitude);
@@ -54,7 +64,7 @@ MAKE_AUTO_HOOK_ORIG_MATCH(NoteDebrisSpawner_SpawnDebris, &GlobalNamespace::NoteD
     noteDebris->Init(colorType, notePos, noteRotation, moveVec, noteScale, position, rotation, cutPoint, -cutNormal, force, -vector3, lifeTime);
     noteDebris2->Init(colorType, notePos, noteRotation, moveVec, noteScale, position, rotation, cutPoint, cutNormal, force2, vector3, lifeTime);
 
-    /// if these notedebris are actaully our own custom type, do some setting on those
+    /// if these notedebris are actually our own custom type, do some setting on those
     auto noteDebrisParent = Qosmetics::Notes::DebrisParent::GetDebrisParent(noteDebris);
     auto noteDebrisParent2 = Qosmetics::Notes::DebrisParent::GetDebrisParent(noteDebris2);
     if (noteDebrisParent && noteDebrisParent2)
@@ -63,4 +73,3 @@ MAKE_AUTO_HOOK_ORIG_MATCH(NoteDebrisSpawner_SpawnDebris, &GlobalNamespace::NoteD
         noteDebrisParent2->SetSliceProperties(colorType, cutPoint, cutNormal);
     }
 }
-*/

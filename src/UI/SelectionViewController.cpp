@@ -108,6 +108,12 @@ namespace Qosmetics::Notes
         if (cell)
         {
             auto& descriptor = cell->descriptor;
+            if (!fileexists(descriptor.get_filePath()))
+            {
+                ReloadDescriptorList();
+                return;
+            }
+
             if (NoteModelContainer::get_instance()->LoadObject(descriptor, std::bind(&SelectionViewController::OnObjectLoadFinished, this)))
             {
                 previewViewController->ClearPrefab();

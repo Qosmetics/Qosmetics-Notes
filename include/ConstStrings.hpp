@@ -21,6 +21,8 @@ namespace ConstStrings
     CONST_STRING(LeftDot);
     CONST_STRING(RightDot);
     CONST_STRING(Debris);
+    CONST_STRING(ChainHeadDebris);
+    CONST_STRING(ChainLinkDebris);
     CONST_STRING(LeftDebris);
     CONST_STRING(RightDebris);
     CONST_STRING(Notes);

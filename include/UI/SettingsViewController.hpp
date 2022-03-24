@@ -17,6 +17,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SettingsViewController, HMUI::ViewContro
                       DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, alsoChangeHitboxesToggle);
                       DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, forceDefaultBombsToggle);
                       DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, forceDefaultDebrisToggle);
+                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, forceDefaultChainDebrisToggle);
                       DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, disableReflectionsToggle);
                       DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, keepMissingReflectionsToggle);
 

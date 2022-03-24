@@ -58,6 +58,7 @@ namespace Qosmetics::Notes
             TOGGLE(alsoChangeHitboxes, "QosmeticsCyoobs:Settings:AlsoChangeHitboxes");
             TOGGLE(forceDefaultBombs, "QosmeticsCyoobs:Settings:ForceDefaultBombs");
             TOGGLE(forceDefaultDebris, "QosmeticsCyoobs:Settings:ForceDefaultDebris");
+            TOGGLE(forceDefaultChainDebris, "QosmeticsCyoobs:Settings:ForceDefaultChainDebris");
             TOGGLE(disableReflections, "QosmeticsCyoobs:Settings:DisableReflections");
             TOGGLE(keepMissingReflections, "QosmeticsCyoobs:Settings:KeepMissingReflections");
         }
@@ -69,6 +70,7 @@ namespace Qosmetics::Notes
             alsoChangeHitboxesToggle->set_isOn(globalConfig.alsoChangeHitboxes);
             forceDefaultBombsToggle->set_isOn(globalConfig.forceDefaultBombs);
             forceDefaultDebrisToggle->set_isOn(globalConfig.forceDefaultDebris);
+            forceDefaultChainDebrisToggle->set_isOn(globalConfig.forceDefaultChainDebris);
             disableReflectionsToggle->set_isOn(globalConfig.disableReflections);
             keepMissingReflectionsToggle->set_isOn(globalConfig.keepMissingReflections);
         }

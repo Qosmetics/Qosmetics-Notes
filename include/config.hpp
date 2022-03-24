@@ -11,6 +11,7 @@ namespace Qosmetics::Notes
         bool alsoChangeHitboxes = false;
         bool forceDefaultBombs = false;
         bool forceDefaultDebris = false;
+        bool forceDefaultChainDebris = false;
         bool disableReflections = false;
         bool disabled = false;
         bool keepMissingReflections = false;

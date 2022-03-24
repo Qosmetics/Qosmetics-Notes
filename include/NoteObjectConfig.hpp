@@ -26,6 +26,8 @@ namespace Qosmetics::Notes
         NoteObjectConfig(const rapidjson::Value& value) : Qosmetics::Core::BasicConfig(value)
         {
             GET_BOOL(hasDebris);
+            GET_BOOL(hasChainHeadDebris);
+            GET_BOOL(hasChainLinkDebris);
             GET_BOOL(hasSlider);
             GET_BOOL(hasBomb);
             GET_BOOL(showArrows);
@@ -35,6 +37,8 @@ namespace Qosmetics::Notes
         }
 
         CONST_GETTER(hasDebris)
+        CONST_GETTER(hasChainHeadDebris)
+        CONST_GETTER(hasChainLinkDebris)
         CONST_GETTER(hasSlider)
         CONST_GETTER(hasBomb)
         CONST_GETTER(showArrows)
@@ -44,6 +48,8 @@ namespace Qosmetics::Notes
 
     private:
         bool hasDebris = false;
+        bool hasChainHeadDebris = false;
+        bool hasChainLinkDebris = false;
         bool hasSlider = false;
         bool hasBomb = false;
         bool showArrows = true;

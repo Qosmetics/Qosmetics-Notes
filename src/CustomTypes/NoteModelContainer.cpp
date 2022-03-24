@@ -120,6 +120,10 @@ void MirrorableFixups(UnityEngine::GameObject* loadedObject)
 
 void SliderFixups(UnityEngine::GameObject* loadedObject)
 {
+    /** TODO: Chain debris
+     *  If note has debris, but no chain head/link debris, make that debris out of the note debris
+     *
+     */
     auto t = loadedObject->get_transform();
 
     auto notes = t->Find(ConstStrings::Notes());
@@ -208,6 +212,23 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
         dbt->GetChild(1)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
     }
 
+    auto chdbt = t->Find(ConstStrings::ChainLinkDebris());
+    if (chdbt)
+    {
+        chdbt->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisHandler*>();
+
+        chdbt->GetChild(0)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+        chdbt->GetChild(1)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+    }
+
+    auto cldbt = t->Find(ConstStrings::ChainHeadDebris());
+    if (cldbt)
+    {
+        cldbt->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisHandler*>();
+
+        cldbt->GetChild(0)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+        cldbt->GetChild(1)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+    }
     auto bt = t->Find(ConstStrings::Bomb());
     auto mbt = t->Find(ConstStrings::MirrorBomb());
     if (bt)
