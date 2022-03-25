@@ -293,7 +293,7 @@ namespace Qosmetics::Notes
                 if (rightDebrisT)
                 {
                     rightDebrisT->set_localScale(Sombrero::FastVector3::one() * noteSize);
-                    rightDebrisT->set_localPosition(Sombrero::FastVector3(0.0f, -unit, 0.0f));
+                    rightDebrisT->set_localPosition(Sombrero::FastVector3(unit, -unit, 0.0f));
                     auto rightDebrisColorHandler = rightDebrisT->get_gameObject()->GetComponent<DebrisColorHandler*>();
                     rightDebrisColorHandler->FetchCCMaterials();
                     rightDebrisColorHandler->SetColors(rightColor, leftColor);
@@ -376,7 +376,7 @@ namespace Qosmetics::Notes
             currentPrefab->SetActive(true);
             auto t = currentPrefab->get_transform();
             t->set_localScale(Sombrero::FastVector3::one() * 30.0f);
-            t->set_localPosition(Sombrero::FastVector3(-30.0f, 0.0f, -75.0f));
+            t->set_localPosition(Sombrero::FastVector3(-30.0f, 7.5f, -75.0f));
             t->set_localEulerAngles(Sombrero::FastVector3(0.0f, 60.0f, 0.0f));
             DEBUG("Instantiated and inited new prefab!");
         }
