@@ -120,10 +120,6 @@ void MirrorableFixups(UnityEngine::GameObject* loadedObject)
 
 void SliderFixups(UnityEngine::GameObject* loadedObject)
 {
-    /** TODO: Chain debris
-     *  If note has debris, but no chain head/link debris, make that debris out of the note debris
-     *
-     */
     auto t = loadedObject->get_transform();
 
     auto notes = t->Find(ConstStrings::Notes());
@@ -132,9 +128,11 @@ void SliderFixups(UnityEngine::GameObject* loadedObject)
     auto leftDot = notes->Find(ConstStrings::LeftDot());
     auto rightDot = notes->Find(ConstStrings::RightDot());
 
+    DEBUG("Checking if chain existed");
     auto chains = t->Find(ConstStrings::Chains());
     if (!chains)
     {
+        DEBUG("Making chain");
         chains = GameObject::New_ctor(ConstStrings::Chains())->get_transform();
         chains->SetParent(t);
     }
@@ -146,30 +144,118 @@ void SliderFixups(UnityEngine::GameObject* loadedObject)
 
     if (!leftHead)
     {
-        auto leftHead = Object::Instantiate(leftArrow->get_gameObject(), chains)->get_transform();
-        leftHead->set_name(ConstStrings::LeftHead());
-        leftHead->set_localScale({1.0f, 0.75f, 1.0f});
+        DEBUG("Making leftHead");
+        leftHead = GameObject::New_ctor(ConstStrings::LeftHead())->get_transform();
+        leftHead->set_parent(chains);
+        leftHead->set_localScale(Sombrero::FastVector3::one());
+        leftHead->set_localPosition(Sombrero::FastVector3::zero());
+        auto leftHeadNote = Object::Instantiate(leftArrow->get_gameObject(), leftHead)->get_transform();
+        leftHeadNote->set_name(ConstStrings::LeftHead());
+        leftHeadNote->set_localPosition(Sombrero::FastVector3::zero());
+        leftHeadNote->set_localScale({1.0f, 0.75f, 1.0f});
     }
 
     if (!rightHead)
     {
-        auto rightHead = Object::Instantiate(rightArrow->get_gameObject(), chains)->get_transform();
-        rightHead->set_name(ConstStrings::RightHead());
-        rightHead->set_localScale({1.0f, 0.75f, 1.0f});
+        DEBUG("Making rightHead");
+        rightHead = GameObject::New_ctor(ConstStrings::RightHead())->get_transform();
+        rightHead->set_parent(chains);
+        rightHead->set_localScale(Sombrero::FastVector3::one());
+        rightHead->set_localPosition(Sombrero::FastVector3::zero());
+        auto rightHeadNote = Object::Instantiate(rightArrow->get_gameObject(), rightHead)->get_transform();
+        rightHeadNote->set_name(ConstStrings::RightHead());
+        rightHeadNote->set_localPosition(Sombrero::FastVector3::zero());
+        rightHeadNote->set_localScale({1.0f, 0.75f, 1.0f});
     }
 
     if (!leftLink)
     {
-        auto leftLink = Object::Instantiate(leftDot->get_gameObject(), chains)->get_transform();
-        leftLink->set_name(ConstStrings::LeftLink());
-        leftLink->set_localScale({1.0f, 0.2f, 1.0f});
+        DEBUG("Making leftLink");
+        leftLink = GameObject::New_ctor(ConstStrings::LeftLink())->get_transform();
+        leftLink->set_parent(chains);
+        leftLink->set_localScale(Sombrero::FastVector3::one());
+        leftLink->set_localPosition(Sombrero::FastVector3::zero());
+        auto leftLinkNote = Object::Instantiate(leftDot->get_gameObject(), leftLink)->get_transform();
+        leftLinkNote->set_name(ConstStrings::LeftLink());
+        leftLinkNote->set_localPosition(Sombrero::FastVector3::zero());
+        leftLinkNote->set_localScale({1.0f, 0.2f, 1.0f});
     }
 
     if (!rightLink)
     {
-        auto rightLink = Object::Instantiate(rightDot->get_gameObject(), chains)->get_transform();
-        rightLink->set_name(ConstStrings::RightLink());
-        rightLink->set_localScale({1.0f, 0.2f, 1.0f});
+        DEBUG("Making rightLink");
+        rightLink = GameObject::New_ctor(ConstStrings::RightLink())->get_transform();
+        rightLink->set_parent(chains);
+        rightLink->set_localScale(Sombrero::FastVector3::one());
+        rightLink->set_localPosition(Sombrero::FastVector3::zero());
+        auto rightLinkNote = Object::Instantiate(rightDot->get_gameObject(), rightLink)->get_transform();
+        rightLinkNote->set_name(ConstStrings::RightLink());
+        rightLinkNote->set_localPosition(Sombrero::FastVector3::zero());
+        rightLinkNote->set_localScale({1.0f, 0.2f, 1.0f});
+    }
+
+    DEBUG("Checking if debris exists");
+    auto debris = t->Find(ConstStrings::Debris());
+    // if we don't even have regular debris, it's not worth actually making it
+    if (debris)
+    {
+        auto chainHeadDebris = t->Find(ConstStrings::ChainHeadDebris());
+        auto chainLinkDebris = t->Find(ConstStrings::ChainLinkDebris());
+
+        auto leftDebris = debris->Find(ConstStrings::LeftDebris());
+        auto rightDebris = debris->Find(ConstStrings::RightDebris());
+
+        if (!chainHeadDebris && leftDebris && rightDebris)
+        {
+            DEBUG("Making chainHeadDebris");
+            chainHeadDebris = GameObject::New_ctor(ConstStrings::ChainHeadDebris())->get_transform();
+            chainHeadDebris->set_parent(t);
+            chainHeadDebris->set_localPosition(Sombrero::FastVector3::zero());
+
+            auto leftHeadDebrisParent = GameObject::New_ctor(ConstStrings::ChainHeadDebris())->get_transform();
+            leftHeadDebrisParent->set_parent(chainHeadDebris);
+            leftHeadDebrisParent->set_localPosition(Sombrero::FastVector3::zero());
+            leftHeadDebrisParent->set_name(ConstStrings::LeftDebris());
+            leftHeadDebrisParent->set_localScale(Sombrero::FastVector3::one());
+            auto leftHeadDebris = Object::Instantiate(leftDebris->get_gameObject(), leftHeadDebrisParent)->get_transform();
+            leftHeadDebris->set_localScale({1.0f, 0.75f, 1.0f});
+            leftHeadDebris->set_localPosition(Sombrero::FastVector3::zero());
+
+            auto rightHeadDebrisParent = GameObject::New_ctor(ConstStrings::ChainHeadDebris())->get_transform();
+            rightHeadDebrisParent->set_parent(chainHeadDebris);
+            rightHeadDebrisParent->set_localPosition(Sombrero::FastVector3::zero());
+            rightHeadDebrisParent->set_name(ConstStrings::RightDebris());
+            rightHeadDebrisParent->set_localScale(Sombrero::FastVector3::one());
+            auto rightHeadDebris = Object::Instantiate(rightDebris->get_gameObject(), rightHeadDebrisParent)->get_transform();
+            rightHeadDebris->set_localScale({1.0f, 0.75f, 1.0f});
+            rightHeadDebris->set_localPosition(Sombrero::FastVector3::zero());
+        }
+
+        if (!chainLinkDebris && leftDebris && rightDebris)
+        {
+            DEBUG("Making chainLinkDebris");
+            chainLinkDebris = GameObject::New_ctor(ConstStrings::ChainLinkDebris())->get_transform();
+            chainLinkDebris->set_parent(t);
+            chainLinkDebris->set_localPosition(Sombrero::FastVector3::zero());
+
+            auto leftLinkDebrisParent = GameObject::New_ctor(ConstStrings::ChainLinkDebris())->get_transform();
+            leftLinkDebrisParent->set_parent(chainLinkDebris);
+            leftLinkDebrisParent->set_localPosition(Sombrero::FastVector3::zero());
+            leftLinkDebrisParent->set_name(ConstStrings::LeftDebris());
+            leftLinkDebrisParent->set_localScale(Sombrero::FastVector3::one());
+            auto leftLinkDebris = Object::Instantiate(leftDebris->get_gameObject(), leftLinkDebrisParent)->get_transform();
+            leftLinkDebris->set_localScale({1.0f, 0.2, 1.0f});
+            leftLinkDebris->set_localPosition(Sombrero::FastVector3::zero());
+
+            auto rightLinkDebrisParent = GameObject::New_ctor(ConstStrings::ChainLinkDebris())->get_transform();
+            rightLinkDebrisParent->set_parent(chainLinkDebris);
+            rightLinkDebrisParent->set_localPosition(Sombrero::FastVector3::zero());
+            rightLinkDebrisParent->set_name(ConstStrings::RightDebris());
+            rightLinkDebrisParent->set_localScale(Sombrero::FastVector3::one());
+            auto rightLinkDebris = Object::Instantiate(rightDebris->get_gameObject(), rightLinkDebrisParent)->get_transform();
+            rightLinkDebris->set_localScale({1.0f, 0.2, 1.0f});
+            rightLinkDebris->set_localPosition(Sombrero::FastVector3::zero());
+        }
     }
 }
 
@@ -203,6 +289,13 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
             mct->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
     }
 
+    auto bt = t->Find(ConstStrings::Bomb());
+    auto mbt = t->Find(ConstStrings::MirrorBomb());
+    if (bt)
+        bt->get_gameObject()->AddComponent<Qosmetics::Notes::BombColorHandler*>();
+    if (mbt)
+        mbt->get_gameObject()->AddComponent<Qosmetics::Notes::BombColorHandler*>();
+
     auto dbt = t->Find(ConstStrings::Debris());
     if (dbt)
     {
@@ -212,7 +305,7 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
         dbt->GetChild(1)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
     }
 
-    auto chdbt = t->Find(ConstStrings::ChainLinkDebris());
+    auto chdbt = t->Find(ConstStrings::ChainHeadDebris());
     if (chdbt)
     {
         chdbt->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisHandler*>();
@@ -221,7 +314,7 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
         chdbt->GetChild(1)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
     }
 
-    auto cldbt = t->Find(ConstStrings::ChainHeadDebris());
+    auto cldbt = t->Find(ConstStrings::ChainLinkDebris());
     if (cldbt)
     {
         cldbt->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisHandler*>();
@@ -229,12 +322,6 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
         cldbt->GetChild(0)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
         cldbt->GetChild(1)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
     }
-    auto bt = t->Find(ConstStrings::Bomb());
-    auto mbt = t->Find(ConstStrings::MirrorBomb());
-    if (bt)
-        bt->get_gameObject()->AddComponent<Qosmetics::Notes::BombColorHandler*>();
-    if (mbt)
-        mbt->get_gameObject()->AddComponent<Qosmetics::Notes::BombColorHandler*>();
 }
 namespace Qosmetics::Notes
 {

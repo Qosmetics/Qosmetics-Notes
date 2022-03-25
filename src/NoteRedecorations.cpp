@@ -306,7 +306,7 @@ REDECORATION_REGISTRATION(burstSliderHeadNotePrefab, 10, true, GlobalNamespace::
             auto chains = UnityEngine::Object::Instantiate(actualChains->get_gameObject(), noteCubeTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(chains);
             chains->set_name("Chains");
-            chains->get_transform()->set_localScale(Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.75f, 1.0f) * 0.4f);
+            chains->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
             chains->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
 
             chainParent->chainHandler = chains->GetComponent<Qosmetics::Notes::ChainHandler*>();
@@ -382,7 +382,7 @@ REDECORATION_REGISTRATION(burstSliderNotePrefab, 10, true, GlobalNamespace::Burs
             auto chains = UnityEngine::Object::Instantiate(actualChains->get_gameObject(), noteCubeTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(chains);
             chains->set_name("Chains");
-            chains->get_transform()->set_localScale(Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.2f, 1.0f) * 0.4f);
+            chains->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
             chains->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
 
             chainParent->chainHandler = chains->GetComponent<Qosmetics::Notes::ChainHandler*>();

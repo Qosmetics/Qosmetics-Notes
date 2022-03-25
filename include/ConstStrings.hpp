@@ -36,6 +36,10 @@ namespace ConstStrings
     CONST_STRING(LeftHead);
     CONST_STRING(RightHead);
     CONST_STRING(LeftLink);
+    CONST_STRING(LeftLinkCopy1);
+    CONST_STRING(LeftLinkCopy2);
     CONST_STRING(RightLink);
+    CONST_STRING(RightLinkCopy1);
+    CONST_STRING(RightLinkCopy2);
 
 }

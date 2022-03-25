@@ -40,6 +40,29 @@
     bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                              \
     bool disappearingArrows = gameplayModifiers->get_disappearingArrows();
 
+static void SetAndFixObjectChildren(UnityEngine::Transform* obj, Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)
+{
+    int childCount = obj->get_childCount();
+    for (int i = 0; i < childCount; i++)
+    {
+        auto child = obj->get_transform()->GetChild(i);
+        child->set_localScale(Sombrero::FastVector3::one());
+        child->set_localPosition(Sombrero::FastVector3::zero());
+        child->set_localRotation(Sombrero::FastQuaternion::identity());
+
+        /// add color handler and set colors
+        auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::DebrisColorHandler*>();
+        if (colorHandler)
+        {
+            colorHandler->FetchCCMaterials();
+            if (child->get_name().starts_with("Left"))
+                colorHandler->SetColors(leftColor, rightColor);
+            else
+                colorHandler->SetColors(rightColor, leftColor);
+        }
+    }
+}
+
 GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container)
 {
     if (Qosmetics::Notes::Disabling::GetAnyDisabling())
@@ -58,28 +81,15 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
             auto actualDebris = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Debris());
             auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(debris);
-            debris->set_name("Debris");
+            debris->set_name(ConstStrings::Debris());
+            debris->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
             debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
 
             auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
             auto leftColor = colorScheme->dyn__saberAColor();
             auto rightColor = colorScheme->dyn__saberBColor();
 
-            int childCount = debris->get_transform()->get_childCount();
-            for (int i = 0; i < childCount; i++)
-            {
-                auto child = debris->get_transform()->GetChild(i);
-                child->set_localPosition(Sombrero::FastVector3::zero());
-                child->set_localRotation(Sombrero::FastQuaternion::identity());
-
-                /// add color handler and set colors
-                auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::DebrisColorHandler*>();
-                colorHandler->FetchCCMaterials();
-                if (child->get_name().starts_with("Left"))
-                    colorHandler->SetColors(leftColor, rightColor);
-                else
-                    colorHandler->SetColors(rightColor, leftColor);
-            }
+            SetAndFixObjectChildren(debris->get_transform(), leftColor, rightColor);
 
             meshTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
         }
@@ -106,7 +116,7 @@ GlobalNamespace::NoteDebris* RedecorateHeadNoteDebris(GlobalNamespace::NoteDebri
         bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows;
 
         // if we are adding our own prefab, we have debris, we are not reducing debris, and not forcing default, replace debris
-        if (addCustomPrefab && config.get_hasChainHeadDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultDebris)
+        if (addCustomPrefab && config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultDebris)
         {
             auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
 
@@ -115,27 +125,14 @@ GlobalNamespace::NoteDebris* RedecorateHeadNoteDebris(GlobalNamespace::NoteDebri
             auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(debris);
             debris->set_name(ConstStrings::ChainHeadDebris());
-            debris->get_transform()->set_localScale(Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.75f, 1.0f) * noteSizeFactor * 0.4f);
+            debris->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
+            debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
 
             auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
             auto leftColor = colorScheme->dyn__saberAColor();
             auto rightColor = colorScheme->dyn__saberBColor();
 
-            int childCount = debris->get_transform()->get_childCount();
-            for (int i = 0; i < childCount; i++)
-            {
-                auto child = debris->get_transform()->GetChild(i);
-                child->set_localPosition(Sombrero::FastVector3::zero());
-                child->set_localRotation(Sombrero::FastQuaternion::identity());
-
-                /// add color handler and set colors
-                auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::DebrisColorHandler*>();
-                colorHandler->FetchCCMaterials();
-                if (child->get_name().starts_with("Left"))
-                    colorHandler->SetColors(leftColor, rightColor);
-                else
-                    colorHandler->SetColors(rightColor, leftColor);
-            }
+            SetAndFixObjectChildren(debris->get_transform(), leftColor, rightColor);
 
             meshTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
         }
@@ -162,7 +159,7 @@ GlobalNamespace::NoteDebris* RedecorateElementNoteDebris(GlobalNamespace::NoteDe
         bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows;
 
         // if we are adding our own prefab, we have debris, we are not reducing debris, and not forcing default, replace debris
-        if (addCustomPrefab && config.get_hasChainLinkDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultChainDebris)
+        if (addCustomPrefab && config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultChainDebris)
         {
             auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
 
@@ -171,27 +168,13 @@ GlobalNamespace::NoteDebris* RedecorateElementNoteDebris(GlobalNamespace::NoteDe
             auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(debris);
             debris->set_name(ConstStrings::ChainLinkDebris());
-            debris->get_transform()->set_localScale(Sombrero::FastVector3(1.0f, config.get_hasSlider() ? 1.0f : 0.2f, 1.0f) * noteSizeFactor * 0.4f);
+            debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
 
             auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
             auto leftColor = colorScheme->dyn__saberAColor();
             auto rightColor = colorScheme->dyn__saberBColor();
 
-            int childCount = debris->get_transform()->get_childCount();
-            for (int i = 0; i < childCount; i++)
-            {
-                auto child = debris->get_transform()->GetChild(i);
-                child->set_localPosition(Sombrero::FastVector3::zero());
-                child->set_localRotation(Sombrero::FastQuaternion::identity());
-
-                /// add color handler and set colors
-                auto colorHandler = child->get_gameObject()->GetComponent<Qosmetics::Notes::DebrisColorHandler*>();
-                colorHandler->FetchCCMaterials();
-                if (child->get_name().starts_with("Left"))
-                    colorHandler->SetColors(leftColor, rightColor);
-                else
-                    colorHandler->SetColors(rightColor, leftColor);
-            }
+            SetAndFixObjectChildren(debris->get_transform(), leftColor, rightColor);
 
             meshTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
         }
