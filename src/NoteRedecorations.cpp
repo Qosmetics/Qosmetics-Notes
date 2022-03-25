@@ -439,3 +439,5 @@ REDECORATION_REGISTRATION(burstSliderNotePrefab, 10, true, GlobalNamespace::Burs
 }
 
 #pragma endregion
+
+// TODO: mirror chains

@@ -11,6 +11,8 @@
     <string name="QosmeticsCyoobs:Settings:ForceDefaultBombsHoverHint">If you turn this on, Qosmetics will never use the custom bombs that come with a Cyoob</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultDebris">Force Default Debris</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultDebrisHoverHint">If you turn this on, Qosmetics will never use the custom debris that come with a Cyoob</string>
+    <string name="QosmeticsCyoobs:Settings:ForceDefaultChainDebris">Force Default Chain Debris</string>
+    <string name="QosmeticsCyoobs:Settings:ForceDefaultChainDebrisHoverHint">If you turn this on, Qosmetics will never use the custom debris that come with a Cyoob's Chain Notes</string>
     <string name="QosmeticsCyoobs:Settings:DisableReflections">Disable Reflections</string>
     <string name="QosmeticsCyoobs:Settings:DisableReflectionsHoverHint">With this turned on, Cyoob reflections will always be disabled</string>
     <string name="QosmeticsCyoobs:Settings:KeepMissingReflections">Keep Missing Reflections</string>

@@ -11,6 +11,8 @@
     <string name="QosmeticsCyoobs:Settings:ForceDefaultBombsHoverHint">Wenn Sie dies aktivieren, wird Qosmetics niemals die benutzerdefinierten Bomben verwenden, die mit einem Cyoob geliefert werden</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultDebris">Standard-Trümmer Erzwingen</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultDebrisHoverHint">Wenn Sie dies einschalten, wird Qosmetics niemals die benutzerdefinierten Trümmer verwenden, die mit einem Cyoob geliefert werden</string>
+    <string name="QosmeticsCyoobs:Settings:ForceDefaultChainDebris">Force Default Chain Debris</string>
+    <string name="QosmeticsCyoobs:Settings:ForceDefaultChainDebrisHoverHint">If you turn this on, Qosmetics will never use the custom debris that come with a Cyoob's Chain Notes</string>
     <string name="QosmeticsCyoobs:Settings:DisableReflections">Reflektionen Deaktivieren</string>
     <string name="QosmeticsCyoobs:Settings:DisableReflectionsHoverHint">Wenn dies aktiviert ist, werden Cyoob-Reflexionen immer deaktiviert</string>
     <string name="QosmeticsCyoobs:Settings:KeepMissingReflections">Fehlende Reflexionen Beibehalten</string>

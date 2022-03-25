@@ -192,7 +192,6 @@ namespace Qosmetics::Notes
             rightHeadColorHandler->FetchCCMaterials();
             rightHeadColorHandler->SetColors(rightColor, leftColor);
 
-            // TODO duplicate links to make 3
             leftLinkT->set_localScale(Sombrero::FastVector3::one() * noteSize);
             leftLinkT->set_localPosition(Sombrero::FastVector3(-unit * 2, 0.0f, 0.0f));
             auto leftLinkColorHandler = leftLinkT->get_gameObject()->GetComponent<CyoobColorHandler*>();

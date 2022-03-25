@@ -276,7 +276,6 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
             mnt->GetChild(i)->get_gameObject()->AddComponent<Qosmetics::Notes::CyoobColorHandler*>();
     }
 
-    /// TODO: Add some kind of handler for the overarching chain type
     auto ct = t->Find(ConstStrings::Chains());
     ct->get_gameObject()->AddComponent<Qosmetics::Notes::ChainHandler*>();
     auto mct = t->Find(ConstStrings::MirrorChains());
