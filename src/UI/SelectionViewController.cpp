@@ -15,6 +15,7 @@
 #include "HMUI/TableView.hpp"
 #include "HMUI/TableView_ScrollPositionType.hpp"
 
+#include "QbloqConversion.hpp"
 #include <algorithm>
 
 DEFINE_TYPE(Qosmetics::Notes, SelectionViewController);
@@ -39,8 +40,10 @@ namespace Qosmetics::Notes
             descriptorList->deletionConfirmationModal = deletionConfirmationModal;
             descriptorList->onSelect = std::bind(reinterpret_cast<void (SelectionViewController::*)(HMUI::TableCell*)>(&SelectionViewController::OnSelectDescriptor), this, std::placeholders::_1);
             descriptorList->defaultSprite = VectorToSprite(std::vector<uint8_t>(_binary_PlaceholderIcon_png_start, _binary_PlaceholderIcon_png_end));
-            ReloadDescriptorList();
         }
+
+        ReloadDescriptorList();
+        QbloqConversion::ConvertOldQbloqs();
     }
 
     void SelectionViewController::ReloadDescriptorList()
@@ -55,6 +58,7 @@ namespace Qosmetics::Notes
         for (auto& cyoob : cyoobs)
         {
             current++;
+
             std::string filePath = fmt::format("{}/{}", cyoob_path, cyoob);
             auto orig = std::find_if(descriptorSet.begin(), descriptorSet.end(), [filePath](auto& d)
                                      { return d.get_filePath() == filePath; });

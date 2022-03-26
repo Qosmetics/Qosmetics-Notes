@@ -358,6 +358,7 @@ namespace Qosmetics::Notes
         if (bundle)
             bundle->Unload(true);
 
+        DEBUG("Loading file {} from cyoob {}", currentManifest.get_fileName(), currentManifest.get_filePath());
         co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadBundleFromZipAsync(currentManifest.get_filePath(), currentManifest.get_fileName(), bundle));
 
         bool isLegacy = currentManifest.get_config().get_isLegacy();

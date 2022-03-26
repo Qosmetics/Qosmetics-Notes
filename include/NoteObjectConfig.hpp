@@ -23,6 +23,7 @@ namespace Qosmetics::Notes
     {
     public:
         NoteObjectConfig() : Qosmetics::Core::BasicConfig(){};
+        NoteObjectConfig(bool showArrows, bool hasBomb, bool hasDebris) : showArrows(showArrows), hasBomb(hasBomb), hasDebris(hasDebris), isLegacy(true){};
         NoteObjectConfig(const rapidjson::Value& value) : Qosmetics::Core::BasicConfig(value)
         {
             GET_BOOL(hasDebris);
@@ -45,6 +46,23 @@ namespace Qosmetics::Notes
         CONST_GETTER(isDefault)
         CONST_GETTER(isLegacy)
         CONST_GETTER(isMirrorable)
+
+        rapidjson::Value ToJson(rapidjson::Document::AllocatorType& allocator) override
+        {
+            rapidjson::Value val;
+            val.SetObject();
+
+            val.AddMember("hasDebris", hasDebris, allocator);
+            val.AddMember("hasChainHeadDebris", hasChainHeadDebris, allocator);
+            val.AddMember("hasChainLinkDebris", hasChainLinkDebris, allocator);
+            val.AddMember("hasSlider", hasSlider, allocator);
+            val.AddMember("hasBomb", hasBomb, allocator);
+            val.AddMember("showArrows", showArrows, allocator);
+            val.AddMember("isLegacy", isLegacy, allocator);
+            val.AddMember("isMirrorable", isMirrorable, allocator);
+
+            return val;
+        }
 
     private:
         bool hasDebris = false;

@@ -64,6 +64,11 @@
       "id": "paper",
       "versionRange": "^1.0.5",
       "additionalData": {}
+    },
+    {
+      "id": "zip",
+      "versionRange": "^1.7.4",
+      "additionalData": {}
     }
   ],
   "additionalData": {}
