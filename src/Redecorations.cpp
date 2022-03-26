@@ -64,8 +64,6 @@
     bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                              \
     bool disappearingArrows = gameplayModifiers->get_disappearingArrows();
 
-// TODO: disable scores if hitboxes get edited (blocked bc bs utils not available)
-
 #pragma region bombs
 REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
 {

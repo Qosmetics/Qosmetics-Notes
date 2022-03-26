@@ -35,7 +35,7 @@ namespace Qosmetics::Notes
     {
         noteController = get_gameObject()->GetComponent<GlobalNamespace::NoteControllerBase*>();
         noteController->get_didInitEvent()->Add(reinterpret_cast<GlobalNamespace::INoteControllerDidInitEvent*>(this));
-        chainHandler = get_gameObject()->GetComponentInChildren<ChainHandler*>();
+        handler = get_gameObject()->GetComponentInChildren<ChainHandler*>();
         noteControllerToParentMap[noteController] = this;
         isHead = get_gameObject()->GetComponent<GlobalNamespace::BurstSliderGameNoteController*>() == nullptr;
     }
@@ -49,13 +49,13 @@ namespace Qosmetics::Notes
     void ChainParent::HandleNoteControllerDidInit(GlobalNamespace::NoteControllerBase* noteController)
     {
         auto gameNoteController = reinterpret_cast<GlobalNamespace::GameNoteController*>(noteController);
-        if (chainHandler)
+        if (handler)
         {
             auto noteData = gameNoteController->get_noteData();
             currentColorType = noteData->get_colorType();
             bool right = currentColorType == GlobalNamespace::ColorType::ColorB;
 
-            chainHandler->ShowNote(right, isHead);
+            handler->ShowNote(right, isHead);
 
 #ifdef CHROMA_EXISTS
             if (useChroma)
@@ -94,7 +94,7 @@ namespace Qosmetics::Notes
 
     void ChainParent::Colorize(Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)
     {
-        if (chainHandler)
-            chainHandler->SetColors(leftColor, rightColor);
+        if (handler)
+            handler->SetColors(leftColor, rightColor);
     }
 }

@@ -12,6 +12,7 @@
 
 namespace ConstStrings
 {
+    CONST_STRING(NoteCube);
     CONST_STRING(NoteArrow);
     CONST_STRING(NoteCircleGlow);
     CONST_STRING(NoteArrowGlow);

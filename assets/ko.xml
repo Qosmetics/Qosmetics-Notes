@@ -9,6 +9,8 @@
     <string name="QosmeticsCyoobs:Settings:AlsoChangeHitboxesHoverHint">Whether or not to let the hitbox size change along with the Cyoob size, turning this on will disable scores!</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultBombs">Force Default Bombs</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultBombsHoverHint">If you turn this on, Qosmetics will never use the custom bombs that come with a Cyoob</string>
+    <string name="QosmeticsCyoobs:Settings:ForceDefaultChains">Force Default Chains</string>
+    <string name="QosmeticsCyoobs:Settings:ForceDefaultChainsHoverHint">If you turn this on, Qosmetics will never use the custom chains that come with a Cyoob</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultDebris">Force Default Debris</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultDebrisHoverHint">If you turn this on, Qosmetics will never use the custom debris that come with a Cyoob</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultChainDebris">Force Default Chain Debris</string>

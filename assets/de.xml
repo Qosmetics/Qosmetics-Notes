@@ -9,6 +9,8 @@
     <string name="QosmeticsCyoobs:Settings:AlsoChangeHitboxesHoverHint">Unabhängig davon, ob sich die Größe der Hitbox zusammen mit der Cyoob-größe ändern soll oder nicht, wird die Punktzahl deaktiviert, wenn Sie dies aktivieren!</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultBombs">Standardbomben erzwingen</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultBombsHoverHint">Wenn Sie dies aktivieren, wird Qosmetics niemals die benutzerdefinierten Bomben verwenden, die mit einem Cyoob geliefert werden</string>
+    <string name="QosmeticsCyoobs:Settings:ForceDefaultChains">Force Default Chains</string>
+    <string name="QosmeticsCyoobs:Settings:ForceDefaultChainsHoverHint">If you turn this on, Qosmetics will never use the custom chains that come with a Cyoob</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultDebris">Standard-Trümmer Erzwingen</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultDebrisHoverHint">Wenn Sie dies einschalten, wird Qosmetics niemals die benutzerdefinierten Trümmer verwenden, die mit einem Cyoob geliefert werden</string>
     <string name="QosmeticsCyoobs:Settings:ForceDefaultChainDebris">Force Default Chain Debris</string>

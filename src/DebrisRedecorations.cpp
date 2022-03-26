@@ -63,25 +63,25 @@ static void SetAndFixObjectChildren(UnityEngine::Transform* obj, Sombrero::FastC
     }
 }
 
-GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container)
+GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container, StringW debrisName, const bool& forceDefaultNotes, const bool& forceDefaultDebris)
 {
     if (Qosmetics::Notes::Disabling::GetAnyDisabling())
         return noteDebrisPrefab;
     try
     {
         GET_CONFIG();
-        bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows;
+        bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows && !forceDefaultNotes;
 
         // if we are adding our own prefab, we have debris, we are not reducing debris, and not forcing default, replace debris
-        if (addCustomPrefab && config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultDebris)
+        if (addCustomPrefab && config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !forceDefaultDebris)
         {
             auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
 
             auto meshTransform = noteDebrisPrefab->dyn__meshTransform();
-            auto actualDebris = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Debris());
+            auto actualDebris = noteModelContainer->currentNoteObject->get_transform()->Find(debrisName);
             auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(debris);
-            debris->set_name(ConstStrings::Debris());
+            debris->set_name(debrisName);
             debris->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
             debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
 
@@ -104,91 +104,26 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
         ERROR("{}", e.what());
     }
     return noteDebrisPrefab;
+}
+GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container)
+{
+    return RedecorateNoteDebris(noteDebrisPrefab, container, ConstStrings::Debris(), false, Qosmetics::Notes::Config::get_config().forceDefaultDebris);
+}
+
+GlobalNamespace::NoteDebris* RedecorateChainNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container, StringW debrisName)
+{
+    auto& globalConfig = Qosmetics::Notes::Config::get_config();
+    return RedecorateNoteDebris(noteDebrisPrefab, container, debrisName, globalConfig.forceDefaultChains, globalConfig.forceDefaultDebris);
 }
 
 GlobalNamespace::NoteDebris* RedecorateHeadNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container)
 {
-    if (Qosmetics::Notes::Disabling::GetAnyDisabling())
-        return noteDebrisPrefab;
-    try
-    {
-        GET_CONFIG();
-        bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows;
-
-        // if we are adding our own prefab, we have debris, we are not reducing debris, and not forcing default, replace debris
-        if (addCustomPrefab && config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultDebris)
-        {
-            auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
-
-            auto meshTransform = noteDebrisPrefab->dyn__meshTransform();
-            auto actualDebris = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::ChainHeadDebris());
-            auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
-            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(debris);
-            debris->set_name(ConstStrings::ChainHeadDebris());
-            debris->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
-            debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
-
-            auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
-            auto leftColor = colorScheme->dyn__saberAColor();
-            auto rightColor = colorScheme->dyn__saberBColor();
-
-            SetAndFixObjectChildren(debris->get_transform(), leftColor, rightColor);
-
-            meshTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
-        }
-        else if (globalConfig.overrideNoteSize)
-        {
-            auto t = noteDebrisPrefab->get_transform();
-            t->set_localScale(t->get_localScale() * noteSizeFactor);
-        }
-    }
-    catch (il2cpp_utils::RunMethodException const& e)
-    {
-        ERROR("{}", e.what());
-    }
-    return noteDebrisPrefab;
+    return RedecorateChainNoteDebris(noteDebrisPrefab, container, ConstStrings::ChainHeadDebris());
 }
 
 GlobalNamespace::NoteDebris* RedecorateElementNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container)
 {
-    if (Qosmetics::Notes::Disabling::GetAnyDisabling())
-        return noteDebrisPrefab;
-    try
-    {
-        GET_CONFIG();
-        bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows;
-
-        // if we are adding our own prefab, we have debris, we are not reducing debris, and not forcing default, replace debris
-        if (addCustomPrefab && config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !globalConfig.forceDefaultChainDebris)
-        {
-            auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
-
-            auto meshTransform = noteDebrisPrefab->dyn__meshTransform();
-            auto actualDebris = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::ChainLinkDebris());
-            auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
-            Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(debris);
-            debris->set_name(ConstStrings::ChainLinkDebris());
-            debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
-
-            auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
-            auto leftColor = colorScheme->dyn__saberAColor();
-            auto rightColor = colorScheme->dyn__saberBColor();
-
-            SetAndFixObjectChildren(debris->get_transform(), leftColor, rightColor);
-
-            meshTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
-        }
-        else if (globalConfig.overrideNoteSize)
-        {
-            auto t = noteDebrisPrefab->get_transform();
-            t->set_localScale(t->get_localScale() * noteSizeFactor);
-        }
-    }
-    catch (il2cpp_utils::RunMethodException const& e)
-    {
-        ERROR("{}", e.what());
-    }
-    return noteDebrisPrefab;
+    return RedecorateChainNoteDebris(noteDebrisPrefab, container, ConstStrings::ChainLinkDebris());
 }
 
 REDECORATION_REGISTRATION(normalNoteDebrisHDPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*)

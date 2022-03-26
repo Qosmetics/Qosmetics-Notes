@@ -20,7 +20,7 @@ DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, CyoobParent, UnityEngine::Mon
 
                                  DECLARE_INSTANCE_FIELD(GlobalNamespace::NoteControllerBase*, noteController);
                                  DECLARE_INSTANCE_FIELD(GlobalNamespace::ColorManager*, colorManager);
-                                 DECLARE_INSTANCE_FIELD(CyoobHandler*, cyoobHandler);
+                                 DECLARE_INSTANCE_FIELD(CyoobHandler*, handler);
                                  DECLARE_INSTANCE_FIELD(GlobalNamespace::ColorType, currentColorType);
                                  DECLARE_INSTANCE_METHOD(void, Awake);
                                  DECLARE_INSTANCE_METHOD(void, OnDestroy);

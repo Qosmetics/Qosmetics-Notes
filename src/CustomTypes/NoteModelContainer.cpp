@@ -90,32 +90,49 @@ void SetMirrorableProperties(UnityEngine::GameObject* loadedObject, bool mirror)
     }
 }
 
+void DuplicateForMirror(UnityEngine::Transform* parent, StringW origName, StringW mirroredName)
+{
+    auto orig = parent->Find(origName)->get_gameObject();
+    auto mirrored = UnityEngine::Object::Instantiate(orig, parent->get_transform());
+    mirrored->set_name(mirroredName);
+
+    SetMirrorableProperties(orig, false);
+    SetMirrorableProperties(mirrored, true);
+}
 void MirrorableFixups(UnityEngine::GameObject* loadedObject)
 {
     auto t = loadedObject->get_transform();
 
-    // Notes
-    auto notes = t->Find(ConstStrings::Notes())->get_gameObject();
-    auto mirroredNotes = UnityEngine::Object::Instantiate(notes, t->get_transform());
-    mirroredNotes->set_name(ConstStrings::MirrorNotes());
+    DuplicateForMirror(t, ConstStrings::Notes(), ConstStrings::MirrorNotes());
+    DuplicateForMirror(t, ConstStrings::Bomb(), ConstStrings::MirrorBomb());
+    DuplicateForMirror(t, ConstStrings::Chains(), ConstStrings::MirrorChains());
+}
 
-    SetMirrorableProperties(notes, false);
-    SetMirrorableProperties(mirroredNotes, true);
+UnityEngine::Transform* MakeSliderNote(UnityEngine::Transform* parent, UnityEngine::GameObject* orig, StringW name, const Sombrero::FastVector3& localPosition, const Sombrero::FastVector3& localScale)
+{
+    DEBUG("Making {}", name);
+    auto noteParent = GameObject::New_ctor(name)->get_transform();
+    noteParent->set_parent(parent);
+    noteParent->set_localScale(Sombrero::FastVector3::one());
+    noteParent->set_localPosition(Sombrero::FastVector3::zero());
+    auto note = Object::Instantiate(orig, noteParent)->get_transform();
+    note->set_name(name);
+    note->set_localPosition(localPosition);
+    note->set_localScale(localScale);
+    return noteParent;
+}
 
-    // Bombs
-    auto bomb = t->Find(ConstStrings::Bomb())->get_gameObject();
-    auto mirroredBomb = UnityEngine::Object::Instantiate(bomb, t->get_transform());
-    mirroredBomb->set_name(ConstStrings::MirrorBomb());
-    SetMirrorableProperties(bomb, false);
-    SetMirrorableProperties(mirroredBomb, true);
-
-    // Chains
-    auto chains = t->Find(ConstStrings::Chains())->get_gameObject();
-    auto mirroredChains = UnityEngine::Object::Instantiate(chains, t->get_transform());
-    mirroredChains->set_name(ConstStrings::MirrorChains());
-
-    SetMirrorableProperties(chains, false);
-    SetMirrorableProperties(mirroredChains, true);
+UnityEngine::Transform* MakeSliderDebris(UnityEngine::Transform* parent, UnityEngine::GameObject* orig, StringW name, const Sombrero::FastVector3& localScale)
+{
+    auto debrisParent = GameObject::New_ctor(name)->get_transform();
+    debrisParent->set_parent(parent);
+    debrisParent->set_localPosition(Sombrero::FastVector3::zero());
+    debrisParent->set_localScale(Sombrero::FastVector3::one());
+    auto debris = Object::Instantiate(orig, debrisParent)->get_transform();
+    debris->set_name(name);
+    debris->set_localScale(localScale);
+    debris->set_localPosition(Sombrero::FastVector3::zero());
+    return debrisParent;
 }
 
 void SliderFixups(UnityEngine::GameObject* loadedObject)
@@ -143,56 +160,16 @@ void SliderFixups(UnityEngine::GameObject* loadedObject)
     auto rightLink = chains->Find(ConstStrings::RightLink());
 
     if (!leftHead)
-    {
-        DEBUG("Making leftHead");
-        leftHead = GameObject::New_ctor(ConstStrings::LeftHead())->get_transform();
-        leftHead->set_parent(chains);
-        leftHead->set_localScale(Sombrero::FastVector3::one());
-        leftHead->set_localPosition(Sombrero::FastVector3::zero());
-        auto leftHeadNote = Object::Instantiate(leftArrow->get_gameObject(), leftHead)->get_transform();
-        leftHeadNote->set_name(ConstStrings::LeftHead());
-        leftHeadNote->set_localPosition(Sombrero::FastVector3::zero());
-        leftHeadNote->set_localScale({1.0f, 0.75f, 1.0f});
-    }
+        leftHead = MakeSliderNote(chains, leftArrow->get_gameObject(), ConstStrings::LeftHead(), {0.0f, 0.125f, 0.0f}, {1.0f, 0.75f, 1.0f});
 
     if (!rightHead)
-    {
-        DEBUG("Making rightHead");
-        rightHead = GameObject::New_ctor(ConstStrings::RightHead())->get_transform();
-        rightHead->set_parent(chains);
-        rightHead->set_localScale(Sombrero::FastVector3::one());
-        rightHead->set_localPosition(Sombrero::FastVector3::zero());
-        auto rightHeadNote = Object::Instantiate(rightArrow->get_gameObject(), rightHead)->get_transform();
-        rightHeadNote->set_name(ConstStrings::RightHead());
-        rightHeadNote->set_localPosition(Sombrero::FastVector3::zero());
-        rightHeadNote->set_localScale({1.0f, 0.75f, 1.0f});
-    }
+        rightHead = MakeSliderNote(chains, rightArrow->get_gameObject(), ConstStrings::RightHead(), {0.0f, 0.125f, 0.0f}, {1.0f, 0.75f, 1.0f});
 
     if (!leftLink)
-    {
-        DEBUG("Making leftLink");
-        leftLink = GameObject::New_ctor(ConstStrings::LeftLink())->get_transform();
-        leftLink->set_parent(chains);
-        leftLink->set_localScale(Sombrero::FastVector3::one());
-        leftLink->set_localPosition(Sombrero::FastVector3::zero());
-        auto leftLinkNote = Object::Instantiate(leftDot->get_gameObject(), leftLink)->get_transform();
-        leftLinkNote->set_name(ConstStrings::LeftLink());
-        leftLinkNote->set_localPosition(Sombrero::FastVector3::zero());
-        leftLinkNote->set_localScale({1.0f, 0.2f, 1.0f});
-    }
+        leftLink = MakeSliderNote(chains, leftDot->get_gameObject(), ConstStrings::LeftLink(), Sombrero::FastVector3::zero(), {1.0f, 0.2f, 1.0f});
 
     if (!rightLink)
-    {
-        DEBUG("Making rightLink");
-        rightLink = GameObject::New_ctor(ConstStrings::RightLink())->get_transform();
-        rightLink->set_parent(chains);
-        rightLink->set_localScale(Sombrero::FastVector3::one());
-        rightLink->set_localPosition(Sombrero::FastVector3::zero());
-        auto rightLinkNote = Object::Instantiate(rightDot->get_gameObject(), rightLink)->get_transform();
-        rightLinkNote->set_name(ConstStrings::RightLink());
-        rightLinkNote->set_localPosition(Sombrero::FastVector3::zero());
-        rightLinkNote->set_localScale({1.0f, 0.2f, 1.0f});
-    }
+        rightLink = MakeSliderNote(chains, rightDot->get_gameObject(), ConstStrings::RightLink(), Sombrero::FastVector3::zero(), {1.0f, 0.2f, 1.0f});
 
     DEBUG("Checking if debris exists");
     auto debris = t->Find(ConstStrings::Debris());
@@ -212,23 +189,8 @@ void SliderFixups(UnityEngine::GameObject* loadedObject)
             chainHeadDebris->set_parent(t);
             chainHeadDebris->set_localPosition(Sombrero::FastVector3::zero());
 
-            auto leftHeadDebrisParent = GameObject::New_ctor(ConstStrings::ChainHeadDebris())->get_transform();
-            leftHeadDebrisParent->set_parent(chainHeadDebris);
-            leftHeadDebrisParent->set_localPosition(Sombrero::FastVector3::zero());
-            leftHeadDebrisParent->set_name(ConstStrings::LeftDebris());
-            leftHeadDebrisParent->set_localScale(Sombrero::FastVector3::one());
-            auto leftHeadDebris = Object::Instantiate(leftDebris->get_gameObject(), leftHeadDebrisParent)->get_transform();
-            leftHeadDebris->set_localScale({1.0f, 0.75f, 1.0f});
-            leftHeadDebris->set_localPosition(Sombrero::FastVector3::zero());
-
-            auto rightHeadDebrisParent = GameObject::New_ctor(ConstStrings::ChainHeadDebris())->get_transform();
-            rightHeadDebrisParent->set_parent(chainHeadDebris);
-            rightHeadDebrisParent->set_localPosition(Sombrero::FastVector3::zero());
-            rightHeadDebrisParent->set_name(ConstStrings::RightDebris());
-            rightHeadDebrisParent->set_localScale(Sombrero::FastVector3::one());
-            auto rightHeadDebris = Object::Instantiate(rightDebris->get_gameObject(), rightHeadDebrisParent)->get_transform();
-            rightHeadDebris->set_localScale({1.0f, 0.75f, 1.0f});
-            rightHeadDebris->set_localPosition(Sombrero::FastVector3::zero());
+            MakeSliderDebris(chainHeadDebris, leftDebris->get_gameObject(), ConstStrings::LeftDebris(), {1.0f, 0.75f, 1.0f});
+            MakeSliderDebris(chainHeadDebris, rightDebris->get_gameObject(), ConstStrings::RightDebris(), {1.0f, 0.75f, 1.0f});
         }
 
         if (!chainLinkDebris && leftDebris && rightDebris)
@@ -238,23 +200,8 @@ void SliderFixups(UnityEngine::GameObject* loadedObject)
             chainLinkDebris->set_parent(t);
             chainLinkDebris->set_localPosition(Sombrero::FastVector3::zero());
 
-            auto leftLinkDebrisParent = GameObject::New_ctor(ConstStrings::ChainLinkDebris())->get_transform();
-            leftLinkDebrisParent->set_parent(chainLinkDebris);
-            leftLinkDebrisParent->set_localPosition(Sombrero::FastVector3::zero());
-            leftLinkDebrisParent->set_name(ConstStrings::LeftDebris());
-            leftLinkDebrisParent->set_localScale(Sombrero::FastVector3::one());
-            auto leftLinkDebris = Object::Instantiate(leftDebris->get_gameObject(), leftLinkDebrisParent)->get_transform();
-            leftLinkDebris->set_localScale({1.0f, 0.2, 1.0f});
-            leftLinkDebris->set_localPosition(Sombrero::FastVector3::zero());
-
-            auto rightLinkDebrisParent = GameObject::New_ctor(ConstStrings::ChainLinkDebris())->get_transform();
-            rightLinkDebrisParent->set_parent(chainLinkDebris);
-            rightLinkDebrisParent->set_localPosition(Sombrero::FastVector3::zero());
-            rightLinkDebrisParent->set_name(ConstStrings::RightDebris());
-            rightLinkDebrisParent->set_localScale(Sombrero::FastVector3::one());
-            auto rightLinkDebris = Object::Instantiate(rightDebris->get_gameObject(), rightLinkDebrisParent)->get_transform();
-            rightLinkDebris->set_localScale({1.0f, 0.2, 1.0f});
-            rightLinkDebris->set_localPosition(Sombrero::FastVector3::zero());
+            MakeSliderDebris(chainLinkDebris, leftDebris->get_gameObject(), ConstStrings::LeftDebris(), {1.0f, 0.2f, 1.0f});
+            MakeSliderDebris(chainLinkDebris, rightDebris->get_gameObject(), ConstStrings::RightDebris(), {1.0f, 0.2f, 1.0f});
         }
     }
 }
@@ -402,6 +349,7 @@ namespace Qosmetics::Notes
         return currentManifest;
     }
     */
+
     custom_types::Helpers::Coroutine NoteModelContainer::LoadBundleRoutine(std::function<void(NoteModelContainer*)> onFinished)
     {
         isLoading = true;

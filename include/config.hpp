@@ -10,6 +10,7 @@ namespace Qosmetics::Notes
         double noteSize = 1.0f;
         bool alsoChangeHitboxes = false;
         bool forceDefaultBombs = false;
+        bool forceDefaultChains = false;
         bool forceDefaultDebris = false;
         bool forceDefaultChainDebris = false;
         bool disableReflections = false;

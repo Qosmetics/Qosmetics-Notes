@@ -80,7 +80,9 @@ namespace Qosmetics::Notes
         SET_JSON_DOUBLE(noteSize);
         SET_JSON_BOOL(alsoChangeHitboxes);
         SET_JSON_BOOL(forceDefaultBombs);
+        SET_JSON_BOOL(forceDefaultChains);
         SET_JSON_BOOL(forceDefaultDebris);
+        SET_JSON_BOOL(forceDefaultChainDebris);
         SET_JSON_BOOL(disableReflections);
         SET_JSON_BOOL(disabled);
         SET_JSON_BOOL(keepMissingReflections);
@@ -96,7 +98,9 @@ namespace Qosmetics::Notes
         GET_JSON_DOUBLE(noteSize)
         GET_JSON_BOOL(alsoChangeHitboxes);
         GET_JSON_BOOL(forceDefaultBombs);
+        GET_JSON_BOOL(forceDefaultChains);
         GET_JSON_BOOL(forceDefaultDebris);
+        GET_JSON_BOOL(forceDefaultChainDebris);
         GET_JSON_BOOL(disableReflections);
         GET_JSON_BOOL(disabled);
         GET_JSON_BOOL(keepMissingReflections);

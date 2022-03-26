@@ -57,6 +57,7 @@ namespace Qosmetics::Notes
 
             TOGGLE(alsoChangeHitboxes, "QosmeticsCyoobs:Settings:AlsoChangeHitboxes");
             TOGGLE(forceDefaultBombs, "QosmeticsCyoobs:Settings:ForceDefaultBombs");
+            TOGGLE(forceDefaultChains, "QosmeticsCyoobs:Settings:ForceDefaultChains");
             TOGGLE(forceDefaultDebris, "QosmeticsCyoobs:Settings:ForceDefaultDebris");
             TOGGLE(forceDefaultChainDebris, "QosmeticsCyoobs:Settings:ForceDefaultChainDebris");
             TOGGLE(disableReflections, "QosmeticsCyoobs:Settings:DisableReflections");
@@ -68,6 +69,7 @@ namespace Qosmetics::Notes
             overrideNoteSizeToggle->set_isOn(globalConfig.overrideNoteSize);
             noteSizeSlider->set_value(globalConfig.noteSize);
             alsoChangeHitboxesToggle->set_isOn(globalConfig.alsoChangeHitboxes);
+            forceDefaultChainsToggle->set_isOn(globalConfig.forceDefaultChains);
             forceDefaultBombsToggle->set_isOn(globalConfig.forceDefaultBombs);
             forceDefaultDebrisToggle->set_isOn(globalConfig.forceDefaultDebris);
             forceDefaultChainDebrisToggle->set_isOn(globalConfig.forceDefaultChainDebris);

@@ -20,7 +20,7 @@ DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, ChainParent, UnityEngine::Mon
 
                                  DECLARE_INSTANCE_FIELD(GlobalNamespace::NoteControllerBase*, noteController);
                                  DECLARE_INSTANCE_FIELD(GlobalNamespace::ColorManager*, colorManager);
-                                 DECLARE_INSTANCE_FIELD(ChainHandler*, chainHandler);
+                                 DECLARE_INSTANCE_FIELD(ChainHandler*, handler);
                                  DECLARE_INSTANCE_FIELD(GlobalNamespace::ColorType, currentColorType);
                                  DECLARE_INSTANCE_FIELD(bool, isHead);
                                  DECLARE_INSTANCE_METHOD(void, Awake);
