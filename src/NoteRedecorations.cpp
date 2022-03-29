@@ -115,6 +115,7 @@ GlobalNamespace::MirroredGameNoteController* RedecorateMirroredGameNoteControlle
             auto mirroredObject = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), mirroredNoteCubeTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(mirroredObject);
             mirroredObject->set_name(mirrorObjectName);
+            mirroredObject->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
             mirroredObject->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
 
             objectParent->handler = mirroredObject->GetComponent<Handler>();
@@ -214,6 +215,7 @@ GlobalNamespace::NoteController* RedecorateGameNoteController(GlobalNamespace::N
             auto notes = UnityEngine::Object::Instantiate(actualNotes->get_gameObject(), noteCubeTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(notes);
             notes->set_name(objectName);
+            notes->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
             notes->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
 
             objectParent->handler = notes->GetComponent<Handler*>();
