@@ -28,7 +28,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, NoteModelContainer, UnityEngine::MonoBeh
                       bool LoadObject(const Qosmetics::Core::Descriptor& descriptor, std::function<void(NoteModelContainer*)> onFinished = nullptr);
                       const NoteObjectConfig& GetNoteConfig();
                       const Qosmetics::Core::Descriptor& GetDescriptor();
-                      void Default();
+                      bool Default();
                       private
                       :
 

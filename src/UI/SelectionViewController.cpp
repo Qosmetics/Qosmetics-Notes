@@ -103,9 +103,10 @@ namespace Qosmetics::Notes
     void SelectionViewController::OnSelectDefault()
     {
         auto noteModelContainer = NoteModelContainer::get_instance();
-        noteModelContainer->Default();
 
-        OnObjectLoadFinished();
+        // if we do not PROPERLY switch to default, don't clear the preview
+        if (noteModelContainer->Default())
+            OnObjectLoadFinished();
     }
 
     void SelectionViewController::OnSelectDescriptor(Qosmetics::Core::QosmeticObjectTableCell* cell)
@@ -141,6 +142,7 @@ namespace Qosmetics::Notes
 
         if (descriptor.get_filePath() == NoteModelContainer::get_instance()->GetDescriptor().get_filePath())
             OnSelectDefault();
+
         deletefile(descriptor.get_filePath());
         ReloadDescriptorList();
     }

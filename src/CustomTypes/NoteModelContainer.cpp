@@ -413,10 +413,10 @@ namespace Qosmetics::Notes
         co_return;
     }
 
-    void NoteModelContainer::Default()
+    bool NoteModelContainer::Default()
     {
         if (isLoading)
-            return;
+            return false;
         if (currentNoteObject)
         {
             Object::DestroyImmediate(currentNoteObject);
@@ -429,6 +429,7 @@ namespace Qosmetics::Notes
         }
 
         currentManifest = decltype(currentManifest)();
+        return true;
     }
 
     void NoteModelContainer::OnDestroy()
