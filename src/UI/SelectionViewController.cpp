@@ -106,7 +106,11 @@ namespace Qosmetics::Notes
 
         // if we do not PROPERLY switch to default, don't clear the preview
         if (noteModelContainer->Default())
+        {
             OnObjectLoadFinished();
+            auto tableView = reinterpret_cast<QuestUI::TableView*>(descriptorList->tableView);
+            tableView->ClearSelection();
+        }
     }
 
     void SelectionViewController::OnSelectDescriptor(Qosmetics::Core::QosmeticObjectTableCell* cell)
