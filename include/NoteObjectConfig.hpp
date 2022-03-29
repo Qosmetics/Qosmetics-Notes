@@ -12,6 +12,10 @@
 
 #endif
 
+#ifndef ADD_BOOL
+#define ADD_BOOL(identifier) val.AddMember(#identifier, identifier, allocator)
+#endif
+
 #ifndef CONST_GETTER
 #define CONST_GETTER(identifier) \
     auto get_##identifier() const { return identifier; }
@@ -52,14 +56,14 @@ namespace Qosmetics::Notes
             rapidjson::Value val;
             val.SetObject();
 
-            val.AddMember("hasDebris", hasDebris, allocator);
-            val.AddMember("hasChainHeadDebris", hasChainHeadDebris, allocator);
-            val.AddMember("hasChainLinkDebris", hasChainLinkDebris, allocator);
-            val.AddMember("hasSlider", hasSlider, allocator);
-            val.AddMember("hasBomb", hasBomb, allocator);
-            val.AddMember("showArrows", showArrows, allocator);
-            val.AddMember("isLegacy", isLegacy, allocator);
-            val.AddMember("isMirrorable", isMirrorable, allocator);
+            ADD_BOOL(hasDebris);
+            ADD_BOOL(hasChainHeadDebris);
+            ADD_BOOL(hasChainLinkDebris);
+            ADD_BOOL(hasSlider);
+            ADD_BOOL(hasBomb);
+            ADD_BOOL(showArrows);
+            ADD_BOOL(isLegacy);
+            ADD_BOOL(isMirrorable);
 
             return val;
         }
