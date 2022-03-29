@@ -69,6 +69,11 @@
       "id": "zip",
       "versionRange": "^1.7.4",
       "additionalData": {}
+    },
+    {
+      "id": "diglett",
+      "versionRange": "^2.0.0",
+      "additionalData": {}
     }
   ],
   "additionalData": {}
