@@ -175,12 +175,13 @@ namespace Qosmetics::Notes
             if (mirrorChainT)
                 UnityEngine::Object::DestroyImmediate(mirrorChainT->get_gameObject());
 
-            DEBUG("Getting lots of transforms");
+            DEBUG("Getting notes transforms");
             auto leftArrowT = notesT->Find(ConstStrings::LeftArrow());
             auto rightArrowT = notesT->Find(ConstStrings::RightArrow());
             auto leftDotT = notesT->Find(ConstStrings::LeftDot());
             auto rightDotT = notesT->Find(ConstStrings::RightDot());
 
+            DEBUG("chains transforms");
             auto leftHeadT = chainsT->Find(ConstStrings::LeftHead());
             auto rightHeadT = chainsT->Find(ConstStrings::RightHead());
             auto leftLinkT = chainsT->Find(ConstStrings::LeftLink());
@@ -188,25 +189,31 @@ namespace Qosmetics::Notes
 
             Sombrero::FastColor leftColor(1.0f, 0.0f, 0.0f, 1.0f);
             Sombrero::FastColor rightColor(0.0f, 0.0f, 1.0f, 1.0f);
-
-            auto monoInstaller = UnityEngine::Resources::FindObjectsOfTypeAll<Zenject::MonoInstaller*>().FirstOrDefault();
-            if (monoInstaller)
+            DEBUG("Attempting getting a monoinstaller");
+            try
             {
-                auto colorManager = monoInstaller->get_Container()->TryResolve<GlobalNamespace::ColorManager*>();
-                if (colorManager)
+
+                auto monoInstaller = UnityEngine::Resources::FindObjectsOfTypeAll<Zenject::MonoInstaller*>().FirstOrDefault();
+                if (monoInstaller)
                 {
-                    leftColor = colorManager->ColorForType(GlobalNamespace::ColorType::ColorA);
-                    rightColor = colorManager->ColorForType(GlobalNamespace::ColorType::ColorB);
+                    DEBUG("Attempting getting the colormanager from the installer: {}", fmt::ptr(monoInstaller));
+                    auto colorManager = monoInstaller->get_Container()->TryResolve<GlobalNamespace::ColorManager*>();
+                    if (colorManager)
+                    {
+                        leftColor = colorManager->ColorForType(GlobalNamespace::ColorType::ColorA);
+                        rightColor = colorManager->ColorForType(GlobalNamespace::ColorType::ColorB);
+                    }
+                    else
+                        ERROR("could not resolve colormanager for proper colors");
                 }
                 else
-                {
-                    ERROR("could not resolve colormanager for proper colors");
-                }
+                    ERROR("No monoinstallers found, can't resolve colormanager for proper colors");
             }
-            else
+            catch (il2cpp_utils::RunMethodException& e)
             {
-                ERROR("No monoinstallers found, can't resolve colormanager for proper colors");
+                ERROR("Failed to get colors from colorManager: {}", e.what());
             }
+
             float distance = 0.4f * (noteSizeFactor > 1.0f ? noteSizeFactor : 1.0f);
             float offset = 0.15f;
             float unit = distance + offset;
