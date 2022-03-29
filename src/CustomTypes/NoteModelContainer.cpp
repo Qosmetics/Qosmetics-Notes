@@ -458,8 +458,8 @@ namespace Qosmetics::Notes
             bundle = nullptr;
         }
 
-        UnityEngine::Object::Destroy(this->get_gameObject());
         instance = nullptr;
+        UnityEngine::Object::DestroyImmediate(this->get_gameObject());
     }
 
 }
