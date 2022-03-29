@@ -39,6 +39,7 @@ namespace Qosmetics::Notes
             descriptorList = CreateScrollableCustomSourceList<Qosmetics::Core::QosmeticObjectTableData*>(vertical->get_transform(), UnityEngine::Vector2(0.0f, 0.0f), UnityEngine::Vector2(100.0f, 76.0f), nullptr);
             descriptorList->deletionConfirmationModal = deletionConfirmationModal;
             descriptorList->onSelect = std::bind(reinterpret_cast<void (SelectionViewController::*)(HMUI::TableCell*)>(&SelectionViewController::OnSelectDescriptor), this, std::placeholders::_1);
+            descriptorList->onDelete = std::bind(reinterpret_cast<void (SelectionViewController::*)(HMUI::TableCell*)>(&SelectionViewController::OnDeleteCell), this, std::placeholders::_1);
             descriptorList->defaultSprite = VectorToSprite(std::vector<uint8_t>(_binary_PlaceholderIcon_png_start, _binary_PlaceholderIcon_png_end));
         }
 
@@ -128,6 +129,20 @@ namespace Qosmetics::Notes
                 previewViewController->UpdatePreview(false);
             }
         }
+    }
+    void SelectionViewController::OnDeleteCell(Qosmetics::Core::QosmeticObjectTableCell* cell)
+    {
+        auto& descriptor = cell->descriptor;
+
+        if (!fileexists(descriptor.get_filePath()))
+        {
+            return;
+        }
+
+        if (descriptor.get_filePath() == NoteModelContainer::get_instance()->GetDescriptor().get_filePath())
+            OnSelectDefault();
+        deletefile(descriptor.get_filePath());
+        ReloadDescriptorList();
     }
 
     void SelectionViewController::OnObjectLoadFinished()
