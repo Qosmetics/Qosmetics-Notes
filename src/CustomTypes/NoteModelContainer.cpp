@@ -29,6 +29,14 @@ DEFINE_TYPE(Qosmetics::Notes, NoteModelContainer);
 
 using namespace UnityEngine;
 
+void SetLayerRecursively(UnityEngine::Transform* obj, int layer)
+{
+    obj->get_gameObject()->set_layer(layer);
+    int childCount = obj->get_childCount();
+    for (int i = 0; i < childCount; i++)
+        SetLayerRecursively(obj->GetChild(i), layer);
+}
+
 void LegacyFixups(UnityEngine::GameObject* loadedObject)
 {
     auto t = loadedObject->get_transform();
@@ -99,6 +107,7 @@ void DuplicateForMirror(UnityEngine::Transform* parent, StringW origName, String
     SetMirrorableProperties(orig, false);
     SetMirrorableProperties(mirrored, true);
 }
+
 void MirrorableFixups(UnityEngine::GameObject* loadedObject)
 {
     auto t = loadedObject->get_transform();
@@ -274,13 +283,6 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
     }
 }
 
-void SetLayerRecursively(UnityEngine::Transform* obj, int layer)
-{
-    obj->get_gameObject()->set_layer(layer);
-    int childCount = obj->get_childCount();
-    for (int i = 0; i < childCount; i++)
-        SetLayerRecursively(obj->GetChild(i), layer);
-}
 namespace Qosmetics::Notes
 {
     NoteModelContainer* NoteModelContainer::instance = nullptr;
