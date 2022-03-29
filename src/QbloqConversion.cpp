@@ -31,6 +31,7 @@ namespace Qosmetics::Notes::QbloqConversion
         std::vector<std::string> result;
 
         Qosmetics::Core::FileUtils::GetFilesInFolderPath("qbloq", note_path, result);
+        Qosmetics::Core::FileUtils::GetFilesInFolderPath("qbloq", cyoob_path, result);
         return result;
     }
 
