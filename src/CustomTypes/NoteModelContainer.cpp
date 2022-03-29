@@ -249,6 +249,7 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
 
         dbt->GetChild(0)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
         dbt->GetChild(1)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+        SetLayerRecursively(dbt, 9);
     }
 
     auto chdbt = t->Find(ConstStrings::ChainHeadDebris());
@@ -258,6 +259,7 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
 
         chdbt->GetChild(0)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
         chdbt->GetChild(1)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+        SetLayerRecursively(chdbt, 9);
     }
 
     auto cldbt = t->Find(ConstStrings::ChainLinkDebris());
@@ -267,7 +269,17 @@ void AddHandlers(UnityEngine::GameObject* loadedObject)
 
         cldbt->GetChild(0)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
         cldbt->GetChild(1)->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisColorHandler*>();
+
+        SetLayerRecursively(cldbt, 9);
     }
+}
+
+void SetLayerRecursively(UnityEngine::Transform* obj, int layer)
+{
+    obj->get_gameObject()->set_layer(layer);
+    int childCount = obj->get_childCount();
+    for (int i = 0; i < childCount; i++)
+        SetLayerRecursively(obj->GetChild(i), layer);
 }
 namespace Qosmetics::Notes
 {
@@ -366,8 +378,8 @@ namespace Qosmetics::Notes
         co_yield custom_types::Helpers::CoroutineHelper::New(Qosmetics::Core::BundleUtils::LoadAssetFromBundleAsync<UnityEngine::GameObject*>(bundle, isLegacy ? "_CustomBloq" : "_Cyoob", currentNoteObject));
 
         auto name = currentNoteObject->get_name();
-        currentNoteObject->set_layer(8);
         currentNoteObject = UnityEngine::Object::Instantiate(currentNoteObject, get_transform());
+        SetLayerRecursively(currentNoteObject->get_transform(), 8);
         currentNoteObject->set_name(name);
         currentNoteObject->SetActive(false);
 
