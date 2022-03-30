@@ -70,10 +70,10 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
     try
     {
         GET_CONFIG();
-        bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows && !forceDefaultNotes;
+        bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows && !forceDefaultNotes && !forceDefaultDebris;
 
         // if we are adding our own prefab, we have debris, we are not reducing debris, and not forcing default, replace debris
-        if (addCustomPrefab && config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris() && !forceDefaultDebris)
+        if (addCustomPrefab && config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris())
         {
             auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
 
@@ -113,7 +113,7 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
 GlobalNamespace::NoteDebris* RedecorateChainNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container, StringW debrisName)
 {
     auto& globalConfig = Qosmetics::Notes::Config::get_config();
-    return RedecorateNoteDebris(noteDebrisPrefab, container, debrisName, globalConfig.forceDefaultChains, globalConfig.forceDefaultDebris);
+    return RedecorateNoteDebris(noteDebrisPrefab, container, debrisName, globalConfig.forceDefaultChains, globalConfig.forceDefaultChainDebris);
 }
 
 GlobalNamespace::NoteDebris* RedecorateHeadNoteDebris(GlobalNamespace::NoteDebris* noteDebrisPrefab, Zenject::DiContainer* container)
