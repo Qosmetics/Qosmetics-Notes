@@ -316,7 +316,6 @@ namespace Qosmetics::Notes
         if (!fileexists(filePath))
             return;
         currentManifest = Qosmetics::Core::Manifest<NoteObjectConfig>(filePath);
-        currentManifest.get_descriptor();
         INFO("Loading Note Object {}", currentManifest.get_descriptor().get_name());
         StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(nullptr)));
     }
