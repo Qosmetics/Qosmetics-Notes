@@ -34,9 +34,9 @@ namespace Qosmetics::Notes::QbloqConversion
         }
     };
 
-    void ConvertOldQbloqs();
+    void ConvertOldQbloqs(std::function<void()> onFinished = nullptr);
 
     std::vector<std::string> GetQbloqFiles();
     std::vector<std::pair<std::string, std::string>> GetNonConverted(std::vector<std::string> filePaths);
-    custom_types::Helpers::Coroutine ConvertAllFoundQbloqs(std::vector<std::pair<std::string, std::string>> oldNewPathPairs);
+    custom_types::Helpers::Coroutine ConvertAllFoundQbloqs(std::vector<std::pair<std::string, std::string>> oldNewPathPairs, std::function<void()> onFinished = nullptr);
 }

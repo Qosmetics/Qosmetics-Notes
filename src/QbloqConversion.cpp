@@ -21,9 +21,9 @@
 
 namespace Qosmetics::Notes::QbloqConversion
 {
-    void ConvertOldQbloqs()
+    void ConvertOldQbloqs(std::function<void()> onFinished)
     {
-        GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(coro(ConvertAllFoundQbloqs(GetNonConverted(GetQbloqFiles()))));
+        GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(coro(ConvertAllFoundQbloqs(GetNonConverted(GetQbloqFiles()), std::move(onFinished))));
     }
 
     std::vector<std::string> GetQbloqFiles()
@@ -47,14 +47,17 @@ namespace Qosmetics::Notes::QbloqConversion
 
             if (!fileexists(convertedFilePath))
             {
-                toConvert.emplace_back(std::make_pair(fmt::format("{}/{}", note_path, file), convertedFilePath));
+                if (fileexists(fmt::format("{}/{}", cyoob_path, file)))
+                    toConvert.emplace_back(std::make_pair(fmt::format("{}/{}", cyoob_path, file), convertedFilePath));
+                else
+                    toConvert.emplace_back(std::make_pair(fmt::format("{}/{}", note_path, file), convertedFilePath));
             }
         }
 
         return toConvert;
     }
 
-    custom_types::Helpers::Coroutine ConvertAllFoundQbloqs(std::vector<std::pair<std::string, std::string>> oldNewPathPairs)
+    custom_types::Helpers::Coroutine ConvertAllFoundQbloqs(std::vector<std::pair<std::string, std::string>> oldNewPathPairs, std::function<void()> onFinished)
     {
         // all pairs should be things to convert
         for (auto& pair : oldNewPathPairs)
@@ -73,6 +76,7 @@ namespace Qosmetics::Notes::QbloqConversion
             if (!fileexists(oldPath))
             {
                 ERROR("{} did not exist, continuing...", oldPath);
+                continue;
             }
             UnityEngine::AssetBundle* bundle = nullptr;
             INFO("Loading bundle...");
@@ -96,7 +100,7 @@ namespace Qosmetics::Notes::QbloqConversion
             descriptorDoc.Parse(descriptorText);
             LegacyDescriptor legacyDescriptor(descriptorDoc);
 
-            Qosmetics::Core::Descriptor actualDescriptor(legacyDescriptor.authorName, std::string(Qosmetics::Core::FileUtils::GetFileName(oldPath, true)), legacyDescriptor.description, newPath, "thumbnail.png");
+            Qosmetics::Core::Descriptor actualDescriptor(legacyDescriptor.authorName, legacyDescriptor.objectName, legacyDescriptor.description, newPath, "thumbnail.png");
 
             /// load config
             UnityEngine::TextAsset* configAsset = nullptr;
@@ -142,9 +146,13 @@ namespace Qosmetics::Notes::QbloqConversion
 
             zip_close(zip);
             bundle->Unload(true);
+
+            deletefile(oldPath);
             co_yield nullptr;
         }
 
+        if (onFinished)
+            onFinished();
         co_return;
     }
 }

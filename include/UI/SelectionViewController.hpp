@@ -28,5 +28,6 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SelectionViewController, HMUI::ViewContr
                       void OnSelectDefault();
                       void ReloadDescriptorList();
                       void OnObjectLoadFinished();
+                      void RefreshAfterBloqConversion();
 
 )

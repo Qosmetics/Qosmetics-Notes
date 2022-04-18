@@ -33,7 +33,8 @@ namespace Qosmetics::Notes
 
             auto localization = Diglett::Localization::get_instance();
             auto defaultObjectBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->get("QosmeticsCore:QosmeticsTable:Default"), std::bind(&SelectionViewController::OnSelectDefault, this));
-            auto refreshBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->get("QosmeticsCore:QosmeticsTable:Refresh"), std::bind(&SelectionViewController::ReloadDescriptorList, this));
+            auto refreshBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->get("QosmeticsCore:QosmeticsTable:Refresh"), [this]()
+                                             { QbloqConversion::ConvertOldQbloqs(std::bind(&SelectionViewController::RefreshAfterBloqConversion, this)); });
 
             deletionConfirmationModal = Qosmetics::Core::DeletionConfirmationModal::Create(get_transform());
             descriptorList = CreateScrollableCustomSourceList<Qosmetics::Core::QosmeticObjectTableData*>(vertical->get_transform(), UnityEngine::Vector2(0.0f, 0.0f), UnityEngine::Vector2(100.0f, 76.0f), nullptr);
@@ -43,8 +44,16 @@ namespace Qosmetics::Notes
             descriptorList->defaultSprite = VectorToSprite(std::vector<uint8_t>(_binary_PlaceholderIcon_png_start, _binary_PlaceholderIcon_png_end));
         }
 
+        QbloqConversion::ConvertOldQbloqs(std::bind(&SelectionViewController::RefreshAfterBloqConversion, this));
+    }
+
+    void SelectionViewController::RefreshAfterBloqConversion()
+    {
+        // don't do shit when not enabled
+        if (!get_enabled() || !get_gameObject()->get_activeSelf())
+            return;
+
         ReloadDescriptorList();
-        QbloqConversion::ConvertOldQbloqs();
     }
 
     void SelectionViewController::ReloadDescriptorList()
