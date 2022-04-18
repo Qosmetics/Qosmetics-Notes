@@ -10,7 +10,7 @@
 #endif
 #endif
 
-#define QOSMETICS_NOTES "qosmetics-cyoobs"
+#define QOSMETICS_NOTES "qosmetics-notes"
 
 namespace Qosmetics::Notes::API
 {
