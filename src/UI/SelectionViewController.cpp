@@ -107,6 +107,7 @@ namespace Qosmetics::Notes
 
         tableView->ReloadData();
         tableView->RefreshCells(true, true);
+        tableView->ClearSelection();
     }
 
     void SelectionViewController::OnSelectDefault()
