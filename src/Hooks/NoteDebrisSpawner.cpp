@@ -16,7 +16,7 @@
 #include "sombrero/shared/RandomUtils.hpp"
 
 #include "CustomTypes/DebrisParent.hpp"
-#include "hooks.hpp"
+#include "hooking.hpp"
 
 static constexpr Sombrero::FastVector3 Cross(const Sombrero::FastVector3& lhs, const Sombrero::FastVector3& rhs)
 {

@@ -3,7 +3,7 @@
 #include "UI/CyoobFlowCoordinator.hpp"
 #include "assets.hpp"
 #include "custom-types/shared/register.hpp"
-#include "hooks.hpp"
+#include "hooking.hpp"
 #include "logging.hpp"
 #include "modloader/shared/modloader.hpp"
 #include "static-defines.hpp"

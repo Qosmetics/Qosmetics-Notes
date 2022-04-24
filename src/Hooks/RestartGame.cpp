@@ -1,5 +1,5 @@
 #include "CustomTypes/NoteModelContainer.hpp"
-#include "hooks.hpp"
+#include "hooking.hpp"
 
 #include "GlobalNamespace/MenuTransitionsHelper.hpp"
 #include "System/Action_1.hpp"
