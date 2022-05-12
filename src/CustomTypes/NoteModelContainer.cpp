@@ -326,6 +326,7 @@ namespace Qosmetics::Notes
             return false;
         if (manifest.get_filePath() == currentManifest.get_filePath())
             return false;
+        isLoading = true;
         currentManifest = manifest;
         StartCoroutine(custom_types::Helpers::CoroutineHelper::New(LoadBundleRoutine(onFinished)));
         return true;
@@ -352,16 +353,6 @@ namespace Qosmetics::Notes
     {
         return currentManifest.get_descriptor();
     }
-
-    /*
-    const Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig>& NoteModelContainer::GetManifest()
-    {
-        DEBUG("{} currentManifest: {}", this, &currentManifest);
-        auto& descriptor = currentManifest.get_descriptor();
-        DEBUG("{} descriptor: {}", this, &descriptor);
-        return currentManifest;
-    }
-    */
 
     custom_types::Helpers::Coroutine NoteModelContainer::LoadBundleRoutine(std::function<void(NoteModelContainer*)> onFinished)
     {
@@ -405,10 +396,10 @@ namespace Qosmetics::Notes
         DEBUG("Adding handlers to object");
         AddHandlers(currentNoteObject);
 
-        isLoading = false;
         if (onFinished)
             onFinished(this);
 
+        isLoading = false;
         co_return;
     }
 
