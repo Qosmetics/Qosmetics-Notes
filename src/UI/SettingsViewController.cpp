@@ -3,6 +3,8 @@
 #include "diglett/shared/Localization.hpp"
 #include "diglett/shared/Util.hpp"
 #include "qosmetics-core/shared/ConfigRegister.hpp"
+#include "qosmetics-core/shared/Utils/DateUtils.hpp"
+#include "qosmetics-core/shared/Utils/RainbowUtils.hpp"
 #include "qosmetics-core/shared/Utils/UIUtils.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
 #include "questui/shared/CustomTypes/Components/ExternalComponents.hpp"
@@ -35,7 +37,12 @@ namespace Qosmetics::Notes
         if (firstActivation)
         {
             auto localization = Diglett::Localization::get_instance();
-            Qosmetics::Core::UIUtils::AddHeader(get_transform(), localization->get("QosmeticsCyoobs:Settings:Settings"), Sombrero::FastColor::blue());
+            if (Qosmetics::Core::DateUtils::isMonth(6))
+            {
+                Qosmetics::Core::UIUtils::AddHeader(get_transform(), Qosmetics::Core::RainbowUtils::gayify(static_cast<std::string>(localization->get("QosmeticsCyoobs:Settings:Settings"))), Sombrero::FastColor::blue());
+            }
+            else
+                Qosmetics::Core::UIUtils::AddHeader(get_transform(), localization->get("QosmeticsCyoobs:Settings:Settings"), Sombrero::FastColor::blue());
             auto container = CreateScrollableSettingsContainer(this);
 
             auto externalComponents = container->GetComponent<QuestUI::ExternalComponents*>();

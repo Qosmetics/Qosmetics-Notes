@@ -8,6 +8,8 @@
 #include "HMUI/ViewController_AnimationDirection.hpp"
 #include "HMUI/ViewController_AnimationType.hpp"
 
+#include "qosmetics-core/shared/Utils/DateUtils.hpp"
+#include "qosmetics-core/shared/Utils/RainbowUtils.hpp"
 #include "qosmetics-core/shared/Utils/UIUtils.hpp"
 
 DEFINE_TYPE(Qosmetics::Notes, CyoobFlowCoordinator)
@@ -28,7 +30,7 @@ namespace Qosmetics::Notes
             ProvideInitialViewControllers(selectionViewController, settingsViewController, previewViewController, nullptr, nullptr);
 
             set_showBackButton(true);
-            SetTitle(il2cpp_utils::newcsstr("Cyoobs"), HMUI::ViewController::AnimationType::In);
+            SetTitle(Qosmetics::Core::DateUtils::isMonth(6) ? Qosmetics::Core::RainbowUtils::gayify("Cyoobs") : "Cyoobs", HMUI::ViewController::AnimationType::In);
         }
 
         HMUI::TitleViewController* titleView = Object::FindObjectOfType<HMUI::TitleViewController*>();

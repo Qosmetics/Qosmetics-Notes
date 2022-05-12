@@ -7,6 +7,8 @@
 #include "diglett/shared/Localization.hpp"
 #include "diglett/shared/Util.hpp"
 #include "logging.hpp"
+#include "qosmetics-core/shared/Utils/DateUtils.hpp"
+#include "qosmetics-core/shared/Utils/RainbowUtils.hpp"
 #include "qosmetics-core/shared/Utils/UIUtils.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
 #include "questui/shared/CustomTypes/Components/Backgroundable.hpp"
@@ -112,7 +114,13 @@ namespace Qosmetics::Notes
 
     void PreviewViewController::SetTitleText(StringW text)
     {
-        title->set_text(u"<i>" + text + u"</i>");
+        if (Qosmetics::Core::DateUtils::isMonth(6))
+        {
+            text = "<i>" + Qosmetics::Core::RainbowUtils::gayify(static_cast<std::string>(text)) + "</i>";
+            title->set_text(text);
+        }
+        else
+            title->set_text(u"<i>" + text + u"</i>");
     }
 
     void PreviewViewController::ShowLoading(bool isLoading)
