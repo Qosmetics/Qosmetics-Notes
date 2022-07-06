@@ -24,7 +24,7 @@ namespace Qosmetics::Notes
         debrisHandler = get_gameObject()->GetComponentInChildren<DebrisHandler*>();
         noteDebris = GetComponent<GlobalNamespace::NoteDebris*>();
         noteDebrisCache[noteDebris] = this;
-        colorManager = noteDebris->dyn__colorManager();
+        colorManager = noteDebris->colorManager;
     }
 
     void DebrisParent::OnDestroy()

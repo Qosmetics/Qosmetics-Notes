@@ -86,6 +86,6 @@ namespace Qosmetics::Notes
         DEBUG("copying first set of renderers");
         memcpy(newRenderers.begin(), renderers.begin(), renderers.Length() * sizeof(UnityEngine::Renderer*));
         memcpy(newRenderers.begin() + renderers.Length(), materialReplacementRenderers.begin(), materialReplacementRenderers.Length() * sizeof(UnityEngine::Renderer*));
-        propertyController->dyn__renderers() = newRenderers;
+        propertyController->renderers = newRenderers;
     }
 }

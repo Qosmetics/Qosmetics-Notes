@@ -35,7 +35,7 @@
     auto& config = noteModelContainer->GetNoteConfig();                                                                                 \
     auto& globalConfig = Qosmetics::Notes::Config::get_config();                                                                        \
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();                            \
-    auto gameplayModifiers = gameplayCoreSceneSetupData->dyn_gameplayModifiers();                                                       \
+    auto gameplayModifiers = gameplayCoreSceneSetupData->gameplayModifiers;                                                             \
     float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayModifiers->get_notesUniformScale(); \
     bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                              \
     bool disappearingArrows = gameplayModifiers->get_disappearingArrows();
@@ -73,11 +73,11 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
         bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows && !forceDefaultNotes && !forceDefaultDebris;
 
         // if we are adding our own prefab, we have debris, we are not reducing debris, and not forcing default, replace debris
-        if (addCustomPrefab && config.get_hasDebris() && !gameplayCoreSceneSetupData->dyn_playerSpecificSettings()->get_reduceDebris())
+        if (addCustomPrefab && config.get_hasDebris() && !gameplayCoreSceneSetupData->playerSpecificSettings->get_reduceDebris())
         {
             auto noteDebrisParent = noteDebrisPrefab->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
 
-            auto meshTransform = noteDebrisPrefab->dyn__meshTransform();
+            auto meshTransform = noteDebrisPrefab->meshTransform;
             auto actualDebris = noteModelContainer->currentNoteObject->get_transform()->Find(debrisName);
             auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(debris);
@@ -85,9 +85,9 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
             debris->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
             debris->get_transform()->set_localScale(Sombrero::FastVector3::one() * noteSizeFactor * 0.4f);
 
-            auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
-            auto leftColor = colorScheme->dyn__saberAColor();
-            auto rightColor = colorScheme->dyn__saberBColor();
+            auto colorScheme = gameplayCoreSceneSetupData->colorScheme;
+            auto leftColor = colorScheme->saberAColor;
+            auto rightColor = colorScheme->saberBColor;
 
             SetAndFixObjectChildren(debris->get_transform(), leftColor, rightColor);
 

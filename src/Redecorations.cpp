@@ -59,7 +59,7 @@
     auto& config = noteModelContainer->GetNoteConfig();                                                                                 \
     auto& globalConfig = Qosmetics::Notes::Config::get_config();                                                                        \
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();                            \
-    auto gameplayModifiers = gameplayCoreSceneSetupData->dyn_gameplayModifiers();                                                       \
+    auto gameplayModifiers = gameplayCoreSceneSetupData->gameplayModifiers;                                                             \
     float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayModifiers->get_notesUniformScale(); \
     bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                              \
     bool disappearingArrows = gameplayModifiers->get_disappearingArrows();

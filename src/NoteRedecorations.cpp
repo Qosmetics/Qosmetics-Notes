@@ -61,7 +61,7 @@ extern ModInfo modInfo;
     auto& config = noteModelContainer->GetNoteConfig();                                                                                 \
     auto& globalConfig = Qosmetics::Notes::Config::get_config();                                                                        \
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();                            \
-    auto gameplayModifiers = gameplayCoreSceneSetupData->dyn_gameplayModifiers();                                                       \
+    auto gameplayModifiers = gameplayCoreSceneSetupData->gameplayModifiers;                                                             \
     float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayModifiers->get_notesUniformScale(); \
     bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                              \
     bool disappearingArrows = gameplayModifiers->get_disappearingArrows();
@@ -121,9 +121,9 @@ GlobalNamespace::MirroredGameNoteController* RedecorateMirroredGameNoteControlle
             objectParent->handler = mirroredObject->GetComponent<Handler>();
 
             auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
-            auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
-            auto leftColor = colorScheme->dyn__saberAColor();
-            auto rightColor = colorScheme->dyn__saberBColor();
+            auto colorScheme = gameplayCoreSceneSetupData->colorScheme;
+            auto leftColor = colorScheme->saberAColor;
+            auto rightColor = colorScheme->saberBColor;
 
             SetAndFixObjectChildren(mirroredObject->get_transform(), leftColor, rightColor);
 
@@ -205,9 +205,9 @@ GlobalNamespace::NoteController* RedecorateGameNoteController(GlobalNamespace::N
 #endif
         if (addCustomPrefab)
         {
-            auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
-            auto leftColor = colorScheme->dyn__saberAColor();
-            auto rightColor = colorScheme->dyn__saberBColor();
+            auto colorScheme = gameplayCoreSceneSetupData->colorScheme;
+            auto leftColor = colorScheme->saberAColor;
+            auto rightColor = colorScheme->saberBColor;
 
             auto objectParent = notePrefab->get_gameObject()->AddComponent<Parent*>();
             auto actualNotes = noteModelContainer->currentNoteObject->get_transform()->Find(objectName);
@@ -300,9 +300,9 @@ GlobalNamespace::GameNoteController* RedecorateGameNoteController(GlobalNamespac
 
 #ifdef CHROMA_EXISTS
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
-    auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
-    auto leftColor = colorScheme->dyn__saberAColor();
-    auto rightColor = colorScheme->dyn__saberBColor();
+    auto colorScheme = gameplayCoreSceneSetupData->colorScheme;
+    auto leftColor = colorScheme->saberAColor;
+    auto rightColor = colorScheme->saberBColor;
 
     auto noteCallbackOpt = Chroma::NoteAPI::getNoteChangedColorCallbackSafe();
     if (noteCallbackOpt.has_value())
@@ -346,9 +346,9 @@ REDECORATION_REGISTRATION(burstSliderHeadNotePrefab, 10, true, GlobalNamespace::
 
 #ifdef CHROMA_EXISTS
     auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
-    auto colorScheme = gameplayCoreSceneSetupData->dyn_colorScheme();
-    auto leftColor = colorScheme->dyn__saberAColor();
-    auto rightColor = colorScheme->dyn__saberBColor();
+    auto colorScheme = gameplayCoreSceneSetupData->colorScheme;
+    auto leftColor = colorScheme->saberAColor;
+    auto rightColor = colorScheme->saberBColor;
     auto noteCallbackOpt = Chroma::NoteAPI::getNoteChangedColorCallbackSafe();
     if (noteCallbackOpt.has_value())
     {
