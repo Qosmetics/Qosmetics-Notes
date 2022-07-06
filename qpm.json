@@ -13,7 +13,7 @@
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "^3.6.8",
+      "versionRange": "^3.9.0",
       "additionalData": {
         "extraFiles": [
           "src/inline-hook"
@@ -22,21 +22,21 @@
     },
     {
       "id": "codegen",
-      "versionRange": "^0.22.0",
+      "versionRange": "^0.24.1",
       "additionalData": {
         "includeQmod": false
       }
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.15.9",
+      "versionRange": "^0.15.13",
       "additionalData": {
         "includeQmod": false
       }
     },
     {
       "id": "questui",
-      "versionRange": "^0.13.5",
+      "versionRange": "^0.16.1",
       "additionalData": {
         "includeQmod": false
       }
@@ -48,7 +48,7 @@
     },
     {
       "id": "sombrero",
-      "versionRange": "^0.1.30",
+      "versionRange": "^0.1.32",
       "additionalData": {}
     },
     {
@@ -68,7 +68,7 @@
     },
     {
       "id": "paper",
-      "versionRange": "^1.0.5",
+      "versionRange": "^1.2.4",
       "additionalData": {}
     },
     {
@@ -79,6 +79,11 @@
     {
       "id": "diglett",
       "versionRange": "^2.0.0",
+      "additionalData": {}
+    },
+    {
+      "id": "qosmetics-core",
+      "versionRange": "^0.1.0",
       "additionalData": {}
     }
   ],
