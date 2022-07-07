@@ -85,6 +85,11 @@
       "id": "qosmetics-core",
       "versionRange": "^0.1.0",
       "additionalData": {}
+    },
+    {
+      "id": "chroma",
+      "versionRange": "^2.5.8",
+      "additionalData": {}
     }
   ],
   "additionalData": {}
