@@ -31,14 +31,16 @@
       "id": "custom-types",
       "versionRange": "^0.15.13",
       "additionalData": {
-        "includeQmod": false
+        "includeQmod": false,
+        "private": true
       }
     },
     {
       "id": "questui",
       "versionRange": "^0.16.1",
       "additionalData": {
-        "includeQmod": false
+        "includeQmod": false,
+        "private": true
       }
     },
     {
@@ -49,7 +51,9 @@
     {
       "id": "sombrero",
       "versionRange": "^0.1.32",
-      "additionalData": {}
+      "additionalData": {
+        "private": true
+      }
     },
     {
       "id": "conditional-dependencies",
@@ -59,37 +63,51 @@
     {
       "id": "fmt",
       "versionRange": "^8.0.5",
-      "additionalData": {}
+      "additionalData": {
+        "private": true
+      }
     },
     {
       "id": "bs-utils",
       "versionRange": "^0.7.0",
-      "additionalData": {}
+      "additionalData": {
+        "private": true
+      }
     },
     {
       "id": "paper",
       "versionRange": "^1.2.4",
-      "additionalData": {}
+      "additionalData": {
+        "private": true
+      }
     },
     {
       "id": "zip",
       "versionRange": "^1.7.4",
-      "additionalData": {}
+      "additionalData": {
+        "private": true
+      }
     },
     {
       "id": "diglett",
       "versionRange": "^2.0.0",
-      "additionalData": {}
+      "additionalData": {
+        "private": true
+      }
     },
     {
       "id": "qosmetics-core",
       "versionRange": "^0.1.0",
-      "additionalData": {}
+      "additionalData": {
+        "private": true
+      }
     },
     {
       "id": "chroma",
       "versionRange": "^2.5.8",
-      "additionalData": {}
+      "additionalData": {
+        "private": true
+      }
     }
   ],
   "additionalData": {}
