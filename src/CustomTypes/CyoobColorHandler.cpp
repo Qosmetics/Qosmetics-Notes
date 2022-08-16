@@ -10,6 +10,9 @@
 #include "UnityEngine/Transform.hpp"
 #include <fmt/format.h>
 
+#include "sombrero/shared/linq_functional.hpp"
+using namespace Sombrero::Linq::Functional;
+
 DEFINE_TYPE(Qosmetics::Notes, CyoobColorHandler);
 
 namespace Qosmetics::Notes
@@ -23,27 +26,26 @@ namespace Qosmetics::Notes
 
     void CyoobColorHandler::SetColors(Sombrero::FastColor thisColor, Sombrero::FastColor thatColor)
     {
-        if (lastThisColor.operator==(thisColor) && lastThatColor.operator==(thatColor))
-            return;
-        DEBUG("{}: setting colors!", fmt::ptr(this));
-        DEBUG("thisColor: {:.2f}, {:.2f}, {:.2f}, {:.2f}", thisColor.r, thisColor.g, thisColor.b, thisColor.a);
-        DEBUG("thatColor: {:.2f}, {:.2f}, {:.2f}, {:.2f}", thatColor.r, thatColor.g, thatColor.b, thatColor.a);
-
-        lastThisColor = thisColor;
-        lastThatColor = thatColor;
-
-        for (auto* mat : customColorMaterials)
+        if (lastThisColor.operator!=(thisColor))
         {
-            if (mat->HasProperty(PropertyID::_Color()))
+            DEBUG("setting thisColor: {:.2f}, {:.2f}, {:.2f}, {:.2f}", thisColor.r, thisColor.g, thisColor.b, thisColor.a);
+            lastThisColor = thisColor;
+            for (auto* mat : thisColorMaterials)
                 mat->SetColor(PropertyID::_Color(), thisColor);
-            if (mat->HasProperty(PropertyID::_OtherColor()))
-                mat->SetColor(PropertyID::_OtherColor(), thatColor);
+
+            if (propertyController)
+            {
+                propertyController->get_materialPropertyBlock()->SetColor(PropertyID::_Color(), thisColor);
+                propertyController->ApplyChanges();
+            }
         }
 
-        if (propertyController)
+        if (lastThatColor.operator!=(thatColor))
         {
-            propertyController->get_materialPropertyBlock()->SetColor(PropertyID::_Color(), thisColor);
-            propertyController->ApplyChanges();
+            DEBUG("setting thatColor: {:.2f}, {:.2f}, {:.2f}, {:.2f}", thisColor.r, thisColor.g, thisColor.b, thisColor.a);
+            lastThatColor = thatColor;
+            for (auto* mat : thatColorMaterials)
+                mat->SetColor(PropertyID::_OtherColor(), thatColor);
         }
     }
 
@@ -76,8 +78,19 @@ namespace Qosmetics::Notes
         }
         DEBUG("Found {} custom colors materials", customColorMaterialsVec.size());
         DEBUG("Found {} replacement renderers", materialReplacementRenderersVec.size());
-        customColorMaterials = il2cpp_utils::vectorToArray(customColorMaterialsVec);
-        materialReplacementRenderers = il2cpp_utils::vectorToArray(materialReplacementRenderersVec);
+        customColorMaterials = ArrayW<UnityEngine::Material*>(customColorMaterialsVec.size());
+        memcpy(customColorMaterials.begin(), customColorMaterialsVec.data(), customColorMaterialsVec.size() * sizeof(UnityEngine::Material*));
+        materialReplacementRenderers = ArrayW<UnityEngine::Renderer*>(materialReplacementRenderersVec.size());
+        memcpy(materialReplacementRenderers.begin(), materialReplacementRenderersVec.data(), materialReplacementRenderersVec.size() * sizeof(UnityEngine::Renderer*));
+
+        thisColorMaterials = customColorMaterials |
+                             Where([](auto x)
+                                   { return x->HasProperty(PropertyID::_Color()); }) |
+                             ToArray();
+        thatColorMaterials = customColorMaterials |
+                             Where([](auto x)
+                                   { return x->HasProperty(PropertyID::_OtherColor()); }) |
+                             ToArray();
     }
 
     void CyoobColorHandler::AddRenderersToPropertyBlockController()

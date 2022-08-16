@@ -13,6 +13,8 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, DebrisColorHandler, UnityEngine::MonoBeh
                       DECLARE_INSTANCE_FIELD(Sombrero::FastColor, lastThisColor);
                       DECLARE_INSTANCE_FIELD(Sombrero::FastColor, lastThatColor);
                       DECLARE_INSTANCE_FIELD(ArrayW<UnityEngine::Material*>, customColorMaterials);
+                      DECLARE_INSTANCE_FIELD(ArrayW<UnityEngine::Material*>, thisColorMaterials);
+                      DECLARE_INSTANCE_FIELD(ArrayW<UnityEngine::Material*>, thatColorMaterials);
                       DECLARE_INSTANCE_FIELD(ArrayW<UnityEngine::Renderer*>, materialReplacementRenderers);
                       DECLARE_INSTANCE_FIELD(GlobalNamespace::MaterialPropertyBlockController*, propertyController);
 

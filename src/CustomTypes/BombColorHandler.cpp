@@ -26,10 +26,7 @@ namespace Qosmetics::Notes
         lastColor = color;
 
         for (auto* mat : customColorMaterials)
-        {
-            if (mat->HasProperty(PropertyID::_Color()))
-                mat->SetColor(PropertyID::_Color(), color);
-        }
+            mat->SetColor(PropertyID::_Color(), color);
 
         if (propertyController)
         {
@@ -53,12 +50,16 @@ namespace Qosmetics::Notes
 
             for (auto material : materials)
             {
-                if (MaterialUtils::ShouldCC(material))
-                    customColorMaterialsVec.push_back(material);
-                else if (!addedRenderer && MaterialUtils::ShouldReplaceExtraCC(material))
+                // if the material does not have the color property skip it because that's dumb
+                if (material->HasProperty(PropertyID::_Color()))
                 {
-                    addedRenderer = true;
-                    materialReplacementRenderersVec.push_back(renderer);
+                    if (MaterialUtils::ShouldCC(material))
+                        customColorMaterialsVec.push_back(material);
+                    else if (!addedRenderer && MaterialUtils::ShouldReplaceExtraCC(material))
+                    {
+                        addedRenderer = true;
+                        materialReplacementRenderersVec.push_back(renderer);
+                    }
                 }
             }
         }

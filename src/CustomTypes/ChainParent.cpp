@@ -88,8 +88,6 @@ namespace Qosmetics::Notes
                 cyoobparentItr->second->Colorize(lastLeftColor, lastRightColor);
             }
         }
-        else
-            ERROR("Couldn't find notecontroller in the map, thus not able to colorize Cyoob!");
     }
 
     void ChainParent::Colorize(Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)

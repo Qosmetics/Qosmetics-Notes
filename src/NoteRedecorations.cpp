@@ -199,10 +199,7 @@ GlobalNamespace::NoteController* RedecorateGameNoteController(GlobalNamespace::N
         auto noteCubeTransform = notePrefab->get_transform()->Find(ConstStrings::NoteCube());
         // if a custom note even exists
         bool addCustomPrefab = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows && !forceDefaultNotes;
-#ifdef CHROMA_EXISTS
-        // set the note colorable by chroma to the opposite of if we are replacing the entire contents of the prefab
-        Chroma::NoteAPI::setNoteColorable(addCustomPrefab);
-#endif
+
         if (addCustomPrefab)
         {
             auto colorScheme = gameplayCoreSceneSetupData->colorScheme;
@@ -286,20 +283,15 @@ GlobalNamespace::NoteController* RedecorateGameNoteController(GlobalNamespace::N
 
 GlobalNamespace::GameNoteController* RedecorateGameNoteController(GlobalNamespace::GameNoteController* prefab, Zenject::DiContainer* container)
 {
+    GET_CONFIG();
 #ifdef BS_UTILS_EXISTS
-    auto& globalConfig = Qosmetics::Notes::Config::get_config();
     if (globalConfig.overrideNoteSize && globalConfig.alsoChangeHitboxes)
-    {
         bs_utils::Submission::disable(modInfo);
-    }
     else
-    {
         bs_utils::Submission::enable(modInfo);
-    }
 #endif
 
 #ifdef CHROMA_EXISTS
-    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();
     auto colorScheme = gameplayCoreSceneSetupData->colorScheme;
     auto leftColor = colorScheme->saberAColor;
     auto rightColor = colorScheme->saberBColor;
@@ -317,6 +309,9 @@ GlobalNamespace::GameNoteController* RedecorateGameNoteController(GlobalNamespac
     Qosmetics::Notes::CyoobParent::lastRightColor = rightColor;
     Qosmetics::Notes::CyoobParent::globalRightColor = Chroma::NoteAPI::getGlobalNoteColorSafe(1).value_or(rightColor);
     Qosmetics::Notes::CyoobParent::globalLeftColor = Chroma::NoteAPI::getGlobalNoteColorSafe(0).value_or(leftColor);
+
+    bool chromaColors = noteModelContainer->currentNoteObject && !ghostNotes && !disappearingArrows && !Qosmetics::Notes::Disabling::GetAnyDisabling();
+    Chroma::NoteAPI::setNoteColorable(chromaColors);
 #endif
 
     return reinterpret_cast<GlobalNamespace::GameNoteController*>(RedecorateGameNoteController<Qosmetics::Notes::CyoobParent, Qosmetics::Notes::CyoobHandler>(prefab, container, ConstStrings::Notes(), false));

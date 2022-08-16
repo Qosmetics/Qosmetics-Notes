@@ -52,17 +52,18 @@ namespace Qosmetics::Notes
             auto noteData = gameNoteController->get_noteData();
             currentColorType = noteData->get_colorType();
             bool right = currentColorType == GlobalNamespace::ColorType::ColorB;
-            bool dot = noteData->get_cutDirection() >= 8;
 
-            handler->ShowNote(right, dot);
+            handler->ShowNote(right, noteData->get_cutDirection() & 0b1000);
 
 #ifdef CHROMA_EXISTS
             if (useChroma)
             {
-                auto thisColor = Chroma::NoteAPI::getNoteControllerColorSafe(gameNoteController).value_or(right ? globalRightColor : globalLeftColor);
+                auto thisColor = Chroma::NoteAPI::getNoteControllerColorSafe(gameNoteController);
                 auto thatColor = right ? globalLeftColor : globalRightColor;
-
-                Colorize(thisColor, thatColor);
+                if (thisColor.has_value())
+                    Colorize(thisColor.value(), thatColor);
+                else
+                    Colorize(right ? globalRightColor : globalLeftColor, thatColor);
             }
 #endif
         }
@@ -87,8 +88,6 @@ namespace Qosmetics::Notes
                 cyoobparentItr->second->Colorize(lastLeftColor, lastRightColor);
             }
         }
-        else
-            ERROR("Couldn't find notecontroller in the map, thus not able to colorize Cyoob!");
     }
 
     void CyoobParent::Colorize(Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)
