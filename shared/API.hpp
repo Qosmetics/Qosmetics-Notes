@@ -1,13 +1,22 @@
 #pragma once
 #include "NotesConfig.hpp"
-#include "UnityEngine/GameObject.hpp"
 #include "conditional-dependencies/shared/main.hpp"
 #include <optional>
+
 #if __has_include("qosmetics-core/shared/Data/Descriptor.hpp")
 #include "qosmetics-core/shared/Data/Descriptor.hpp"
 #ifndef QOSMETICS_CORE
 #define QOSMETICS_CORE
 #endif
+#endif
+
+#if __has_include("UnityEngine/GameObject.hpp")
+#include "UnityEngine/GameObject.hpp"
+#else
+namespace UnityEngine
+{
+    typedef Il2CppObject GameObject;
+}
 #endif
 
 #define QOSMETICS_NOTES "qosmetics-notes"
