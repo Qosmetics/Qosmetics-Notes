@@ -14,6 +14,7 @@
 #include "UnityEngine/Transform.hpp"
 
 #if __has_include("chroma/shared/NoteAPI.hpp")
+#include "chroma/shared/CoreAPI.hpp"
 #include "chroma/shared/NoteAPI.hpp"
 #ifndef CHROMA_EXISTS
 #define CHROMA_EXISTS
@@ -22,7 +23,6 @@
 
 DEFINE_TYPE(Qosmetics::Notes, ChainParent);
 
-extern bool useChroma;
 namespace Qosmetics::Notes
 {
     std::unordered_map<GlobalNamespace::NoteControllerBase*, ChainParent*> ChainParent::noteControllerToParentMap = {};
@@ -58,7 +58,7 @@ namespace Qosmetics::Notes
             handler->ShowNote(right, isHead);
 
 #ifdef CHROMA_EXISTS
-            if (useChroma)
+            if (Chroma::CoreAPI::isChromaRunning())
             {
                 auto thisColor = Chroma::NoteAPI::getNoteControllerColorSafe(gameNoteController).value_or(right ? globalRightColor : globalLeftColor);
                 auto thatColor = right ? globalLeftColor : globalRightColor;

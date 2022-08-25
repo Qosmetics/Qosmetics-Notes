@@ -37,26 +37,6 @@ extern "C" void setup(ModInfo& info)
     info = modInfo;
 }
 
-bool useChroma = false;
-bool chromaInReqs = false;
-bool chromaInSugs = false;
-
-void UpdateUseChromaSug(const std::vector<std::string>& sugs)
-{
-    auto itr = std::find(sugs.begin(), sugs.end(), "Chroma");
-    chromaInSugs = itr != sugs.end();
-    useChroma = chromaInSugs || chromaInReqs;
-    INFO("Qosmetics Cyoobs useChroma: {}", useChroma);
-}
-
-void UpdateUseChromaReq(const std::vector<std::string>& reqs)
-{
-    auto itr = std::find(reqs.begin(), reqs.end(), "Chroma");
-    chromaInReqs = itr != reqs.end();
-    useChroma = chromaInSugs || chromaInReqs;
-    INFO("Qosmetics Cyoobs useChroma: {}", useChroma);
-}
-
 extern "C" void load()
 {
     il2cpp_functions::Class_Init(classof(HMUI::ImageView*));
@@ -73,7 +53,4 @@ extern "C" void load()
     Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::fr_xml), Diglett::Language::FRENCH);
     Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::ja_xml), Diglett::Language::JAPANESE);
     Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::ko_xml), Diglett::Language::KOREAN);
-
-    PinkCore::API::GetFoundSuggestionCallbackSafe() += UpdateUseChromaSug;
-    PinkCore::API::GetFoundRequirementCallbackSafe() += UpdateUseChromaReq;
 }

@@ -13,6 +13,7 @@
 #include "UnityEngine/Transform.hpp"
 
 #if __has_include("chroma/shared/NoteAPI.hpp")
+#include "chroma/shared/CoreAPI.hpp"
 #include "chroma/shared/NoteAPI.hpp"
 #ifndef CHROMA_EXISTS
 #define CHROMA_EXISTS
@@ -21,7 +22,6 @@
 
 DEFINE_TYPE(Qosmetics::Notes, CyoobParent);
 
-extern bool useChroma;
 namespace Qosmetics::Notes
 {
     std::unordered_map<GlobalNamespace::NoteControllerBase*, CyoobParent*> CyoobParent::noteControllerToParentMap = {};
@@ -56,7 +56,7 @@ namespace Qosmetics::Notes
             handler->ShowNote(right, noteData->get_cutDirection() & 0b1000);
 
 #ifdef CHROMA_EXISTS
-            if (useChroma)
+            if (Chroma::CoreAPI::isChromaRunning())
             {
                 auto thisColor = Chroma::NoteAPI::getNoteControllerColorSafe(gameNoteController);
                 auto thatColor = right ? globalLeftColor : globalRightColor;

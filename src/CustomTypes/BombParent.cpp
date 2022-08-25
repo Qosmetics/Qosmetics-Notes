@@ -5,6 +5,7 @@
 
 #if __has_include("chroma/shared/BombAPI.hpp")
 #include "chroma/shared/BombAPI.hpp"
+#include "chroma/shared/CoreAPI.hpp"
 #ifndef CHROMA_EXISTS
 #define CHROMA_EXISTS
 #endif
@@ -12,15 +13,16 @@
 
 DEFINE_TYPE(Qosmetics::Notes, BombParent);
 
-extern bool useChroma;
 namespace Qosmetics::Notes
 {
     std::unordered_map<GlobalNamespace::NoteControllerBase*, BombParent*> BombParent::noteControllerToParentMap = {};
     void BombParent::Awake()
     {
         noteController = get_gameObject()->GetComponent<GlobalNamespace::NoteControllerBase*>();
-        if (useChroma)
+#ifdef CHROMA_EXISTS
+        if (Chroma::CoreAPI::isChromaRunning())
             noteController->get_didInitEvent()->Add(reinterpret_cast<GlobalNamespace::INoteControllerDidInitEvent*>(this));
+#endif
 
         colorHandler = get_gameObject()->GetComponentInChildren<BombColorHandler*>();
         noteControllerToParentMap[noteController] = this;
@@ -39,8 +41,10 @@ namespace Qosmetics::Notes
 
     void BombParent::OnDestroy()
     {
-        if (useChroma)
+#ifdef CHROMA_EXISTS
+        if (Chroma::CoreAPI::isChromaRunning())
             noteController->get_didInitEvent()->Remove(reinterpret_cast<GlobalNamespace::INoteControllerDidInitEvent*>(this));
+#endif
         noteControllerToParentMap.erase(noteController);
     }
 
