@@ -11,8 +11,6 @@
 #include "sombrero/shared/FastColor.hpp"
 #include "sombrero/shared/FastVector2.hpp"
 
-#include "UnityEngine/RectTransform.hpp"
-
 DEFINE_TYPE(Qosmetics::Notes, SettingsViewController);
 
 using namespace QuestUI::BeatSaberUI;
@@ -50,19 +48,42 @@ namespace Qosmetics::Notes
             scrollTransform->set_sizeDelta(Sombrero::FastVector2::zero());
 
             auto containerT = container->get_transform();
-            TOGGLE(overrideNoteSize, "QosmeticsCyoobs:Settings:OverrideNoteSize");
-            noteSizeSlider = CreateSliderSetting(containerT, localization->get("QosmeticsCyoobs:Settings:NoteSize"), 0.05f, globalConfig.noteSize, 0.05f, 2.0f, 0.2f, [&](auto v)
+            overrideNoteSizeToggle = CreateToggle(containerT, localization->get("QosmeticsCyoobs:Settings:OverrideNoteSize"), globalConfig.get_overrideNoteSize(),
+                                                  [&](auto v)
+                                                  {
+                                                      auto& config = Config::get_config();
+                                                      config.set_overrideNoteSize(v);
+
+                                                      Qosmetics::Core::Config::SaveConfig();
+                                                      previewViewController->UpdatePreview(false);
+                                                  });
+            AddHoverHint(overrideNoteSizeToggle, localization->get("QosmeticsCyoobs:Settings:OverrideNoteSizeHoverHint"));
+
+            noteSizeSlider = CreateSliderSetting(containerT, localization->get("QosmeticsCyoobs:Settings:NoteSize"), 0.05f, globalConfig.noteSize, 0.05f, 2.0f, 0.2f,
+                                                 [&](auto v)
                                                  {
-                                                          Config::get_config().noteSize = v;
-                                                          Qosmetics::Core::Config::SaveConfig();
-                                                          previewViewController->UpdatePreview(false); });
+                                                     Config::get_config().noteSize = v;
+                                                     Qosmetics::Core::Config::SaveConfig();
+                                                     previewViewController->UpdatePreview(false);
+                                                 });
+
             noteSizeSlider->FormatString = [](auto v) -> std::string
             {
                 return std::to_string(v).substr(0, 4);
             };
+
             AddHoverHint(noteSizeSlider, localization->get("QosmeticsCyoobs:Settings:NoteSizeHoverHint"));
 
-            TOGGLE(alsoChangeHitboxes, "QosmeticsCyoobs:Settings:AlsoChangeHitboxes");
+            alsoChangeHitboxesToggle = CreateToggle(containerT, localization->get("QosmeticsCyoobs:Settings:AlsoChangeHitboxes"), globalConfig.get_alsoChangeHitboxes(),
+                                                    [&](auto v)
+                                                    {
+                                                        auto& config = Config::get_config();
+                                                        config.set_alsoChangeHitboxes(v);
+                                                        Qosmetics::Core::Config::SaveConfig();
+                                                        previewViewController->UpdatePreview(false);
+                                                    });
+            AddHoverHint(alsoChangeHitboxesToggle, localization->get("QosmeticsCyoobs:Settings:AlsoChangeHitboxesHint"));
+
             TOGGLE(forceDefaultBombs, "QosmeticsCyoobs:Settings:ForceDefaultBombs");
             TOGGLE(forceDefaultChains, "QosmeticsCyoobs:Settings:ForceDefaultChains");
             TOGGLE(forceDefaultDebris, "QosmeticsCyoobs:Settings:ForceDefaultDebris");
@@ -73,9 +94,9 @@ namespace Qosmetics::Notes
         else if (justChangedProfile)
         {
             justChangedProfile = false;
-            overrideNoteSizeToggle->set_isOn(globalConfig.overrideNoteSize);
+            overrideNoteSizeToggle->set_isOn(globalConfig.get_overrideNoteSize());
             noteSizeSlider->set_value(globalConfig.noteSize);
-            alsoChangeHitboxesToggle->set_isOn(globalConfig.alsoChangeHitboxes);
+            alsoChangeHitboxesToggle->set_isOn(globalConfig.get_alsoChangeHitboxes());
             forceDefaultChainsToggle->set_isOn(globalConfig.forceDefaultChains);
             forceDefaultBombsToggle->set_isOn(globalConfig.forceDefaultBombs);
             forceDefaultDebrisToggle->set_isOn(globalConfig.forceDefaultDebris);

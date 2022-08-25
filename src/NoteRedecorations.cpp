@@ -49,21 +49,14 @@ extern ModInfo modInfo;
 #endif
 #endif
 
-#if __has_include("bs-utils/shared/utils.hpp")
-#include "bs-utils/shared/utils.hpp"
-#ifndef BS_UTILS_EXISTS
-#define BS_UTILS_EXISTS
-#endif
-#endif
-
-#define GET_CONFIG()                                                                                                                    \
-    auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();                                                     \
-    auto& config = noteModelContainer->GetNoteConfig();                                                                                 \
-    auto& globalConfig = Qosmetics::Notes::Config::get_config();                                                                        \
-    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();                            \
-    auto gameplayModifiers = gameplayCoreSceneSetupData->gameplayModifiers;                                                             \
-    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayModifiers->get_notesUniformScale(); \
-    bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                              \
+#define GET_CONFIG()                                                                                                                          \
+    auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();                                                           \
+    auto& config = noteModelContainer->GetNoteConfig();                                                                                       \
+    auto& globalConfig = Qosmetics::Notes::Config::get_config();                                                                              \
+    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();                                  \
+    auto gameplayModifiers = gameplayCoreSceneSetupData->gameplayModifiers;                                                                   \
+    float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * gameplayModifiers->get_notesUniformScale(); \
+    bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                                    \
     bool disappearingArrows = gameplayModifiers->get_disappearingArrows();
 
 static void SetAndFixObjectChildren(UnityEngine::Transform* obj, Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)
@@ -128,7 +121,7 @@ GlobalNamespace::MirroredGameNoteController* RedecorateMirroredGameNoteControlle
             SetAndFixObjectChildren(mirroredObject->get_transform(), leftColor, rightColor);
 
             // Update note sizes
-            if (globalConfig.overrideNoteSize)
+            if (globalConfig.get_overrideNoteSize())
                 mirroredNoteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
 
             // if we don't want to show arrows, disable the arrow gameobjects
@@ -171,10 +164,10 @@ GlobalNamespace::MirroredGameNoteController* RedecorateMirroredGameNoteControlle
             if (circle)
                 circle->get_gameObject()->SetActive(false);
 
-            if (globalConfig.overrideNoteSize)
+            if (globalConfig.get_overrideNoteSize())
                 mirroredNoteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
         }
-        else if (globalConfig.overrideNoteSize)
+        else if (globalConfig.get_overrideNoteSize())
         {
             mirroredNoteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
         }
@@ -221,11 +214,11 @@ GlobalNamespace::NoteController* RedecorateGameNoteController(GlobalNamespace::N
             SetAndFixObjectChildren(notes->get_transform(), leftColor, rightColor);
 
             // Update note sizes
-            if (globalConfig.overrideNoteSize)
+            if (globalConfig.get_overrideNoteSize())
             {
                 noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
 
-                if (!globalConfig.alsoChangeHitboxes)
+                if (!globalConfig.get_alsoChangeHitboxes())
                 {
                     ArrayW bigCuttables = CRASH_UNLESS(il2cpp_utils::GetFieldValue<ArrayW<GlobalNamespace::BoxCuttableBySaber*>>(notePrefab, "_bigCuttableBySaberList"));
                     for (auto bigCuttable : bigCuttables)
@@ -257,12 +250,12 @@ GlobalNamespace::NoteController* RedecorateGameNoteController(GlobalNamespace::N
             noteCubeTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
         }
         // note didn't exist, but we do want to change note size
-        else if (globalConfig.overrideNoteSize)
+        else if (globalConfig.get_overrideNoteSize())
         {
             noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
 
             // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
-            if (!globalConfig.alsoChangeHitboxes)
+            if (!globalConfig.get_alsoChangeHitboxes())
             {
                 ArrayW bigCuttables = CRASH_UNLESS(il2cpp_utils::GetFieldValue<ArrayW<GlobalNamespace::BoxCuttableBySaber*>>(notePrefab, "_bigCuttableBySaberList"));
                 for (auto bigCuttable : bigCuttables)
@@ -284,13 +277,6 @@ GlobalNamespace::NoteController* RedecorateGameNoteController(GlobalNamespace::N
 GlobalNamespace::GameNoteController* RedecorateGameNoteController(GlobalNamespace::GameNoteController* prefab, Zenject::DiContainer* container)
 {
     GET_CONFIG();
-#ifdef BS_UTILS_EXISTS
-    if (globalConfig.overrideNoteSize && globalConfig.alsoChangeHitboxes)
-        bs_utils::Submission::disable(modInfo);
-    else
-        bs_utils::Submission::enable(modInfo);
-#endif
-
 #ifdef CHROMA_EXISTS
     auto colorScheme = gameplayCoreSceneSetupData->colorScheme;
     auto leftColor = colorScheme->saberAColor;

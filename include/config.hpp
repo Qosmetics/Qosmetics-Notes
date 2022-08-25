@@ -6,9 +6,7 @@ namespace Qosmetics::Notes
     struct Config
     {
         std::string lastUsedCyoob;
-        bool overrideNoteSize = false;
         double noteSize = 1.0f;
-        bool alsoChangeHitboxes = false;
         bool forceDefaultBombs = false;
         bool forceDefaultChains = false;
         bool forceDefaultDebris = false;
@@ -18,6 +16,25 @@ namespace Qosmetics::Notes
         bool keepMissingReflections = false;
 
         static Config& get_config();
+
+        auto get_overrideNoteSize() { return overrideNoteSize; }
+        void set_overrideNoteSize(auto value)
+        {
+            overrideNoteSize = value;
+            UpdateSubmission();
+        }
+        auto get_alsoChangeHitboxes() { return alsoChangeHitboxes; }
+        void set_alsoChangeHitboxes(auto value)
+        {
+            alsoChangeHitboxes = value;
+            UpdateSubmission();
+        }
+
+        void UpdateSubmission();
+
+    private:
+        bool overrideNoteSize = false;
+        bool alsoChangeHitboxes = false;
     };
 
     struct NoteConfigRegistration : public Qosmetics::Core::Config::Registration

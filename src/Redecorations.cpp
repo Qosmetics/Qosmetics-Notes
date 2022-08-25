@@ -54,14 +54,14 @@
 #endif
 
 // just a macro to quickly get all the relevant config stuff because it was redundant to type every time and it's the same across everywhere but I can't cahce it into a method or something cause it's like 10 things
-#define GET_CONFIG()                                                                                                                    \
-    auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();                                                     \
-    auto& config = noteModelContainer->GetNoteConfig();                                                                                 \
-    auto& globalConfig = Qosmetics::Notes::Config::get_config();                                                                        \
-    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();                            \
-    auto gameplayModifiers = gameplayCoreSceneSetupData->gameplayModifiers;                                                             \
-    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayModifiers->get_notesUniformScale(); \
-    bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                              \
+#define GET_CONFIG()                                                                                                                          \
+    auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();                                                           \
+    auto& config = noteModelContainer->GetNoteConfig();                                                                                       \
+    auto& globalConfig = Qosmetics::Notes::Config::get_config();                                                                              \
+    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();                                  \
+    auto gameplayModifiers = gameplayCoreSceneSetupData->gameplayModifiers;                                                                   \
+    float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * gameplayModifiers->get_notesUniformScale(); \
+    bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                                    \
     bool disappearingArrows = gameplayModifiers->get_disappearingArrows();
 
 #pragma region bombs
@@ -106,18 +106,18 @@ REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteCon
             auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
             meshRenderer->set_enabled(false);
 
-            if (globalConfig.overrideNoteSize && globalConfig.alsoChangeHitboxes)
+            if (globalConfig.get_overrideNoteSize() && globalConfig.get_alsoChangeHitboxes())
             {
                 auto sphereCollider = mesh->get_gameObject()->GetComponent<UnityEngine::SphereCollider*>();
                 sphereCollider->set_radius(sphereCollider->get_radius() * noteSizeFactor);
             }
         }
         // bomb didn't exist, but we do want to change note size
-        else if (globalConfig.overrideNoteSize)
+        else if (globalConfig.get_overrideNoteSize())
         {
 
             mesh->set_localScale(mesh->get_localScale() * noteSizeFactor);
-            if (!globalConfig.alsoChangeHitboxes)
+            if (!globalConfig.get_alsoChangeHitboxes())
             {
                 auto sphereCollider = mesh->get_gameObject()->GetComponent<UnityEngine::SphereCollider*>();
                 sphereCollider->set_radius(sphereCollider->get_radius() / noteSizeFactor);
@@ -156,12 +156,12 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
         else if (globalConfig.disableReflections || (!config.get_isMirrorable() && !globalConfig.keepMissingReflections))
         {
             meshRenderer->set_enabled(false);
-            if (globalConfig.overrideNoteSize)
+            if (globalConfig.get_overrideNoteSize())
             {
                 mesh->set_localScale(mesh->get_localScale() * noteSizeFactor);
             }
         }
-        else if (globalConfig.overrideNoteSize)
+        else if (globalConfig.get_overrideNoteSize())
         {
             mesh->set_localScale(mesh->get_localScale() * noteSizeFactor);
         }

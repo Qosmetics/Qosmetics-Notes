@@ -30,14 +30,14 @@
 
 #include "qosmetics-core/shared/RedecorationRegister.hpp"
 
-#define GET_CONFIG()                                                                                                                    \
-    auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();                                                     \
-    auto& config = noteModelContainer->GetNoteConfig();                                                                                 \
-    auto& globalConfig = Qosmetics::Notes::Config::get_config();                                                                        \
-    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();                            \
-    auto gameplayModifiers = gameplayCoreSceneSetupData->gameplayModifiers;                                                             \
-    float noteSizeFactor = (globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f) * gameplayModifiers->get_notesUniformScale(); \
-    bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                              \
+#define GET_CONFIG()                                                                                                                          \
+    auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();                                                           \
+    auto& config = noteModelContainer->GetNoteConfig();                                                                                       \
+    auto& globalConfig = Qosmetics::Notes::Config::get_config();                                                                              \
+    auto gameplayCoreSceneSetupData = container->TryResolve<GlobalNamespace::GameplayCoreSceneSetupData*>();                                  \
+    auto gameplayModifiers = gameplayCoreSceneSetupData->gameplayModifiers;                                                                   \
+    float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * gameplayModifiers->get_notesUniformScale(); \
+    bool ghostNotes = gameplayModifiers->get_ghostNotes();                                                                                    \
     bool disappearingArrows = gameplayModifiers->get_disappearingArrows();
 
 static void SetAndFixObjectChildren(UnityEngine::Transform* obj, Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)
@@ -93,7 +93,7 @@ GlobalNamespace::NoteDebris* RedecorateNoteDebris(GlobalNamespace::NoteDebris* n
 
             meshTransform->get_gameObject()->GetComponent<UnityEngine::MeshFilter*>()->set_mesh(nullptr);
         }
-        else if (globalConfig.overrideNoteSize)
+        else if (globalConfig.get_overrideNoteSize())
         {
             auto t = noteDebrisPrefab->get_transform();
             t->set_localScale(t->get_localScale() * noteSizeFactor);

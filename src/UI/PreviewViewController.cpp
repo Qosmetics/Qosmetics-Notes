@@ -160,7 +160,7 @@ namespace Qosmetics::Notes
             auto name = descriptor.get_name();
             SetTitleText(name);
 
-            float noteSizeFactor = globalConfig.overrideNoteSize ? globalConfig.noteSize : 1.0f;
+            float noteSizeFactor = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
             float noteSize = noteSizeFactor * 0.4f;
 
             DEBUG("Cleaning up note mirrorables");

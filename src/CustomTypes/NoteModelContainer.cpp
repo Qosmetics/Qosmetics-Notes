@@ -437,16 +437,12 @@ namespace Qosmetics::Notes
 
     void NoteModelContainer::OnGameRestart()
     {
-        if (currentNoteObject)
-        {
+        if (currentNoteObject && currentNoteObject->m_CachedPtr.m_value)
             Object::DestroyImmediate(currentNoteObject);
-            currentNoteObject = nullptr;
-        }
-        if (bundle)
-        {
+        currentNoteObject = nullptr;
+        if (bundle && bundle->m_CachedPtr.m_value)
             bundle->Unload(true);
-            bundle = nullptr;
-        }
+        bundle = nullptr;
 
         instance = nullptr;
         UnityEngine::Object::DestroyImmediate(this->get_gameObject());
