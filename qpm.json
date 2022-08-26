@@ -4,11 +4,11 @@
   "info": {
     "name": "Qosmetics Cyoobs",
     "id": "qosmetics-notes",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "url": "https://github.com/Qosmetics/Qosmetics-Notes",
     "additionalData": {
-      "overrideSoName": "libqosmetics-notes.so",
-      "headersOnly": true
+      "headersOnly": true,
+      "overrideSoName": "libqosmetics-notes.so"
     }
   },
   "dependencies": [
