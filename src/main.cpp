@@ -20,8 +20,6 @@
 #include <vector>
 
 #include "GlobalNamespace/MainFlowCoordinator.hpp"
-#include "pinkcore/shared/API.hpp"
-#include "pinkcore/shared/RequirementAPI.hpp"
 
 QOSMETICS_FLOWCOORDINATOR_REGISTER(Cyoobs, Qosmetics::Notes::CyoobFlowCoordinator*)
 {
