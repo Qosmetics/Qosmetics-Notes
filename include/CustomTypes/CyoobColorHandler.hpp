@@ -7,7 +7,7 @@
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "UnityEngine/Renderer.hpp"
 #include "custom-types/shared/macros.hpp"
-#include "sombrero/shared/Fastcolor.hpp"
+#include "sombrero/shared/FastColor.hpp"
 
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, CyoobColorHandler, UnityEngine::MonoBehaviour,
                       DECLARE_INSTANCE_FIELD(Sombrero::FastColor, lastThisColor);
