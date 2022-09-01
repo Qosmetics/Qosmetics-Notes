@@ -24,6 +24,12 @@ using namespace QuestUI::BeatSaberUI;
 
 namespace Qosmetics::Notes
 {
+    void SelectionViewController::Inject(PreviewViewController* previewViewController, NoteModelContainer* noteModelContainer)
+    {
+        this->previewViewController = previewViewController;
+        this->noteModelContainer = noteModelContainer;
+    }
+
     void SelectionViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
         if (firstActivation)
@@ -112,8 +118,6 @@ namespace Qosmetics::Notes
 
     void SelectionViewController::OnSelectDefault()
     {
-        auto noteModelContainer = NoteModelContainer::get_instance();
-
         // if we do not PROPERLY switch to default, don't clear the preview
         if (noteModelContainer->Default())
         {
@@ -134,7 +138,7 @@ namespace Qosmetics::Notes
                 return;
             }
 
-            if (NoteModelContainer::get_instance()->LoadObject(descriptor, std::bind(&SelectionViewController::OnObjectLoadFinished, this)))
+            if (noteModelContainer->LoadObject(descriptor, std::bind(&SelectionViewController::OnObjectLoadFinished, this)))
             {
                 previewViewController->ClearPrefab();
                 previewViewController->ShowLoading(true);
@@ -150,7 +154,7 @@ namespace Qosmetics::Notes
             return;
         }
 
-        if (descriptor.get_filePath() == NoteModelContainer::get_instance()->GetDescriptor().get_filePath())
+        if (descriptor.get_filePath() == noteModelContainer->GetDescriptor().get_filePath())
             OnSelectDefault();
 
         deletefile(descriptor.get_filePath());
@@ -160,8 +164,6 @@ namespace Qosmetics::Notes
     void SelectionViewController::OnObjectLoadFinished()
     {
         // something to do after we changed the object, like update preview
-        auto noteModelContainer = NoteModelContainer::get_instance();
-
         Qosmetics::Notes::Config::get_config().lastUsedCyoob = noteModelContainer->GetNoteConfig().get_isDefault() ? "" : Qosmetics::Core::FileUtils::GetFileName(noteModelContainer->GetDescriptor().get_filePath(), true);
         Qosmetics::Core::Config::SaveConfig();
         previewViewController->UpdatePreview(true);

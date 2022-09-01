@@ -2,7 +2,6 @@
 #include "ConstStrings.hpp"
 #include "CustomTypes/CyoobColorHandler.hpp"
 #include "CustomTypes/DebrisColorHandler.hpp"
-#include "CustomTypes/NoteModelContainer.hpp"
 #include "config.hpp"
 #include "diglett/shared/Localization.hpp"
 #include "diglett/shared/Util.hpp"
@@ -67,6 +66,12 @@ static UnityEngine::Transform* GetOrDuplicateLink(UnityEngine::Transform* parent
 namespace Qosmetics::Notes
 {
     bool PreviewViewController::justChangedProfile = false;
+
+    void PreviewViewController::Inject(Qosmetics::Notes::NoteModelContainer* noteModelContainer)
+    {
+        this->noteModelContainer = noteModelContainer;
+    }
+
     void PreviewViewController::DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
     {
         if (currentPrefab)
@@ -152,7 +157,6 @@ namespace Qosmetics::Notes
             }
 
             DEBUG("Getting variables");
-            auto noteModelContainer = NoteModelContainer::get_instance();
             auto config = noteModelContainer->GetNoteConfig();
             auto& globalConfig = Config::get_config();
 
@@ -320,7 +324,6 @@ namespace Qosmetics::Notes
 
     void PreviewViewController::InstantiatePrefab()
     {
-        auto noteModelContainer = NoteModelContainer::get_instance();
         if (noteModelContainer->currentNoteObject)
         {
             DEBUG("Found a new note object, instantiating it! name: {}", noteModelContainer->currentNoteObject->get_name());

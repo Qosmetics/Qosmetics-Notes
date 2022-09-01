@@ -11,7 +11,6 @@
 #include "HMUI/CurvedTextMeshPro.hpp"
 #include "HMUI/ImageView.hpp"
 
-#include "qosmetics-core/shared/FlowCoordinatorRegister.hpp"
 #include "questui/shared/BeatSaberUI.hpp"
 
 #include "diglett/shared/Conversions.hpp"
@@ -21,13 +20,20 @@
 
 #include "GlobalNamespace/MainFlowCoordinator.hpp"
 
+#include "Installers/AppInstaller.hpp"
+#include "Installers/GameInstaller.hpp"
+#include "Installers/MenuInstaller.hpp"
+#include "lapiz/shared/AttributeRegistration.hpp"
+#include "lapiz/shared/zenject/Zenjector.hpp"
+
+/*
 QOSMETICS_FLOWCOORDINATOR_REGISTER(Cyoobs, Qosmetics::Notes::CyoobFlowCoordinator*)
 {
     auto inactive = QuestUI::BeatSaberUI::ArrayToSprite(IncludedAssets::NoteIcon_png);
     auto active = QuestUI::BeatSaberUI::ArrayToSprite(IncludedAssets::NoteIconSelected_png);
     return std::make_pair(inactive, active);
 }
-
+*/
 ModInfo modInfo = {MOD_ID, VERSION};
 
 extern "C" void setup(ModInfo& info)
@@ -37,13 +43,13 @@ extern "C" void setup(ModInfo& info)
 
 extern "C" void load()
 {
-    il2cpp_functions::Class_Init(classof(HMUI::ImageView*));
-    il2cpp_functions::Class_Init(classof(HMUI::CurvedTextMeshPro*));
+    il2cpp_functions::Init();
 
     mkpath(cyoob_path);
     auto& logger = Qosmetics::Notes::Logging::getLogger();
     Hooks::InstallHooks(logger);
     custom_types::Register::AutoRegister();
+    Lapiz::Attributes::AutoRegister();
 
     Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::de_xml), Diglett::Language::GERMAN);
     Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::en_xml), Diglett::Language::ENGLISH);
@@ -51,4 +57,9 @@ extern "C" void load()
     Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::fr_xml), Diglett::Language::FRENCH);
     Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::ja_xml), Diglett::Language::JAPANESE);
     Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::ko_xml), Diglett::Language::KOREAN);
+
+    auto zenjector = Lapiz::Zenject::Zenjector::Get();
+    zenjector->Install<Qosmetics::Notes::AppInstaller*>(Lapiz::Zenject::Location::App);
+    zenjector->Install<Qosmetics::Notes::MenuInstaller*>(Lapiz::Zenject::Location::Menu);
+    zenjector->Install<Qosmetics::Notes::GameInstaller*>(Lapiz::Zenject::Location::Player | Lapiz::Zenject::Location::Tutorial);
 }

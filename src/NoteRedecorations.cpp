@@ -37,8 +37,6 @@
 #include "config.hpp"
 #include "logging.hpp"
 
-#include "qosmetics-core/shared/RedecorationRegister.hpp"
-
 extern ModInfo modInfo;
 
 #if __has_include("chroma/shared/NoteAPI.hpp")
@@ -303,6 +301,7 @@ GlobalNamespace::GameNoteController* RedecorateGameNoteController(GlobalNamespac
     return reinterpret_cast<GlobalNamespace::GameNoteController*>(RedecorateGameNoteController<Qosmetics::Notes::CyoobParent, Qosmetics::Notes::CyoobHandler>(prefab, container, ConstStrings::Notes(), false));
 }
 
+/*
 REDECORATION_REGISTRATION(normalBasicNotePrefab, 10, true, GlobalNamespace::GameNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
 {
     return RedecorateGameNoteController(normalBasicNotePrefab, container);
@@ -317,11 +316,11 @@ REDECORATION_REGISTRATION(mirroredGameNoteControllerPrefab, 10, true, GlobalName
 {
     return RedecorateMirroredGameNoteController<Qosmetics::Notes::CyoobParent*, Qosmetics::Notes::CyoobHandler*>(mirroredGameNoteControllerPrefab, container, ConstStrings::MirrorNotes(), false);
 }
-
+*/
 #pragma endregion
 
 #pragma region chainNotes
-
+/*
 REDECORATION_REGISTRATION(burstSliderHeadNotePrefab, 10, true, GlobalNamespace::GameNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
 {
 
@@ -362,5 +361,5 @@ REDECORATION_REGISTRATION(mirroredBurstSliderGameNoteControllerPrefab, 10, true,
 {
     return RedecorateMirroredGameNoteController<Qosmetics::Notes::ChainParent*, Qosmetics::Notes::ChainHandler*>(mirroredBurstSliderGameNoteControllerPrefab, container, ConstStrings::MirrorChains(), Qosmetics::Notes::Config::get_config().forceDefaultChains);
 }
-
+*/
 #pragma endregion

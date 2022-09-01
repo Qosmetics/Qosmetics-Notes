@@ -4,6 +4,7 @@
 #include "UI/PreviewViewController.hpp"
 #include "UnityEngine/UI/Toggle.hpp"
 #include "custom-types/shared/macros.hpp"
+#include "lapiz/shared/macros.hpp"
 #include "questui/shared/CustomTypes/Components/Settings/SliderSetting.hpp"
 
 #ifndef DECLARE_OVERRIDE_METHOD_MATCH
@@ -23,8 +24,10 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SettingsViewController, HMUI::ViewContro
                       DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, keepMissingReflectionsToggle);
 
                       DECLARE_INSTANCE_FIELD(PreviewViewController*, previewViewController);
-                      DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
 
+                      DECLARE_INJECT_METHOD(void, Inject, PreviewViewController* previewViewController);
+                      DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
+                      DECLARE_DEFAULT_CTOR();
                       public
                       :
 

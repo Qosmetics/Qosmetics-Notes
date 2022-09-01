@@ -7,6 +7,6 @@
 
 MAKE_AUTO_HOOK_MATCH(MenuTransitionsHelper_RestartGame, &GlobalNamespace::MenuTransitionsHelper::RestartGame, void, GlobalNamespace::MenuTransitionsHelper* self, System::Action_1<Zenject::DiContainer*>* finishCallback)
 {
-    Qosmetics::Notes::NoteModelContainer::get_instance()->OnGameRestart();
+    // Qosmetics::Notes::NoteModelContainer::get_instance()->OnGameRestart();
     MenuTransitionsHelper_RestartGame(self, finishCallback);
 }

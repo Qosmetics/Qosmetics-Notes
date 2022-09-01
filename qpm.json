@@ -7,8 +7,8 @@
     "version": "0.0.1",
     "url": "https://github.com/Qosmetics/Qosmetics-Notes",
     "additionalData": {
-      "overrideSoName": "libqosmetics-notes.so",
-      "headersOnly": true
+      "headersOnly": true,
+      "overrideSoName": "libqosmetics-notes.so"
     }
   },
   "dependencies": [
@@ -89,7 +89,7 @@
     },
     {
       "id": "qosmetics-core",
-      "versionRange": "^2.0.0",
+      "versionRange": "^0.1.0",
       "additionalData": {
         "private": true
       }
@@ -100,6 +100,11 @@
       "additionalData": {
         "private": true
       }
+    },
+    {
+      "id": "lapiz",
+      "versionRange": "^0.1.0",
+      "additionalData": {}
     }
   ],
   "additionalData": {}

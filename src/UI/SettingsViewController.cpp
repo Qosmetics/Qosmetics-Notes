@@ -2,6 +2,7 @@
 #include "config.hpp"
 #include "diglett/shared/Localization.hpp"
 #include "diglett/shared/Util.hpp"
+#include "logging.hpp"
 #include "qosmetics-core/shared/ConfigRegister.hpp"
 #include "qosmetics-core/shared/Utils/DateUtils.hpp"
 #include "qosmetics-core/shared/Utils/RainbowUtils.hpp"
@@ -28,6 +29,11 @@ using namespace QuestUI::BeatSaberUI;
 namespace Qosmetics::Notes
 {
     bool SettingsViewController::justChangedProfile = false;
+
+    void SettingsViewController::Inject(PreviewViewController* previewViewController)
+    {
+        this->previewViewController = previewViewController;
+    }
 
     void SettingsViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {

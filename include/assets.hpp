@@ -1,11 +1,16 @@
 #pragma once
+
+#include <string_view>
+#include "beatsaber-hook/shared/utils/typedefs.h"
+
 struct IncludedAsset {
 
     IncludedAsset(uint8_t* start, uint8_t* end) : array(reinterpret_cast<Array<uint8_t>*>(start)) {
         array->klass = nullptr;
         array->monitor = nullptr;
         array->bounds = nullptr;
-        array->max_length = end - start - 32;
+        array->max_length = end - start - 33;
+        *(end - 1)= '\0';
     }
     
     operator ArrayW<uint8_t>() const {

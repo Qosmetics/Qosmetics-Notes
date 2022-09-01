@@ -22,7 +22,6 @@
 #include "UnityEngine/SphereCollider.hpp"
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/Vector3.hpp"
-#include "qosmetics-core/shared/RedecorationRegister.hpp"
 #include "sombrero/shared/FastQuaternion.hpp"
 #include "sombrero/shared/FastVector3.hpp"
 
@@ -65,6 +64,7 @@
     bool disappearingArrows = gameplayModifiers->get_disappearingArrows();
 
 #pragma region bombs
+/*
 REDECORATION_REGISTRATION(bombNotePrefab, 10, true, GlobalNamespace::BombNoteController*, GlobalNamespace::BeatmapObjectsInstaller*)
 {
     if (Qosmetics::Notes::Disabling::GetAnyDisabling())
@@ -173,5 +173,5 @@ REDECORATION_REGISTRATION(mirroredBombNoteControllerPrefab, 10, true, GlobalName
 
     return mirroredBombNoteControllerPrefab;
 }
-
+*/
 #pragma endregion

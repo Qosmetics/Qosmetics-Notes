@@ -28,8 +28,6 @@
 #include "config.hpp"
 #include "logging.hpp"
 
-#include "qosmetics-core/shared/RedecorationRegister.hpp"
-
 #define GET_CONFIG()                                                                                                                          \
     auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance();                                                           \
     auto& config = noteModelContainer->GetNoteConfig();                                                                                       \
@@ -126,6 +124,7 @@ GlobalNamespace::NoteDebris* RedecorateElementNoteDebris(GlobalNamespace::NoteDe
     return RedecorateChainNoteDebris(noteDebrisPrefab, container, ConstStrings::ChainLinkDebris());
 }
 
+/*
 REDECORATION_REGISTRATION(normalNoteDebrisHDPrefab, 10, true, GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*)
 {
     return RedecorateNoteDebris(normalNoteDebrisHDPrefab, container);
@@ -155,3 +154,4 @@ REDECORATION_REGISTRATION(burstSliderElementNoteLWPrefab, 10, true, GlobalNamesp
 {
     return RedecorateElementNoteDebris(burstSliderElementNoteLWPrefab, container);
 }
+*/
