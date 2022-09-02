@@ -42,5 +42,6 @@ namespace ConstStrings
     CONST_STRING(RightLink);
     CONST_STRING(RightLinkCopy1);
     CONST_STRING(RightLinkCopy2);
+    CONST_STRING(Mesh);
 
 }

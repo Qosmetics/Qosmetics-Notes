@@ -15,6 +15,7 @@ DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, BasicNoteScaler, UnityEngine:
                                  DECLARE_INSTANCE_FIELD(GlobalNamespace::NoteControllerBase*, noteController);
                                  DECLARE_INSTANCE_METHOD(void, Awake);
                                  DECLARE_INSTANCE_METHOD(void, OnDestroy);
+                                 DECLARE_INSTANCE_METHOD(GlobalNamespace::INoteControllerDidInitEvent*, i_INoteControllerDidInitEvent);
                                  DECLARE_OVERRIDE_METHOD_MATCH(void, HandleNoteControllerDidInit, &GlobalNamespace::INoteControllerDidInitEvent::HandleNoteControllerDidInit, GlobalNamespace::NoteControllerBase* noteController);
 
 )

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CustomTypes/NoteModelContainer.hpp"
+#include "GlobalNamespace/PlayerDataModel.hpp"
 #include "HMUI/ViewController.hpp"
 #include "TMPro/TextMeshProUGUI.hpp"
 #include "UnityEngine/GameObject.hpp"
@@ -15,12 +16,13 @@
 
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, PreviewViewController, HMUI::ViewController,
                       DECLARE_INSTANCE_FIELD(NoteModelContainer*, noteModelContainer);
+                      DECLARE_INSTANCE_FIELD(GlobalNamespace::PlayerDataModel*, playerDataModel);
                       DECLARE_INSTANCE_FIELD(TMPro::TextMeshProUGUI*, title);
                       DECLARE_INSTANCE_FIELD(UnityEngine::GameObject*, loadingIndicator);
                       DECLARE_INSTANCE_FIELD(UnityEngine::GameObject*, currentPrefab);
                       DECLARE_INSTANCE_METHOD(void, SetTitleText, StringW text);
 
-                      DECLARE_INJECT_METHOD(void, Inject, Qosmetics::Notes::NoteModelContainer* modelContainer);
+                      DECLARE_INJECT_METHOD(void, Inject, Qosmetics::Notes::NoteModelContainer* modelContainer, GlobalNamespace::PlayerDataModel* playerDataModel);
                       DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
                       DECLARE_OVERRIDE_METHOD_MATCH(void, DidDeactivate, &HMUI::ViewController::DidDeactivate, bool removedFromHierarchy, bool screenSystemDisabling);
 

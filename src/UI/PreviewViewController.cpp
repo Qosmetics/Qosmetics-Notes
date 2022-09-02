@@ -20,7 +20,11 @@
 #include "HMUI/ImageView.hpp"
 
 #include "GlobalNamespace/ColorManager.hpp"
+#include "GlobalNamespace/ColorScheme.hpp"
+#include "GlobalNamespace/ColorSchemesSettings.hpp"
 #include "GlobalNamespace/ColorType.hpp"
+#include "GlobalNamespace/PlayerData.hpp"
+#include "System/Collections/Generic/Dictionary_2.hpp"
 #include "Zenject/DiContainer.hpp"
 #include "Zenject/MonoInstaller.hpp"
 
@@ -67,9 +71,10 @@ namespace Qosmetics::Notes
 {
     bool PreviewViewController::justChangedProfile = false;
 
-    void PreviewViewController::Inject(Qosmetics::Notes::NoteModelContainer* noteModelContainer)
+    void PreviewViewController::Inject(Qosmetics::Notes::NoteModelContainer* noteModelContainer, GlobalNamespace::PlayerDataModel* playerDataModel)
     {
         this->noteModelContainer = noteModelContainer;
+        this->playerDataModel = playerDataModel;
     }
 
     void PreviewViewController::DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -201,25 +206,19 @@ namespace Qosmetics::Notes
 
             Sombrero::FastColor leftColor(1.0f, 0.0f, 0.0f, 1.0f);
             Sombrero::FastColor rightColor(0.0f, 0.0f, 1.0f, 1.0f);
-            DEBUG("Attempting getting a monoinstaller");
+            DEBUG("Attempting to get the selected color scheme");
             try
             {
-
-                auto monoInstaller = UnityEngine::Resources::FindObjectsOfTypeAll<Zenject::MonoInstaller*>().FirstOrDefault();
-                if (monoInstaller)
+                auto overrideColorScheme = playerDataModel->playerData->colorSchemesSettings->GetOverrideColorScheme();
+                if (!overrideColorScheme)
                 {
-                    DEBUG("Attempting getting the colormanager from the installer: {}", fmt::ptr(monoInstaller));
-                    auto colorManager = monoInstaller->get_Container()->TryResolve<GlobalNamespace::ColorManager*>();
-                    if (colorManager)
-                    {
-                        leftColor = colorManager->ColorForType(GlobalNamespace::ColorType::ColorA);
-                        rightColor = colorManager->ColorForType(GlobalNamespace::ColorType::ColorB);
-                    }
-                    else
-                        ERROR("could not resolve colormanager for proper colors");
+                    playerDataModel->playerData->colorSchemesSettings->colorSchemesDict->TryGetValue("TheFirst", byref(overrideColorScheme));
                 }
-                else
-                    ERROR("No monoinstallers found, can't resolve colormanager for proper colors");
+                if (overrideColorScheme)
+                {
+                    leftColor = overrideColorScheme->saberAColor;
+                    rightColor = overrideColorScheme->saberBColor;
+                }
             }
             catch (il2cpp_utils::RunMethodException& e)
             {
