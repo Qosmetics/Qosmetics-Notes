@@ -97,14 +97,13 @@ namespace Qosmetics::Notes
         if (hasCustoms)
         {
             bool replaceBombs = config.get_hasBomb() && !(_ghostNotes || _disappearingArrows) && !globalConfig.forceDefaultBombs;
-            Chroma::BombAPI::setBombColorable(!replaceBombs);
-
+            Chroma::BombAPI::setBombColorable(replaceBombs);
             Chroma::NoteAPI::setNoteColorable(!(_ghostNotes || _disappearingArrows));
         }
         else
         {
-            Chroma::BombAPI::setBombColorable(true);
-            Chroma::NoteAPI::setNoteColorable(true);
+            Chroma::BombAPI::setBombColorable(false);
+            Chroma::NoteAPI::setNoteColorable(false);
         }
 #endif
 

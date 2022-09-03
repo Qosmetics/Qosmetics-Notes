@@ -18,22 +18,12 @@
 
 #include <vector>
 
-#include "GlobalNamespace/MainFlowCoordinator.hpp"
-
 #include "Installers/AppInstaller.hpp"
 #include "Installers/GameInstaller.hpp"
 #include "Installers/MenuInstaller.hpp"
 #include "lapiz/shared/AttributeRegistration.hpp"
 #include "lapiz/shared/zenject/Zenjector.hpp"
 
-/*
-QOSMETICS_FLOWCOORDINATOR_REGISTER(Cyoobs, Qosmetics::Notes::CyoobFlowCoordinator*)
-{
-    auto inactive = QuestUI::BeatSaberUI::ArrayToSprite(IncludedAssets::NoteIcon_png);
-    auto active = QuestUI::BeatSaberUI::ArrayToSprite(IncludedAssets::NoteIconSelected_png);
-    return std::make_pair(inactive, active);
-}
-*/
 ModInfo modInfo = {MOD_ID, VERSION};
 
 extern "C" void setup(ModInfo& info)
