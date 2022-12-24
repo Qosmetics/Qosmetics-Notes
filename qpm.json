@@ -23,14 +23,14 @@
     },
     {
       "id": "codegen",
-      "versionRange": "^0.28.0",
+      "versionRange": "^0.31.0",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.15.21",
+      "versionRange": "^0.15.22",
       "additionalData": {
         "private": true
       }
@@ -75,7 +75,7 @@
     },
     {
       "id": "qosmetics-core",
-      "versionRange": "^2.1.0",
+      "versionRange": "^2.1.1",
       "additionalData": {
         "private": true
       }
@@ -89,14 +89,14 @@
     },
     {
       "id": "lapiz",
-      "versionRange": "^0.1.4",
+      "versionRange": "^0.1.8",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "bsml",
-      "versionRange": "^0.2.3",
+      "versionRange": "^0.2.8",
       "additionalData": {
         "private": true
       }
