@@ -4,7 +4,7 @@
   "info": {
     "name": "Qosmetics Cyoobs",
     "id": "qosmetics-notes",
-    "version": "0.0.1",
+    "version": "0.1.2",
     "url": "https://github.com/Qosmetics/Qosmetics-Notes",
     "additionalData": {
       "headersOnly": true,
