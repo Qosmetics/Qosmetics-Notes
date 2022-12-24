@@ -2,48 +2,62 @@
 #include "CustomTypes/NoteModelContainer.hpp"
 #include "assets.hpp"
 #include "config.hpp"
-#include "diglett/shared/Localization.hpp"
-#include "diglett/shared/Util.hpp"
 #include "logging.hpp"
 #include "qosmetics-core/shared/ConfigRegister.hpp"
 #include "qosmetics-core/shared/Utils/FileUtils.hpp"
 #include "qosmetics-core/shared/Utils/ZipUtils.hpp"
-#include "questui/shared/BeatSaberUI.hpp"
-#include "questui/shared/CustomTypes/Components/List/QuestUITableView.hpp"
 #include "static-defines.hpp"
 
 #include "HMUI/TableView.hpp"
 #include "HMUI/TableView_ScrollPositionType.hpp"
 
+#include "bsml/shared/BSML.hpp"
+#include "bsml/shared/Helpers/utilities.hpp"
+
 #include "QbloqConversion.hpp"
+#include "System/Collections/Generic/HashSet_1.hpp"
 #include <algorithm>
 
 DEFINE_TYPE(Qosmetics::Notes, SelectionViewController);
 
-using namespace QuestUI::BeatSaberUI;
-
 namespace Qosmetics::Notes
 {
+    void SelectionViewController::Inject(PreviewViewController* previewViewController, NoteModelContainer* noteModelContainer)
+    {
+        this->previewViewController = previewViewController;
+        this->noteModelContainer = noteModelContainer;
+    }
+
     void SelectionViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
         if (firstActivation)
         {
-            auto vertical = CreateVerticalLayoutGroup(get_transform());
-            auto buttonHorizontal = CreateHorizontalLayoutGroup(vertical->get_transform());
-
-            auto localization = Diglett::Localization::get_instance();
-            auto defaultObjectBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->get("QosmeticsCore:QosmeticsTable:Default"), std::bind(&SelectionViewController::OnSelectDefault, this));
-            auto refreshBtn = CreateUIButton(buttonHorizontal->get_transform(), localization->get("QosmeticsCore:QosmeticsTable:Refresh"), [this]()
-                                             { QbloqConversion::ConvertOldQbloqs(std::bind(&SelectionViewController::RefreshAfterBloqConversion, this)); });
-
-            deletionConfirmationModal = Qosmetics::Core::DeletionConfirmationModal::Create(get_transform());
-            descriptorList = CreateScrollableCustomSourceList<Qosmetics::Core::QosmeticObjectTableData*>(vertical->get_transform(), UnityEngine::Vector2(0.0f, 0.0f), UnityEngine::Vector2(100.0f, 76.0f), nullptr);
-            descriptorList->deletionConfirmationModal = deletionConfirmationModal;
-            descriptorList->onSelect = std::bind(reinterpret_cast<void (SelectionViewController::*)(HMUI::TableCell*)>(&SelectionViewController::OnSelectDescriptor), this, std::placeholders::_1);
-            descriptorList->onDelete = std::bind(reinterpret_cast<void (SelectionViewController::*)(HMUI::TableCell*)>(&SelectionViewController::OnDeleteCell), this, std::placeholders::_1);
-            descriptorList->defaultSprite = ArrayToSprite(IncludedAssets::PlaceholderIcon_png);
+            BSML::parse_and_construct(IncludedAssets::SelectionView_bsml, get_transform(), this);
         }
 
+        Refresh();
+    }
+
+    void SelectionViewController::PostParse()
+    {
+        deletionConfirmationModal = Qosmetics::Core::DeletionConfirmationModal::Create(get_transform());
+
+        auto tableView = descriptorListTableData->tableView;
+        auto go = descriptorListTableData->get_gameObject();
+        Object::DestroyImmediate(descriptorListTableData);
+        descriptorListTableData = nullptr;
+        descriptorList = go->AddComponent<Qosmetics::Core::QosmeticObjectTableData*>();
+        descriptorList->tableView = tableView;
+        tableView->SetDataSource(reinterpret_cast<HMUI::TableView::IDataSource*>(descriptorList), false);
+
+        descriptorList->deletionConfirmationModal = deletionConfirmationModal;
+        descriptorList->onSelect = std::bind(reinterpret_cast<void (SelectionViewController::*)(HMUI::TableCell*)>(&SelectionViewController::OnSelectDescriptor), this, std::placeholders::_1);
+        descriptorList->onDelete = std::bind(reinterpret_cast<void (SelectionViewController::*)(HMUI::TableCell*)>(&SelectionViewController::OnDeleteCell), this, std::placeholders::_1);
+        descriptorList->defaultSprite = BSML::Utilities::LoadSpriteRaw(IncludedAssets::PlaceholderIcon_png);
+    }
+
+    void SelectionViewController::Refresh()
+    {
         QbloqConversion::ConvertOldQbloqs(std::bind(&SelectionViewController::RefreshAfterBloqConversion, this));
     }
 
@@ -56,19 +70,27 @@ namespace Qosmetics::Notes
         ReloadDescriptorList();
     }
 
+    int SelectionViewController::GetSelectedCellIdx()
+    {
+        if (!descriptorList || !descriptorList->m_CachedPtr.m_value)
+            return -1;
+        auto tableView = descriptorList->tableView;
+        auto enumerator = tableView->selectedCellIdxs->GetEnumerator();
+        int result = -1;
+        if (enumerator.MoveNext())
+            result = enumerator.get_Current();
+        enumerator.Dispose();
+        return result;
+    }
+
     void SelectionViewController::ReloadDescriptorList()
     {
         std::vector<std::string> cyoobs = {};
         Qosmetics::Core::FileUtils::GetFilesInFolderPath("cyoob", cyoob_path, cyoobs);
-        auto tableView = reinterpret_cast<QuestUI::TableView*>(descriptorList->tableView);
-        int scrolledRow = tableView->get_scrolledRow();
-
         auto& descriptorSet = descriptorList->objectDescriptors;
-        int current = 0;
+        int row = GetSelectedCellIdx();
         for (auto& cyoob : cyoobs)
         {
-            current++;
-
             std::string filePath = fmt::format("{}/{}", cyoob_path, cyoob);
             auto orig = std::find_if(descriptorSet.begin(), descriptorSet.end(), [filePath](auto& d)
                                      { return d.get_filePath() == filePath; });
@@ -105,21 +127,20 @@ namespace Qosmetics::Notes
                 it++;
         }
 
+        auto tableView = descriptorList->tableView;
         tableView->ReloadData();
         tableView->RefreshCells(true, true);
+        tableView->ScrollToCellWithIdx(std::clamp(row, 0, (int)descriptorSet.size() - 1), HMUI::TableView::ScrollPositionType::Center, true);
         tableView->ClearSelection();
     }
 
-    void SelectionViewController::OnSelectDefault()
+    void SelectionViewController::Default()
     {
-        auto noteModelContainer = NoteModelContainer::get_instance();
-
         // if we do not PROPERLY switch to default, don't clear the preview
         if (noteModelContainer->Default())
         {
             OnObjectLoadFinished();
-            auto tableView = reinterpret_cast<QuestUI::TableView*>(descriptorList->tableView);
-            tableView->ClearSelection();
+            descriptorList->tableView->ClearSelection();
         }
     }
 
@@ -134,7 +155,7 @@ namespace Qosmetics::Notes
                 return;
             }
 
-            if (NoteModelContainer::get_instance()->LoadObject(descriptor, std::bind(&SelectionViewController::OnObjectLoadFinished, this)))
+            if (noteModelContainer->LoadObject(descriptor, std::bind(&SelectionViewController::OnObjectLoadFinished, this)))
             {
                 previewViewController->ClearPrefab();
                 previewViewController->ShowLoading(true);
@@ -150,8 +171,8 @@ namespace Qosmetics::Notes
             return;
         }
 
-        if (descriptor.get_filePath() == NoteModelContainer::get_instance()->GetDescriptor().get_filePath())
-            OnSelectDefault();
+        if (descriptor.get_filePath() == noteModelContainer->GetDescriptor().get_filePath())
+            Default();
 
         deletefile(descriptor.get_filePath());
         ReloadDescriptorList();
@@ -160,8 +181,6 @@ namespace Qosmetics::Notes
     void SelectionViewController::OnObjectLoadFinished()
     {
         // something to do after we changed the object, like update preview
-        auto noteModelContainer = NoteModelContainer::get_instance();
-
         Qosmetics::Notes::Config::get_config().lastUsedCyoob = noteModelContainer->GetNoteConfig().get_isDefault() ? "" : Qosmetics::Core::FileUtils::GetFileName(noteModelContainer->GetDescriptor().get_filePath(), true);
         Qosmetics::Core::Config::SaveConfig();
         previewViewController->UpdatePreview(true);

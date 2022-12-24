@@ -1,0 +1,76 @@
+<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+    xsi:noNamespaceSchemaLocation='https://raw.githubusercontent.com/RedBrumbler/Quest-BSML-Docs/gh-pages/schema.xsd'>
+    <!-- Header -->
+    <stack background="title-gradient" pref-width='90' pref-height='10' vertical-fit="PreferredSize"
+        horizontal-fit="PreferredSize"
+        background-color0="#0000FFFF" background-color1="#0000FF00" ignore-layout="true"
+        anchor-pos-y="45">
+        <macro.if value='!gay'>
+            <text text='Cyoob Settings' align="Center" font-size="8" />
+        </macro.if>
+        <macro.if value='gay'>
+            <text text='Cyoob Settings' align="Center" font-size="8" />
+        </macro.if>
+    </stack>
+    <!-- Container -->
+    <scrollable-settings-container size-delta-y="0">
+        <toggle-setting
+            id='overrideNoteSizeToggle'
+            text='Override Cyoob Size'
+            value='overrideNoteSize'
+            apply-on-change='true'
+            hover-hint='Whether or not the configured Cyoob size is even used' />
+        <slider-setting
+            id='noteSizeSlider'
+            text='Cyoob Size'
+            value='noteSize'
+            apply-on-change='true'
+            increment='0.05'
+            min='0.2'
+            max='2'
+            digits='2'
+            hover-hint='The configured Cyoob size, set to 1.00 for normal size' />
+        <toggle-setting
+            id='alsoChangeHitboxesToggle'
+            text='Change Hitbox Sizes'
+            value='alsoChangeHitboxes'
+            apply-on-change='true'
+            hover-hint='Whether or not to let the hitbox size change along with the Cyoob size, turning this on will disable scores!' />
+        <toggle-setting
+            id='forceDefaultBombsToggle'
+            text='Force Default Bombs'
+            value='forceDefaultBombs'
+            apply-on-change='true'
+            hover-hint='If you turn this on, Qosmetics will never use the custom bombs that come with a Cyoob' />
+        <toggle-setting
+            id='forceDefaultChainsToggle'
+            text='Force Default Chains'
+            value='forceDefaultChains'
+            apply-on-change='true'
+            hover-hint='If you turn this on, Qosmetics will never use the custom chains that come with a Cyoob' />
+        <toggle-setting
+            id='forceDefaultDebrisToggle'
+            text='Force Default Debris'
+            value='forceDefaultDebris'
+            apply-on-change='true'
+            hover-hint='If you turn this on, Qosmetics will never use the custom debris that come with a Cyoob' />
+        <toggle-setting
+            id='forceDefaultChainDebrisToggle'
+            text='Force Default Chain Debris'
+            value='forceDefaultChainDebris'
+            apply-on-change='true'
+            hover-hint="If you turn this on, Qosmetics will never use the custom debris that come with a Cyoob's Chain Notes" />
+        <toggle-setting
+            id='disableReflectionsToggle'
+            text='Disable Reflections'
+            value='disableReflections'
+            apply-on-change='true'
+            hover-hint='With this turned on, Cyoob reflections will always be disabled' />
+        <toggle-setting
+            id='keepMissingReflectionsToggle'
+            text='Keep Missing Reflections'
+            value='keepMissingReflections'
+            apply-on-change='true'
+            hover-hint="With this turned on, if a Cyoob has no reflective options it'll keep the default reflections the base game has" />
+    </scrollable-settings-container>
+</bg>

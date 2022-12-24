@@ -2,31 +2,44 @@
 #include "UI/PreviewViewController.hpp"
 #include "UI/SelectionViewController.hpp"
 #include "UI/SettingsViewController.hpp"
-#include "questui/shared/BeatSaberUI.hpp"
 
 #include "HMUI/TitleViewController.hpp"
 #include "HMUI/ViewController_AnimationDirection.hpp"
 #include "HMUI/ViewController_AnimationType.hpp"
 
+#include "bsml/shared/Helpers/utilities.hpp"
 #include "qosmetics-core/shared/Utils/DateUtils.hpp"
 #include "qosmetics-core/shared/Utils/RainbowUtils.hpp"
 #include "qosmetics-core/shared/Utils/UIUtils.hpp"
 
-DEFINE_TYPE(Qosmetics::Notes, CyoobFlowCoordinator)
+#include "assets.hpp"
+#include "logging.hpp"
 
-using namespace QuestUI::BeatSaberUI;
+DEFINE_TYPE(Qosmetics::Notes, CyoobFlowCoordinator)
 
 namespace Qosmetics::Notes
 {
+    void CyoobFlowCoordinator::ctor()
+    {
+        static auto baseKlass = classof(Qosmetics::Core::QosmeticsBaseFlowCoordinator*);
+        custom_types::InvokeBaseCtor(baseKlass, this);
+
+        name = "Cyoobs";
+        inActiveSprite = BSML::Utilities::LoadSpriteRaw(IncludedAssets::NoteIcon_png);
+        activeSprite = BSML::Utilities::LoadSpriteRaw(IncludedAssets::NoteIconSelected_png);
+    }
+
+    void CyoobFlowCoordinator::Inject(PreviewViewController* previewViewController, SelectionViewController* selectionViewController, SettingsViewController* settingsViewController)
+    {
+        this->previewViewController = previewViewController;
+        this->selectionViewController = selectionViewController;
+        this->settingsViewController = settingsViewController;
+    }
+
     void CyoobFlowCoordinator::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
         if (firstActivation)
         {
-            previewViewController = CreateViewController<Qosmetics::Notes::PreviewViewController*>();
-            settingsViewController = CreateViewController<Qosmetics::Notes::SettingsViewController*>();
-            reinterpret_cast<Qosmetics::Notes::SettingsViewController*>(settingsViewController)->previewViewController = reinterpret_cast<Qosmetics::Notes::PreviewViewController*>(previewViewController);
-            selectionViewController = CreateViewController<Qosmetics::Notes::SelectionViewController*>();
-            reinterpret_cast<Qosmetics::Notes::SelectionViewController*>(selectionViewController)->previewViewController = reinterpret_cast<Qosmetics::Notes::PreviewViewController*>(previewViewController);
             ProvideInitialViewControllers(selectionViewController, settingsViewController, previewViewController, nullptr, nullptr);
 
             set_showBackButton(true);

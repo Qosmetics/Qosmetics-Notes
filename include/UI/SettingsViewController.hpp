@@ -2,29 +2,42 @@
 
 #include "HMUI/ViewController.hpp"
 #include "UI/PreviewViewController.hpp"
-#include "UnityEngine/UI/Toggle.hpp"
 #include "custom-types/shared/macros.hpp"
-#include "questui/shared/CustomTypes/Components/Settings/SliderSetting.hpp"
+#include "lapiz/shared/macros.hpp"
 
-#ifndef DECLARE_OVERRIDE_METHOD_MATCH
-#define DECLARE_OVERRIDE_METHOD_MATCH(retval, name, mptr, ...) \
-    DECLARE_OVERRIDE_METHOD(retval, name, il2cpp_utils::il2cpp_type_check::MetadataGetter<mptr>::get(), __VA_ARGS__)
-#endif
+#include "bsml/shared/BSML/Components/Settings/SliderSetting.hpp"
+#include "bsml/shared/BSML/Components/Settings/ToggleSetting.hpp"
+#include "bsml/shared/macros.hpp"
+
+#include "private_field.hpp"
 
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SettingsViewController, HMUI::ViewController,
-                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, overrideNoteSizeToggle);
-                      DECLARE_INSTANCE_FIELD(QuestUI::SliderSetting*, noteSizeSlider);
-                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, alsoChangeHitboxesToggle);
-                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, forceDefaultBombsToggle);
-                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, forceDefaultChainsToggle);
-                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, forceDefaultDebrisToggle);
-                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, forceDefaultChainDebrisToggle);
-                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, disableReflectionsToggle);
-                      DECLARE_INSTANCE_FIELD(UnityEngine::UI::Toggle*, keepMissingReflectionsToggle);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, overrideNoteSizeToggle);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::SliderSetting*, noteSizeSlider);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, alsoChangeHitboxesToggle);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, forceDefaultBombsToggle);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, forceDefaultChainsToggle);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, forceDefaultDebrisToggle);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, forceDefaultChainDebrisToggle);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, disableReflectionsToggle);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, keepMissingReflectionsToggle);
 
-                      DECLARE_INSTANCE_FIELD(PreviewViewController*, previewViewController);
-                      DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(PreviewViewController*, previewViewController);
 
+                      DECLARE_BSML_PROPERTY(bool, overrideNoteSize);
+                      DECLARE_BSML_PROPERTY(float, noteSize);
+                      DECLARE_BSML_PROPERTY(bool, alsoChangeHitboxes);
+                      DECLARE_BSML_PROPERTY(bool, forceDefaultBombs);
+                      DECLARE_BSML_PROPERTY(bool, forceDefaultChains);
+                      DECLARE_BSML_PROPERTY(bool, forceDefaultDebris);
+                      DECLARE_BSML_PROPERTY(bool, forceDefaultChainDebris);
+                      DECLARE_BSML_PROPERTY(bool, disableReflections);
+                      DECLARE_BSML_PROPERTY(bool, keepMissingReflections);
+
+                      DECLARE_INJECT_METHOD(void, Inject, PreviewViewController* previewViewController);
+                      DECLARE_INSTANCE_METHOD(bool, get_gay);
+                      DECLARE_OVERRIDE_METHOD(void, DidActivate, il2cpp_utils::il2cpp_type_check::MetadataGetter<&HMUI::ViewController::DidActivate>::get(), bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
+                      DECLARE_DEFAULT_CTOR();
                       public
                       :
 

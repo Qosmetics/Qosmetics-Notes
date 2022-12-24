@@ -13,13 +13,15 @@ namespace Qosmetics::Notes
     void BasicNoteScaler::Awake()
     {
         noteController = get_gameObject()->GetComponentInParent<GlobalNamespace::NoteControllerBase*>();
-        noteController->get_didInitEvent()->Add(reinterpret_cast<GlobalNamespace::INoteControllerDidInitEvent*>(this));
+        noteController->get_didInitEvent()->Add(i_INoteControllerDidInitEvent());
     }
 
     void BasicNoteScaler::OnDestroy()
     {
-        noteController->get_didInitEvent()->Remove(reinterpret_cast<GlobalNamespace::INoteControllerDidInitEvent*>(this));
+        noteController->get_didInitEvent()->Remove(i_INoteControllerDidInitEvent());
     }
+
+    GlobalNamespace::INoteControllerDidInitEvent* BasicNoteScaler::i_INoteControllerDidInitEvent() { return reinterpret_cast<GlobalNamespace::INoteControllerDidInitEvent*>(this); }
 
     void BasicNoteScaler::HandleNoteControllerDidInit(GlobalNamespace::NoteControllerBase* noteController)
     {

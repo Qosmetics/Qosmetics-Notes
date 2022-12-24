@@ -289,11 +289,7 @@ namespace Qosmetics::Notes
 
     NoteModelContainer* NoteModelContainer::get_instance()
     {
-        if (instance)
-            return instance;
-        auto go = GameObject::New_ctor(StringW(___TypeRegistration::get()->name()));
-        Object::DontDestroyOnLoad(go);
-        return go->AddComponent<NoteModelContainer*>();
+        return instance;
     }
 
     void NoteModelContainer::ctor()
@@ -400,6 +396,7 @@ namespace Qosmetics::Notes
             onFinished(this);
 
         isLoading = false;
+        DEBUG("Finished loading!");
         co_return;
     }
 
@@ -425,17 +422,10 @@ namespace Qosmetics::Notes
     void NoteModelContainer::OnDestroy()
     {
         instance = nullptr;
-        UnloadBundle();
+        Unload();
     }
 
-    void NoteModelContainer::UnloadBundle()
-    {
-        if (bundle)
-            bundle->Unload(false);
-        bundle = nullptr;
-    }
-
-    void NoteModelContainer::OnGameRestart()
+    void NoteModelContainer::Unload()
     {
         if (currentNoteObject && currentNoteObject->m_CachedPtr.m_value)
             Object::DestroyImmediate(currentNoteObject);
@@ -443,9 +433,5 @@ namespace Qosmetics::Notes
         if (bundle && bundle->m_CachedPtr.m_value)
             bundle->Unload(true);
         bundle = nullptr;
-
-        instance = nullptr;
-        UnityEngine::Object::DestroyImmediate(this->get_gameObject());
     }
-
 }

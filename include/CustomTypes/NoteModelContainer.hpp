@@ -9,13 +9,14 @@
 #include "qosmetics-core/shared/Data/Descriptor.hpp"
 #include "qosmetics-core/shared/Data/Manifest.hpp"
 
+#include "private_field.hpp"
+
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, NoteModelContainer, UnityEngine::MonoBehaviour,
                       DECLARE_INSTANCE_METHOD(void, Start);
                       DECLARE_INSTANCE_METHOD(void, OnDestroy);
-                      DECLARE_INSTANCE_METHOD(void, OnGameRestart);
-                      DECLARE_INSTANCE_FIELD(UnityEngine::AssetBundle*, bundle);
-                      DECLARE_INSTANCE_FIELD(bool, isLoading);
-                      DECLARE_INSTANCE_FIELD(UnityEngine::GameObject*, currentNoteObject);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(UnityEngine::AssetBundle*, bundle);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(bool, isLoading);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(UnityEngine::GameObject*, currentNoteObject);
 
                       DECLARE_CTOR(ctor);
                       public
@@ -33,7 +34,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, NoteModelContainer, UnityEngine::MonoBeh
                       :
 
                       custom_types::Helpers::Coroutine LoadBundleRoutine(std::function<void(NoteModelContainer*)> onFinished);
-                      void UnloadBundle();
+                      void Unload();
 
                       Manifest currentManifest;
 

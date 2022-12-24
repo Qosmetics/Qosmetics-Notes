@@ -18,8 +18,8 @@ namespace Qosmetics::Notes
 #define ERROR(...) Paper::Logger::fmtLog<Paper::LogLevel::ERR>(__VA_ARGS__)
 #define WARNING(...) Paper::Logger::fmtLog<Paper::LogLevel::WRN>(__VA_ARGS__)
 #define CRITICAL(...) Paper::Logger::fmtLog<Paper::LogLevel::CRIT>(__VA_ARGS__)
-//#define DEBUG(...) Paper::Logger::fmtLog<Paper::LogLevel::DBG>(__VA_ARGS__)
-#define DEBUG(...)
+#define DEBUG(...) Paper::Logger::fmtLog<Paper::LogLevel::DBG>(__VA_ARGS__)
+//#define DEBUG(...)
 
 template <>
 struct fmt::formatter<::StringW> : formatter<std::string_view>
@@ -28,6 +28,6 @@ struct fmt::formatter<::StringW> : formatter<std::string_view>
     template <typename FormatContext>
     auto format(StringW s, FormatContext& ctx)
     {
-        return formatter<std::string_view>::format(static_cast<std::string>(s), ctx);
+        return formatter<std::string_view>::format(s ? static_cast<std::string>(s) : std::string("NULL"), ctx);
     }
 };

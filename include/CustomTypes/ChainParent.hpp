@@ -16,13 +16,15 @@
     DECLARE_OVERRIDE_METHOD(retval, method, il2cpp_utils::il2cpp_type_check::MetadataGetter<mptr>::get(), __VA_ARGS__)
 #endif
 
+#include "private_field.hpp"
+
 DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, ChainParent, UnityEngine::MonoBehaviour, classof(GlobalNamespace::INoteControllerDidInitEvent*),
 
-                                 DECLARE_INSTANCE_FIELD(GlobalNamespace::NoteControllerBase*, noteController);
-                                 DECLARE_INSTANCE_FIELD(GlobalNamespace::ColorManager*, colorManager);
-                                 DECLARE_INSTANCE_FIELD(ChainHandler*, handler);
-                                 DECLARE_INSTANCE_FIELD(GlobalNamespace::ColorType, currentColorType);
-                                 DECLARE_INSTANCE_FIELD(bool, isHead);
+                                 DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::NoteControllerBase*, noteController);
+                                 DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::ColorManager*, colorManager);
+                                 DECLARE_INSTANCE_PRIVATE_FIELD(ChainHandler*, handler);
+                                 DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::ColorType, currentColorType);
+                                 DECLARE_INSTANCE_PRIVATE_FIELD(bool, isHead);
                                  DECLARE_INSTANCE_METHOD(void, Awake);
                                  DECLARE_INSTANCE_METHOD(void, OnDestroy);
                                  DECLARE_INSTANCE_METHOD(void, Colorize, Sombrero::FastColor thisColor, Sombrero::FastColor otherColor);
