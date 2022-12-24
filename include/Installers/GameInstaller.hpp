@@ -14,14 +14,16 @@
 #include "custom-types/shared/macros.hpp"
 #include "lapiz/shared/macros.hpp"
 
+#include "private_field.hpp"
+
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, GameInstaller, ::Zenject::Installer,
-                      DECLARE_PRIVATE_FIELD(NoteModelContainer*, _noteModelContainer);
-                      DECLARE_PRIVATE_FIELD(GlobalNamespace::GameplayCoreSceneSetupData*, _gameplayCoreSceneSetupData);
-                      DECLARE_PRIVATE_FIELD(bool, _ghostNotes);
-                      DECLARE_PRIVATE_FIELD(bool, _disappearingArrows);
-                      DECLARE_PRIVATE_FIELD(bool, _smallCubes);
-                      DECLARE_PRIVATE_FIELD(bool, _proMode);
-                      DECLARE_PRIVATE_FIELD(bool, _reduceDebris);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(NoteModelContainer*, _noteModelContainer);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::GameplayCoreSceneSetupData*, _gameplayCoreSceneSetupData);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(bool, _ghostNotes);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(bool, _disappearingArrows);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(bool, _smallCubes);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(bool, _proMode);
+                      DECLARE_INSTANCE_PRIVATE_FIELD(bool, _reduceDebris);
                       DECLARE_PRIVATE_METHOD(GlobalNamespace::GameNoteController*, DecorateNote, GlobalNamespace::GameNoteController* original);
                       DECLARE_PRIVATE_METHOD(GlobalNamespace::BombNoteController*, DecorateBombs, GlobalNamespace::BombNoteController* original);
                       DECLARE_PRIVATE_METHOD(GlobalNamespace::BurstSliderGameNoteController*, DecorateBurstSliderElement, GlobalNamespace::BurstSliderGameNoteController* original);

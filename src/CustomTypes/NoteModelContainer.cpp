@@ -431,7 +431,7 @@ namespace Qosmetics::Notes
             Object::DestroyImmediate(currentNoteObject);
         currentNoteObject = nullptr;
         if (bundle && bundle->m_CachedPtr.m_value)
-            bundle->Unload(false);
+            bundle->Unload(true);
         bundle = nullptr;
     }
 }

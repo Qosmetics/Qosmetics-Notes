@@ -2,12 +2,12 @@
 #include "UI/PreviewViewController.hpp"
 #include "UI/SelectionViewController.hpp"
 #include "UI/SettingsViewController.hpp"
-#include "questui/shared/BeatSaberUI.hpp"
 
 #include "HMUI/TitleViewController.hpp"
 #include "HMUI/ViewController_AnimationDirection.hpp"
 #include "HMUI/ViewController_AnimationType.hpp"
 
+#include "bsml/shared/Helpers/utilities.hpp"
 #include "qosmetics-core/shared/Utils/DateUtils.hpp"
 #include "qosmetics-core/shared/Utils/RainbowUtils.hpp"
 #include "qosmetics-core/shared/Utils/UIUtils.hpp"
@@ -17,8 +17,6 @@
 
 DEFINE_TYPE(Qosmetics::Notes, CyoobFlowCoordinator)
 
-using namespace QuestUI::BeatSaberUI;
-
 namespace Qosmetics::Notes
 {
     void CyoobFlowCoordinator::ctor()
@@ -27,8 +25,8 @@ namespace Qosmetics::Notes
         custom_types::InvokeBaseCtor(baseKlass, this);
 
         name = "Cyoobs";
-        inActiveSprite = ArrayToSprite(IncludedAssets::NoteIcon_png);
-        activeSprite = ArrayToSprite(IncludedAssets::NoteIconSelected_png);
+        inActiveSprite = BSML::Utilities::LoadSpriteRaw(IncludedAssets::NoteIcon_png);
+        activeSprite = BSML::Utilities::LoadSpriteRaw(IncludedAssets::NoteIconSelected_png);
     }
 
     void CyoobFlowCoordinator::Inject(PreviewViewController* previewViewController, SelectionViewController* selectionViewController, SettingsViewController* settingsViewController)

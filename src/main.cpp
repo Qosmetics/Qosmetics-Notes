@@ -11,11 +11,6 @@
 #include "HMUI/CurvedTextMeshPro.hpp"
 #include "HMUI/ImageView.hpp"
 
-#include "questui/shared/BeatSaberUI.hpp"
-
-#include "diglett/shared/Conversions.hpp"
-#include "diglett/shared/Register.hpp"
-
 #include <vector>
 
 #include "Installers/AppInstaller.hpp"
@@ -40,13 +35,6 @@ extern "C" void load()
     Hooks::InstallHooks(logger);
     custom_types::Register::AutoRegister();
     Lapiz::Attributes::AutoRegister();
-
-    Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::de_xml), Diglett::Language::GERMAN);
-    Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::en_xml), Diglett::Language::ENGLISH);
-    Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::es_xml), Diglett::Language::SPANISH);
-    Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::fr_xml), Diglett::Language::FRENCH);
-    Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::ja_xml), Diglett::Language::JAPANESE);
-    Diglett::RegisterAsset(static_cast<std::string_view>(IncludedAssets::ko_xml), Diglett::Language::KOREAN);
 
     auto zenjector = Lapiz::Zenject::Zenjector::Get();
     zenjector->Install<Qosmetics::Notes::AppInstaller*>(Lapiz::Zenject::Location::App);

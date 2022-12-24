@@ -2,35 +2,27 @@
 #include "ConstStrings.hpp"
 #include "CustomTypes/CyoobColorHandler.hpp"
 #include "CustomTypes/DebrisColorHandler.hpp"
+#include "assets.hpp"
 #include "config.hpp"
-#include "diglett/shared/Localization.hpp"
-#include "diglett/shared/Util.hpp"
 #include "logging.hpp"
+
 #include "qosmetics-core/shared/Utils/DateUtils.hpp"
 #include "qosmetics-core/shared/Utils/RainbowUtils.hpp"
-#include "qosmetics-core/shared/Utils/UIUtils.hpp"
-#include "questui/shared/BeatSaberUI.hpp"
-#include "questui/shared/CustomTypes/Components/Backgroundable.hpp"
 #include "sombrero/shared/FastColor.hpp"
 #include "sombrero/shared/FastVector3.hpp"
-
-#include "UnityEngine/UI/LayoutElement.hpp"
-
-#include "HMUI/CurvedCanvasSettingsHelper.hpp"
-#include "HMUI/ImageView.hpp"
 
 #include "GlobalNamespace/ColorManager.hpp"
 #include "GlobalNamespace/ColorScheme.hpp"
 #include "GlobalNamespace/ColorSchemesSettings.hpp"
 #include "GlobalNamespace/ColorType.hpp"
 #include "GlobalNamespace/PlayerData.hpp"
+#include "HMUI/CurvedCanvasSettingsHelper.hpp"
 #include "System/Collections/Generic/Dictionary_2.hpp"
-#include "Zenject/DiContainer.hpp"
-#include "Zenject/MonoInstaller.hpp"
+
+#include "bsml/shared/BSML.hpp"
+#include "bsml/shared/BSML/Components/Backgroundable.hpp"
 
 DEFINE_TYPE(Qosmetics::Notes, PreviewViewController);
-
-using namespace QuestUI::BeatSaberUI;
 
 /// @brief Set object size, position and color
 /// @tparam the color handler to do stuff with
@@ -83,20 +75,20 @@ namespace Qosmetics::Notes
             currentPrefab->SetActive(false);
     }
 
+    bool PreviewViewController::get_gay()
+    {
+        return Qosmetics::Core::DateUtils::isMonth(6);
+    }
+
     void PreviewViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {
         if (firstActivation)
         {
-            title = Qosmetics::Core::UIUtils::AddHeader(get_transform(), "", Sombrero::FastColor::blue());
-
-            auto backgroundLayout = CreateVerticalLayoutGroup(this);
-            auto layoutElem = backgroundLayout->get_gameObject()->GetComponent<UnityEngine::UI::LayoutElement*>();
-            layoutElem->set_preferredWidth(100.0f);
-
-            auto bg = backgroundLayout->get_gameObject()->AddComponent<QuestUI::Backgroundable*>();
-            bg->ApplyBackgroundWithAlpha("title-gradient", 1.0f);
-
-            auto imageView = bg->get_gameObject()->GetComponent<HMUI::ImageView*>();
+            auto parser = BSML::parse_and_construct(IncludedAssets::PreviewView_bsml, get_transform(), this);
+            auto params = parser->parserParams.get();
+            auto objectBG = params->GetObjectsWithTag("objectBG").at(0)->GetComponent<BSML::Backgroundable*>();
+            auto imageView = objectBG->background;
+            imageView->skew = 0;
             imageView->set_gradient(true);
             imageView->gradientDirection = 1;
             imageView->set_color(Sombrero::FastColor::white());
@@ -107,7 +99,6 @@ namespace Qosmetics::Notes
             imageView->set_color1(color);
             imageView->curvedCanvasSettingsHelper->Reset();
 
-            loadingIndicator = Qosmetics::Core::UIUtils::CreateLoadingIndicator(get_transform());
             ShowLoading(true);
             UpdatePreview(true);
         }
@@ -124,6 +115,8 @@ namespace Qosmetics::Notes
 
     void PreviewViewController::SetTitleText(StringW text)
     {
+        if (!(title && title->m_CachedPtr.m_value))
+            return;
         if (Qosmetics::Core::DateUtils::isMonth(6))
         {
             text = "<i>" + Qosmetics::Core::RainbowUtils::gayify(static_cast<std::string>(text)) + "</i>";
@@ -135,10 +128,13 @@ namespace Qosmetics::Notes
 
     void PreviewViewController::ShowLoading(bool isLoading)
     {
-        loadingIndicator->SetActive(isLoading);
+        if (!(loadingIndicator && loadingIndicator->m_CachedPtr.m_value))
+            return;
+
+        loadingIndicator->get_gameObject()->SetActive(isLoading);
         if (isLoading)
         {
-            SetTitleText(Diglett::Localization::get_instance()->get("QosmeticsCore:Misc:Loading") + u"...");
+            SetTitleText("Loading...");
         }
     }
 
@@ -157,7 +153,7 @@ namespace Qosmetics::Notes
             if (!currentPrefab)
             {
                 DEBUG("No prefab found, must be default!");
-                SetTitleText(Diglett::Localization::get_instance()->get("QosmeticsCyoobs:Preview:Default"));
+                SetTitleText("Default Cyoob (no preview)");
                 return;
             }
 
@@ -211,9 +207,8 @@ namespace Qosmetics::Notes
             {
                 auto overrideColorScheme = playerDataModel->playerData->colorSchemesSettings->GetOverrideColorScheme();
                 if (!overrideColorScheme)
-                {
                     playerDataModel->playerData->colorSchemesSettings->colorSchemesDict->TryGetValue("TheFirst", byref(overrideColorScheme));
-                }
+
                 if (overrideColorScheme)
                 {
                     leftColor = overrideColorScheme->saberAColor;
