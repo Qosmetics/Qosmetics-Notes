@@ -28,6 +28,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, PreviewViewController, HMUI::ViewControl
                       DECLARE_INJECT_METHOD(void, Inject, Qosmetics::Notes::NoteModelContainer* modelContainer, GlobalNamespace::PlayerDataModel* playerDataModel);
                       DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
                       DECLARE_OVERRIDE_METHOD_MATCH(void, DidDeactivate, &HMUI::ViewController::DidDeactivate, bool removedFromHierarchy, bool screenSystemDisabling);
+                      DECLARE_INSTANCE_METHOD(StringW, get_gaydient);
                       DECLARE_INSTANCE_METHOD(bool, get_gay);
 
                       DECLARE_DEFAULT_CTOR();

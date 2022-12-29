@@ -35,6 +35,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SettingsViewController, HMUI::ViewContro
                       DECLARE_BSML_PROPERTY(bool, keepMissingReflections);
 
                       DECLARE_INJECT_METHOD(void, Inject, PreviewViewController* previewViewController);
+                      DECLARE_INSTANCE_METHOD(StringW, get_gaydient);
                       DECLARE_INSTANCE_METHOD(bool, get_gay);
                       DECLARE_OVERRIDE_METHOD(void, DidActivate, il2cpp_utils::il2cpp_type_check::MetadataGetter<&HMUI::ViewController::DidActivate>::get(), bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
                       DECLARE_DEFAULT_CTOR();
