@@ -8,7 +8,11 @@
     "url": "https://github.com/Qosmetics/Qosmetics-Notes",
     "additionalData": {
       "headersOnly": true,
-      "overrideSoName": "libqosmetics-notes.so"
+      "soLink": "https://github.com/Qosmetics/Qosmetics-Notes/releases/download/v0.1.3/libqosmetics-notes.so",
+      "debugSoLink": "https://github.com/Qosmetics/Qosmetics-Notes/releases/download/v0.1.3/debug_libqosmetics-notes.so",
+      "overrideSoName": "libqosmetics-notes.so",
+      "modLink": "https://github.com/Qosmetics/Qosmetics-Notes/releases/download/v0.1.3/QosmeticsCyoobs.qmod",
+      "branchName": "version-v0.1.3"
     }
   },
   "dependencies": [
