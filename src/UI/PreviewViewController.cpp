@@ -32,7 +32,8 @@ DEFINE_TYPE(Qosmetics::Notes, PreviewViewController);
 /// @param thisColor the color applied to _Color
 /// @param thatColor the color applied to _OtherColor
 template <typename T>
-requires(std::is_convertible_v<T, Qosmetics::Notes::CyoobColorHandler*> || std::is_convertible_v<T, Qosmetics::Notes::DebrisColorHandler*>) void SetObjectSizePosColor(UnityEngine::Transform* obj, float objectSize, const Sombrero::FastVector3& localPosition, const Sombrero::FastColor& thisColor, const Sombrero::FastColor& thatColor)
+    requires(std::is_convertible_v<T, Qosmetics::Notes::CyoobColorHandler*> || std::is_convertible_v<T, Qosmetics::Notes::DebrisColorHandler*>)
+void SetObjectSizePosColor(UnityEngine::Transform* obj, float objectSize, const Sombrero::FastVector3& localPosition, const Sombrero::FastColor& thisColor, const Sombrero::FastColor& thatColor)
 {
     obj->set_localScale(Sombrero::FastVector3::one() * objectSize);
     obj->set_localPosition(localPosition);
@@ -75,10 +76,8 @@ namespace Qosmetics::Notes
             currentPrefab->SetActive(false);
     }
 
-    bool PreviewViewController::get_gay()
-    {
-        return Qosmetics::Core::DateUtils::isMonth(6);
-    }
+    StringW PreviewViewController::get_gaydient() { return Qosmetics::Core::RainbowUtils::randomGradient(); }
+    bool PreviewViewController::get_gay() { return Qosmetics::Core::DateUtils::isMonth(6); }
 
     void PreviewViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {

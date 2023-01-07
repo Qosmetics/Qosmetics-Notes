@@ -23,10 +23,8 @@ namespace Qosmetics::Notes
         this->previewViewController = previewViewController;
     }
 
-    bool SettingsViewController::get_gay()
-    {
-        return Qosmetics::Core::DateUtils::isMonth(6);
-    }
+    StringW SettingsViewController::get_gaydient() { return Qosmetics::Core::RainbowUtils::randomGradient(); }
+    bool SettingsViewController::get_gay() { return Qosmetics::Core::DateUtils::isMonth(6); }
 
     void SettingsViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
     {

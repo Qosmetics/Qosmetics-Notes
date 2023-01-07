@@ -100,7 +100,10 @@ void SetMirrorableProperties(UnityEngine::GameObject* loadedObject, bool mirror)
 
 void DuplicateForMirror(UnityEngine::Transform* parent, StringW origName, StringW mirroredName)
 {
-    auto orig = parent->Find(origName)->get_gameObject();
+    auto origT = parent->Find(origName);
+    if (!origT)
+        return;
+    auto orig = origT->get_gameObject();
     auto mirrored = UnityEngine::Object::Instantiate(orig, parent->get_transform());
     mirrored->set_name(mirroredName);
 
