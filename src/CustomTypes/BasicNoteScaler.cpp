@@ -25,6 +25,6 @@ namespace Qosmetics::Notes
 
     void BasicNoteScaler::HandleNoteControllerDidInit(GlobalNamespace::NoteControllerBase* noteController)
     {
-        get_transform()->set_localScale(Sombrero::FastVector3::one() * Config::get_config().noteSize);
+        get_transform()->set_localScale(Sombrero::FastVector3::one() * Config::get_config().noteSize * notesUniformScale);
     }
 }
