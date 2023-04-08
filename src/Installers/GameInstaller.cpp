@@ -43,7 +43,8 @@
 DEFINE_TYPE(Qosmetics::Notes, GameInstaller);
 
 template <typename T>
-requires(std::is_same_v<T, Qosmetics::Notes::CyoobColorHandler*> || std::is_same_v<T, Qosmetics::Notes::DebrisColorHandler*>) static void SetAndFixObjectChildren(UnityEngine::Transform* obj, Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)
+    requires(std::is_same_v<T, Qosmetics::Notes::CyoobColorHandler*> || std::is_same_v<T, Qosmetics::Notes::DebrisColorHandler*>)
+static void SetAndFixObjectChildren(UnityEngine::Transform* obj, Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)
 {
     int childCount = obj->get_childCount();
     for (int i = 0; i < childCount; i++)
@@ -109,6 +110,8 @@ namespace Qosmetics::Notes
 
         auto container = get_Container();
 
+        DEBUG("Pro Mode: {}", _proMode);
+
         if (_proMode)
             Lapiz::Objects::Beatmap::ProModeNoteRegistration::New_ctor(std::bind(&GameInstaller::DecorateNote, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
         else
@@ -135,6 +138,52 @@ namespace Qosmetics::Notes
         Lapiz::Objects::Registration<GlobalNamespace::MirroredGameNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*>::New_ctor("mirroredBurstSliderHeadGameNoteControllerPrefab", std::bind(&GameInstaller::DecorateMirrorBurstSliderHead, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
         Lapiz::Objects::Registration<GlobalNamespace::MirroredGameNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*>::New_ctor("mirroredBurstSliderGameNoteControllerPrefab", std::bind(&GameInstaller::DecorateMirrorBurstSliderElement, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
         Lapiz::Objects::Registration<GlobalNamespace::MirroredBombNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*>::New_ctor("mirroredBombNoteControllerPrefab", std::bind(&GameInstaller::DecorateMirrorBomb, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+    }
+
+    /// @brief Makes it so all hitbox changes are unified in 1 method, making it easier to edit what gets done
+    /// @param globalConfig the config used
+    /// @param original the original object
+    /// @param noteCubeTransform the notecube of the object
+    /// @param notesUniformScale the uniform scale of notes (small / normal notes?)
+    template <typename T>
+    void SetupForNoteHitboxChanges(const Qosmetics::Notes::Config& globalConfig, T original, UnityEngine::Transform* noteCubeTransform, float notesUniformScale)
+    {
+        DEBUG("Setting up hitbox changes for type {}", classof(T)->name);
+        auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+        noteScaler->noteSize = Sombrero::FastVector3::one() * overrideNoteSize * notesUniformScale;
+
+        // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
+        if (!globalConfig.get_alsoChangeHitboxes())
+        {
+            DEBUG("note Size: {}, scale: {}", overrideNoteSize, notesUniformScale);
+            for (auto cuttable : original->bigCuttableBySaberList)
+            {
+                auto sz = cuttable->get_colliderSize();
+                DEBUG("Big Collider size: {}, {}, {}", sz.x, sz.y, sz.z);
+                cuttable->set_colliderSize((cuttable->get_colliderSize() / overrideNoteSize) * notesUniformScale);
+            }
+
+            for (auto cuttable : original->smallCuttableBySaberList)
+            {
+                auto sz = cuttable->get_colliderSize();
+                DEBUG("Small Collider size: {}, {}, {}", sz.x, sz.y, sz.z);
+                cuttable->set_colliderSize((cuttable->get_colliderSize() / overrideNoteSize) * notesUniformScale);
+            }
+        }
+    }
+
+    void SetupForBombHitboxChanges(const Qosmetics::Notes::Config& globalConfig, GlobalNamespace::BombNoteController* original, UnityEngine::Transform* mesh, float notesUniformScale)
+    {
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+        mesh->set_localScale(mesh->get_localScale() * overrideNoteSize);
+
+        if (!globalConfig.get_alsoChangeHitboxes())
+        {
+            auto sphereCollider = mesh->get_gameObject()->GetComponent<UnityEngine::SphereCollider*>();
+            sphereCollider->set_radius(sphereCollider->get_radius() / overrideNoteSize);
+        }
     }
 
     /* regular dot / arrow notes */
@@ -164,7 +213,10 @@ namespace Qosmetics::Notes
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+
+        float noteSizeFactor = overrideNoteSize * notesUniformScale;
 
         if (!(_ghostNotes || _disappearingArrows) && currentNoteObject)
         {
@@ -203,19 +255,7 @@ namespace Qosmetics::Notes
         }
 
         if (globalConfig.get_overrideNoteSize())
-        {
-            auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
-            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
-
-            // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
-            if (!globalConfig.get_alsoChangeHitboxes())
-            {
-                for (auto bigCuttable : original->bigCuttableBySaberList)
-                    bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() / noteSizeFactor);
-                for (auto smallCuttable : original->smallCuttableBySaberList)
-                    smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() / noteSizeFactor);
-            }
-        }
+            SetupForNoteHitboxChanges(globalConfig, original, noteCubeTransform, notesUniformScale);
 
         return original;
     }
@@ -228,7 +268,10 @@ namespace Qosmetics::Notes
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+
+        float noteSizeFactor = overrideNoteSize * notesUniformScale;
 
         // if we have a note object, and a bomb exists on it, and we don't force default
         if (!(_ghostNotes || _disappearingArrows || globalConfig.forceDefaultBombs) && currentNoteObject && config.get_hasBomb())
@@ -259,14 +302,8 @@ namespace Qosmetics::Notes
         }
         // change note size
         if (globalConfig.get_overrideNoteSize())
-        {
-            mesh->set_localScale(mesh->get_localScale() * noteSizeFactor);
-            if (!globalConfig.get_alsoChangeHitboxes())
-            {
-                auto sphereCollider = mesh->get_gameObject()->GetComponent<UnityEngine::SphereCollider*>();
-                sphereCollider->set_radius(sphereCollider->get_radius() / noteSizeFactor);
-            }
-        }
+            SetupForBombHitboxChanges(globalConfig, original, mesh, notesUniformScale);
+
         return original;
     }
 
@@ -282,7 +319,9 @@ namespace Qosmetics::Notes
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+        float noteSizeFactor = overrideNoteSize * notesUniformScale;
 
         if (!(_ghostNotes || _disappearingArrows) && currentNoteObject && !globalConfig.forceDefaultChains)
         {
@@ -321,19 +360,7 @@ namespace Qosmetics::Notes
         }
 
         if (globalConfig.get_overrideNoteSize())
-        {
-            auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
-            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
-
-            // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
-            if (!globalConfig.get_alsoChangeHitboxes())
-            {
-                for (auto bigCuttable : original->bigCuttableBySaberList)
-                    bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() / noteSizeFactor);
-                for (auto smallCuttable : original->smallCuttableBySaberList)
-                    smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() / noteSizeFactor);
-            }
-        }
+            SetupForNoteHitboxChanges(globalConfig, original, noteCubeTransform, notesUniformScale);
 
         return original;
     }
@@ -365,7 +392,10 @@ namespace Qosmetics::Notes
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+
+        float noteSizeFactor = overrideNoteSize * notesUniformScale;
 
         if (!(_ghostNotes || _disappearingArrows) && currentNoteObject && !globalConfig.forceDefaultChains)
         {
@@ -404,19 +434,7 @@ namespace Qosmetics::Notes
         }
 
         if (globalConfig.get_overrideNoteSize())
-        {
-            auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
-            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
-
-            // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
-            if (!globalConfig.get_alsoChangeHitboxes())
-            {
-                for (auto bigCuttable : original->bigCuttableBySaberList)
-                    bigCuttable->set_colliderSize(bigCuttable->get_colliderSize() / noteSizeFactor);
-                for (auto smallCuttable : original->smallCuttableBySaberList)
-                    smallCuttable->set_colliderSize(smallCuttable->get_colliderSize() / noteSizeFactor);
-            }
-        }
+            SetupForNoteHitboxChanges(globalConfig, original, noteCubeTransform, notesUniformScale);
 
         return original;
     }
@@ -453,7 +471,10 @@ namespace Qosmetics::Notes
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+
+        float noteSizeFactor = overrideNoteSize * notesUniformScale;
 
         // if we are adding our own prefab, we have debris, we are not reducing debris, and not forcing default, replace debris
         if (currentNoteObject && useDebris)
@@ -494,7 +515,10 @@ namespace Qosmetics::Notes
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+
+        float noteSizeFactor = overrideNoteSize * notesUniformScale;
 
         if (!(_ghostNotes || _disappearingArrows) && currentNoteObject && config.get_isMirrorable() && !globalConfig.disableReflections)
         {
@@ -551,7 +575,7 @@ namespace Qosmetics::Notes
         if (globalConfig.get_overrideNoteSize())
         {
             auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
-            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+            noteScaler->noteSize = Sombrero::FastVector3::one() * notesUniformScale;
         }
 
         return original;
@@ -569,7 +593,10 @@ namespace Qosmetics::Notes
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+
+        float noteSizeFactor = overrideNoteSize * notesUniformScale;
 
         if (!(_ghostNotes || _disappearingArrows) && currentNoteObject && config.get_isMirrorable() && !globalConfig.disableReflections && !globalConfig.forceDefaultChains)
         {
@@ -625,7 +652,7 @@ namespace Qosmetics::Notes
         if (globalConfig.get_overrideNoteSize())
         {
             auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
-            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+            noteScaler->noteSize = Sombrero::FastVector3::one() * notesUniformScale;
         }
 
         return original;
@@ -643,7 +670,10 @@ namespace Qosmetics::Notes
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+
+        float noteSizeFactor = overrideNoteSize * notesUniformScale;
 
         if (!(_ghostNotes || _disappearingArrows) && currentNoteObject && config.get_isMirrorable() && !globalConfig.disableReflections && !globalConfig.forceDefaultChains)
         {
@@ -699,7 +729,7 @@ namespace Qosmetics::Notes
         if (globalConfig.get_overrideNoteSize())
         {
             auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
-            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+            noteScaler->noteSize = Sombrero::FastVector3::one() * notesUniformScale;
         }
 
         return original;
@@ -714,7 +744,10 @@ namespace Qosmetics::Notes
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        float noteSizeFactor = (globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f) * _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+
+        float noteSizeFactor = overrideNoteSize * notesUniformScale;
         if (!(_ghostNotes || _disappearingArrows || globalConfig.forceDefaultBombs || globalConfig.disableReflections) && currentNoteObject && config.get_hasBomb() && config.get_isMirrorable())
         {
             meshRenderer->set_enabled(false);

@@ -101,7 +101,7 @@ namespace Qosmetics::Notes
 {
     Config actual_config;
 
-    void Config::UpdateSubmission()
+    void Config::UpdateSubmission() const
     {
 #ifdef BS_UTILS_EXISTS
 
