@@ -204,7 +204,8 @@ namespace Qosmetics::Notes
 
         if (globalConfig.get_overrideNoteSize())
         {
-            noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+            auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
 
             // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
             if (!globalConfig.get_alsoChangeHitboxes())
@@ -321,7 +322,8 @@ namespace Qosmetics::Notes
 
         if (globalConfig.get_overrideNoteSize())
         {
-            noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+            auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
 
             // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
             if (!globalConfig.get_alsoChangeHitboxes())
@@ -403,7 +405,8 @@ namespace Qosmetics::Notes
 
         if (globalConfig.get_overrideNoteSize())
         {
-            noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+            auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
 
             // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
             if (!globalConfig.get_alsoChangeHitboxes())
@@ -546,7 +549,10 @@ namespace Qosmetics::Notes
         }
 
         if (globalConfig.get_overrideNoteSize())
-            noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+        {
+            auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        }
 
         return original;
     }
@@ -617,7 +623,10 @@ namespace Qosmetics::Notes
         }
 
         if (globalConfig.get_overrideNoteSize())
-            noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+        {
+            auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        }
 
         return original;
     }
@@ -688,7 +697,10 @@ namespace Qosmetics::Notes
         }
 
         if (globalConfig.get_overrideNoteSize())
-            noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+        {
+            auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+            noteScaler->notesUniformScale = _gameplayCoreSceneSetupData->gameplayModifiers->get_notesUniformScale();
+        }
 
         return original;
     }

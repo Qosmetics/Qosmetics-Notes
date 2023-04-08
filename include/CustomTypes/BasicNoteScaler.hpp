@@ -15,6 +15,7 @@
 
 DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, BasicNoteScaler, UnityEngine::MonoBehaviour, classof(GlobalNamespace::INoteControllerDidInitEvent*),
                                  DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::NoteControllerBase*, noteController);
+                                 DECLARE_INSTANCE_FIELD(float, notesUniformScale);
                                  DECLARE_INSTANCE_METHOD(void, Awake);
                                  DECLARE_INSTANCE_METHOD(void, OnDestroy);
                                  DECLARE_INSTANCE_METHOD(GlobalNamespace::INoteControllerDidInitEvent*, i_INoteControllerDidInitEvent);
