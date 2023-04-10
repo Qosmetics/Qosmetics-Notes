@@ -5,7 +5,7 @@
     "info": {
       "name": "Qosmetics Cyoobs",
       "id": "qosmetics-notes",
-      "version": "0.0.1",
+      "version": "0.1.5",
       "url": "https://github.com/Qosmetics/Qosmetics-Notes",
       "additionalData": {
         "headersOnly": true,
@@ -111,19 +111,19 @@
     ],
     "workspace": {
       "scripts": {
+        "build": [
+          "pwsh ./scripts/build.ps1"
+        ],
         "qmod": [
           "pwsh ./scripts/build.ps1 -clean",
           "qpm-rust qmod build",
           "pwsh ./scripts/createqmod.ps1 QosmeticsCyoobs -clean"
         ],
-        "clean": [
-          "pwsh ./scripts/build.ps1 -clean"
-        ],
         "copy": [
           "pwsh ./scripts/copy.ps1"
         ],
-        "build": [
-          "pwsh ./scripts/build.ps1"
+        "clean": [
+          "pwsh ./scripts/build.ps1 -clean"
         ],
         "log": [
           "pwsh ./scripts/log.ps1"

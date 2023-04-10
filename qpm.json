@@ -4,7 +4,7 @@
   "info": {
     "name": "Qosmetics Cyoobs",
     "id": "qosmetics-notes",
-    "version": "0.0.1",
+    "version": "0.1.5",
     "url": "https://github.com/Qosmetics/Qosmetics-Notes",
     "additionalData": {
       "headersOnly": true,
@@ -89,8 +89,8 @@
       "id": "chroma",
       "versionRange": "^2.6.2",
       "additionalData": {
-        "private": true,
-        "includeQmod": false
+        "includeQmod": false,
+        "private": true
       }
     },
     {
@@ -113,21 +113,20 @@
       "build": [
         "pwsh ./scripts/build.ps1"
       ],
-      "clean": [
-        "pwsh ./scripts/build.ps1 -clean"
-      ],
-      "copy": [
-        "pwsh ./scripts/copy.ps1"
-      ],
-      "log": [
-        "pwsh ./scripts/log.ps1"
-      ],
       "qmod": [
         "pwsh ./scripts/build.ps1 -clean",
         "qpm-rust qmod build",
         "pwsh ./scripts/createqmod.ps1 QosmeticsCyoobs -clean"
+      ],
+      "copy": [
+        "pwsh ./scripts/copy.ps1"
+      ],
+      "clean": [
+        "pwsh ./scripts/build.ps1 -clean"
+      ],
+      "log": [
+        "pwsh ./scripts/log.ps1"
       ]
     }
-  },
-  "additionalData": {}
+  }
 }
