@@ -17,20 +17,20 @@ namespace Qosmetics::Notes
 
         static Config& get_config();
 
-        auto get_overrideNoteSize() { return overrideNoteSize; }
+        auto get_overrideNoteSize() const { return overrideNoteSize; }
         void set_overrideNoteSize(auto value)
         {
             overrideNoteSize = value;
             UpdateSubmission();
         }
-        auto get_alsoChangeHitboxes() { return alsoChangeHitboxes; }
+        auto get_alsoChangeHitboxes() const { return alsoChangeHitboxes; }
         void set_alsoChangeHitboxes(auto value)
         {
             alsoChangeHitboxes = value;
             UpdateSubmission();
         }
 
-        void UpdateSubmission();
+        void UpdateSubmission() const;
 
     private:
         bool overrideNoteSize = false;
