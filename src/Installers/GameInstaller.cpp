@@ -193,52 +193,6 @@ namespace Qosmetics::Notes
     void SetupForBombHitboxChanges(const Qosmetics::Notes::Config& globalConfig, GlobalNamespace::BombNoteController* original, UnityEngine::Transform* mesh, float notesUniformScale)
     {
         float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
-        mesh->set_localScale(mesh->localScale * overrideNoteSize);
-
-        if (!globalConfig.get_alsoChangeHitboxes())
-        {
-            auto sphereCollider = mesh->get_gameObject()->GetComponent<UnityEngine::SphereCollider*>();
-            sphereCollider->set_radius(sphereCollider->get_radius() / overrideNoteSize);
-        }
-    }
-
-    /// @brief Makes it so all hitbox changes are unified in 1 method, making it easier to edit what gets done
-    /// @param globalConfig the config used
-    /// @param original the original object
-    /// @param noteCubeTransform the notecube of the object
-    /// @param notesUniformScale the uniform scale of notes (small / normal notes?)
-    template <typename T>
-    void SetupForNoteHitboxChanges(const Qosmetics::Notes::Config& globalConfig, T original, UnityEngine::Transform* noteCubeTransform, float notesUniformScale)
-    {
-        DEBUG("Setting up hitbox changes for type {}", classof(T)->name);
-        auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
-
-        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
-        noteScaler->noteSize = Sombrero::FastVector3::one() * overrideNoteSize * notesUniformScale;
-
-        // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
-        if (!globalConfig.get_alsoChangeHitboxes())
-        {
-            DEBUG("note Size: {}, scale: {}", overrideNoteSize, notesUniformScale);
-            for (auto cuttable : original->bigCuttableBySaberList)
-            {
-                auto sz = cuttable->get_colliderSize();
-                DEBUG("Big Collider size: {}, {}, {}", sz.x, sz.y, sz.z);
-                cuttable->set_colliderSize((cuttable->get_colliderSize() / overrideNoteSize) * notesUniformScale);
-            }
-
-            for (auto cuttable : original->smallCuttableBySaberList)
-            {
-                auto sz = cuttable->get_colliderSize();
-                DEBUG("Small Collider size: {}, {}, {}", sz.x, sz.y, sz.z);
-                cuttable->set_colliderSize((cuttable->get_colliderSize() / overrideNoteSize) * notesUniformScale);
-            }
-        }
-    }
-
-    void SetupForBombHitboxChanges(const Qosmetics::Notes::Config& globalConfig, GlobalNamespace::BombNoteController* original, UnityEngine::Transform* mesh, float notesUniformScale)
-    {
-        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
         mesh->set_localScale(mesh->get_localScale() * overrideNoteSize);
 
         if (!globalConfig.get_alsoChangeHitboxes())
