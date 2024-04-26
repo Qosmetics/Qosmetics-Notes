@@ -61,7 +61,7 @@ MAKE_AUTO_HOOK_ORIG_MATCH(NoteDebrisSpawner_SpawnDebris, &GlobalNamespace::NoteD
     GlobalNamespace::NoteDebris* noteDebris;
     GlobalNamespace::NoteDebris* noteDebris2;
 
-    self->SpawnNoteDebris(noteGameplayType, byref(noteDebris), byref(noteDebris2));
+    self->SpawnNoteDebris(noteGameplayType, ByRef<GlobalNamespace::NoteDebris*>(noteDebris), ByRef<GlobalNamespace::NoteDebris*>(noteDebris2));
 
     if (!noteDebris || !noteDebris2)
     {

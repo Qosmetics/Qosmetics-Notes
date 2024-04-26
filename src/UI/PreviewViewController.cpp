@@ -206,7 +206,7 @@ namespace Qosmetics::Notes
             {
                 auto overrideColorScheme = playerDataModel->playerData->colorSchemesSettings->GetOverrideColorScheme();
                 if (!overrideColorScheme)
-                    playerDataModel->playerData->colorSchemesSettings->_colorSchemesDict->TryGetValue("TheFirst", byref(overrideColorScheme));
+                    playerDataModel->playerData->colorSchemesSettings->_colorSchemesDict->TryGetValue("TheFirst", ByRef<GlobalNamespace::ColorScheme*>(overrideColorScheme));
 
                 if (overrideColorScheme)
                 {
