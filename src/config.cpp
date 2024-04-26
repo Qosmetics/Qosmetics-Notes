@@ -96,7 +96,7 @@
         member.AddMember(#identifier, actual_config.identifier, allocator); \
     }
 
-extern ModInfo modInfo;
+extern modloader::ModInfo modInfo;
 namespace Qosmetics::Notes
 {
     Config actual_config;

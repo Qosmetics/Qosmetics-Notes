@@ -12,19 +12,12 @@
 
 #include "lapiz/shared/macros.hpp"
 
-#ifndef DECLARE_OVERRIDE_METHOD_MATCH
-#define DECLARE_OVERRIDE_METHOD_MATCH(retval, name, mptr, ...) \
-    DECLARE_OVERRIDE_METHOD(retval, name, il2cpp_utils::il2cpp_type_check::MetadataGetter<mptr>::get(), __VA_ARGS__)
-#endif
-
-#include "private_field.hpp"
-
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SelectionViewController, HMUI::ViewController,
-                      DECLARE_INSTANCE_PRIVATE_FIELD(NoteModelContainer*, noteModelContainer);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(PreviewViewController*, previewViewController);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::CustomListTableData*, descriptorListTableData);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(Qosmetics::Core::QosmeticObjectTableData*, descriptorList);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(Qosmetics::Core::DeletionConfirmationModal*, deletionConfirmationModal);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(NoteModelContainer*, noteModelContainer);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(PreviewViewController*, previewViewController);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(BSML::CustomListTableData*, descriptorListTableData);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(Qosmetics::Core::QosmeticObjectTableData*, descriptorList);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(Qosmetics::Core::DeletionConfirmationModal*, deletionConfirmationModal);
 
                       DECLARE_INJECT_METHOD(void, Inject, PreviewViewController* previewViewController, NoteModelContainer* noteModelContainer);
                       DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);

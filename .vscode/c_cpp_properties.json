@@ -28,8 +28,8 @@
       ],
       "compilerPath": "${ndkPath}/toolchains/llvm/prebuilt/windows-x86_64/bin/aarch64-linux-android24-clang.cmd",
       "name": "Quest",
-      "cStandard": "c11",
-      "cppStandard": "c++20",
+      "cStandard": "gnu11",
+      "cppStandard": "gnu++20",
       "intelliSenseMode": "linux-clang-arm64"
     }
   ],

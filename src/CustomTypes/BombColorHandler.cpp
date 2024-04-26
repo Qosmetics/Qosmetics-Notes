@@ -75,12 +75,12 @@ namespace Qosmetics::Notes
             return;
         auto renderers = propertyController->get_renderers();
         DEBUG("Creating new renderers");
-        ArrayW<UnityEngine::Renderer*> newRenderers(renderers.Length() + materialReplacementRenderers.Length());
+        ArrayW<UnityW<UnityEngine::Renderer>> newRenderers(renderers.size() + materialReplacementRenderers.size());
 
         DEBUG("copying first set of renderers");
-        memcpy(newRenderers.begin(), renderers.begin(), renderers.Length() * sizeof(UnityEngine::Renderer*));
-        memcpy(newRenderers.begin() + renderers.Length(), materialReplacementRenderers.begin(), materialReplacementRenderers.Length() * sizeof(UnityEngine::Renderer*));
-        propertyController->renderers = newRenderers;
+        memcpy(newRenderers.begin(), renderers.begin(), renderers.size() * sizeof(UnityEngine::Renderer*));
+        memcpy(newRenderers.begin() + renderers.size(), materialReplacementRenderers.begin(), materialReplacementRenderers.size() * sizeof(UnityEngine::Renderer*));
+        propertyController->_renderers = newRenderers;
     }
 
 }

@@ -42,8 +42,25 @@
 
 DEFINE_TYPE(Qosmetics::Notes, GameInstaller);
 
+static UnityEngine::Vector3 operator*(UnityEngine::Vector3 vec, float v)
+{
+    return {
+        vec.x * v,
+        vec.y * v,
+        vec.z * v};
+}
+
+static UnityEngine::Vector3 operator/(UnityEngine::Vector3 vec, float v)
+{
+    return {
+        vec.x / v,
+        vec.y / v,
+        vec.z / v};
+}
+
 template <typename T>
-requires(std::is_same_v<T, Qosmetics::Notes::CyoobColorHandler*> || std::is_same_v<T, Qosmetics::Notes::DebrisColorHandler*>) static void SetAndFixObjectChildren(UnityEngine::Transform* obj, Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)
+    requires(std::is_same_v<T, Qosmetics::Notes::CyoobColorHandler*> || std::is_same_v<T, Qosmetics::Notes::DebrisColorHandler*>)
+static void SetAndFixObjectChildren(UnityEngine::Transform* obj, Sombrero::FastColor leftColor, Sombrero::FastColor rightColor)
 {
     int childCount = obj->get_childCount();
     for (int i = 0; i < childCount; i++)
@@ -92,7 +109,7 @@ namespace Qosmetics::Notes
         auto& config = _noteModelContainer->GetNoteConfig();
 #ifdef HAS_CHROMA
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
-        bool hasCustoms = _noteModelContainer->currentNoteObject;
+        bool hasCustoms = _noteModelContainer->CurrentNoteObject;
 
         if (hasCustoms)
         {
@@ -122,19 +139,65 @@ namespace Qosmetics::Notes
         // if reduce debris is used, don't even bother redecorating the debris
         if (!_reduceDebris)
         {
-            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("normalNoteDebrisHDPrefab", std::bind(&GameInstaller::DecorateNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
-            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("burstSliderHeadNoteDebrisHDPrefab", std::bind(&GameInstaller::DecorateHeadNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
-            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("burstSliderElementNoteHDPrefab", std::bind(&GameInstaller::DecorateLinkNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("_normalNoteDebrisHDPrefab", std::bind(&GameInstaller::DecorateNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("_burstSliderHeadNoteDebrisHDPrefab", std::bind(&GameInstaller::DecorateHeadNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("_burstSliderElementNoteHDPrefab", std::bind(&GameInstaller::DecorateLinkNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
 
-            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("normalNoteDebrisLWPrefab", std::bind(&GameInstaller::DecorateNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
-            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("burstSliderHeadNoteDebrisLWPrefab", std::bind(&GameInstaller::DecorateHeadNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
-            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("burstSliderElementNoteLWPrefab", std::bind(&GameInstaller::DecorateLinkNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("_normalNoteDebrisLWPrefab", std::bind(&GameInstaller::DecorateNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("_burstSliderHeadNoteDebrisLWPrefab", std::bind(&GameInstaller::DecorateHeadNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+            Lapiz::Objects::Registration<GlobalNamespace::NoteDebris*, GlobalNamespace::NoteDebrisPoolInstaller*>::New_ctor("_burstSliderElementNoteLWPrefab", std::bind(&GameInstaller::DecorateLinkNoteDebris, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
         }
 
-        Lapiz::Objects::Registration<GlobalNamespace::MirroredGameNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*>::New_ctor("mirroredGameNoteControllerPrefab", std::bind(&GameInstaller::DecorateMirrorNote, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
-        Lapiz::Objects::Registration<GlobalNamespace::MirroredGameNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*>::New_ctor("mirroredBurstSliderHeadGameNoteControllerPrefab", std::bind(&GameInstaller::DecorateMirrorBurstSliderHead, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
-        Lapiz::Objects::Registration<GlobalNamespace::MirroredGameNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*>::New_ctor("mirroredBurstSliderGameNoteControllerPrefab", std::bind(&GameInstaller::DecorateMirrorBurstSliderElement, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
-        Lapiz::Objects::Registration<GlobalNamespace::MirroredBombNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*>::New_ctor("mirroredBombNoteControllerPrefab", std::bind(&GameInstaller::DecorateMirrorBomb, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+        Lapiz::Objects::Registration<GlobalNamespace::MirroredGameNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*>::New_ctor("_mirroredGameNoteControllerPrefab", std::bind(&GameInstaller::DecorateMirrorNote, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+        Lapiz::Objects::Registration<GlobalNamespace::MirroredGameNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*>::New_ctor("_mirroredBurstSliderHeadGameNoteControllerPrefab", std::bind(&GameInstaller::DecorateMirrorBurstSliderHead, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+        Lapiz::Objects::Registration<GlobalNamespace::MirroredGameNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*>::New_ctor("_mirroredBurstSliderGameNoteControllerPrefab", std::bind(&GameInstaller::DecorateMirrorBurstSliderElement, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+        Lapiz::Objects::Registration<GlobalNamespace::MirroredBombNoteController*, GlobalNamespace::FakeMirrorObjectsInstaller*>::New_ctor("_mirroredBombNoteControllerPrefab", std::bind(&GameInstaller::DecorateMirrorBomb, this, std::placeholders::_1), DECORATION_PRIORITY)->RegisterRedecorator(container);
+    }
+
+    /// @brief Makes it so all hitbox changes are unified in 1 method, making it easier to edit what gets done
+    /// @param globalConfig the config used
+    /// @param original the original object
+    /// @param noteCubeTransform the notecube of the object
+    /// @param notesUniformScale the uniform scale of notes (small / normal notes?)
+    template <typename T>
+    void SetupForNoteHitboxChanges(const Qosmetics::Notes::Config& globalConfig, T original, UnityEngine::Transform* noteCubeTransform, float notesUniformScale)
+    {
+        DEBUG("Setting up hitbox changes for type {}", classof(T)->name);
+        auto noteScaler = noteCubeTransform->get_gameObject()->AddComponent<Qosmetics::Notes::BasicNoteScaler*>();
+
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+        noteScaler->noteSize = Sombrero::FastVector3::one() * overrideNoteSize * notesUniformScale;
+
+        // if we don't want to change hitbox sizes, scale the cuttable hitboxes to make them proper size
+        if (!globalConfig.get_alsoChangeHitboxes())
+        {
+            DEBUG("note Size: {}, scale: {}", overrideNoteSize, notesUniformScale);
+            for (auto cuttable : original->_bigCuttableBySaberList)
+            {
+                auto sz = cuttable->get_colliderSize();
+                DEBUG("Big Collider size: {}, {}, {}", sz.x, sz.y, sz.z);
+                cuttable->set_colliderSize((cuttable->get_colliderSize() / overrideNoteSize) * notesUniformScale);
+            }
+
+            for (auto cuttable : original->_smallCuttableBySaberList)
+            {
+                auto sz = cuttable->get_colliderSize();
+                DEBUG("Small Collider size: {}, {}, {}", sz.x, sz.y, sz.z);
+                cuttable->set_colliderSize((cuttable->get_colliderSize() / overrideNoteSize) * notesUniformScale);
+            }
+        }
+    }
+
+    void SetupForBombHitboxChanges(const Qosmetics::Notes::Config& globalConfig, GlobalNamespace::BombNoteController* original, UnityEngine::Transform* mesh, float notesUniformScale)
+    {
+        float overrideNoteSize = globalConfig.get_overrideNoteSize() ? globalConfig.noteSize : 1.0f;
+        mesh->set_localScale(mesh->localScale * overrideNoteSize);
+
+        if (!globalConfig.get_alsoChangeHitboxes())
+        {
+            auto sphereCollider = mesh->get_gameObject()->GetComponent<UnityEngine::SphereCollider*>();
+            sphereCollider->set_radius(sphereCollider->get_radius() / overrideNoteSize);
+        }
     }
 
     /* regular dot / arrow notes */
@@ -160,7 +223,7 @@ namespace Qosmetics::Notes
         Qosmetics::Notes::CyoobParent::globalLeftColor = Chroma::NoteAPI::getGlobalNoteColorSafe(0).value_or(leftColor);
 #endif
         auto noteCubeTransform = original->get_transform()->Find(ConstStrings::NoteCube());
-        auto currentNoteObject = _noteModelContainer->currentNoteObject;
+        auto currentNoteObject = _noteModelContainer->CurrentNoteObject;
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
@@ -178,7 +241,7 @@ namespace Qosmetics::Notes
             notes->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
             notes->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
 
-            objectParent->handler = notes->GetComponent<CyoobHandler*>();
+            objectParent->Handler = notes->GetComponent<CyoobHandler*>();
             int childCount = notes->get_transform()->get_childCount();
             SetAndFixObjectChildren<CyoobColorHandler*>(notes->get_transform(), leftColor, rightColor);
 
@@ -224,7 +287,7 @@ namespace Qosmetics::Notes
     GlobalNamespace::BombNoteController* GameInstaller::DecorateBombs(GlobalNamespace::BombNoteController* original)
     {
         auto mesh = original->get_transform()->Find(ConstStrings::Mesh());
-        auto currentNoteObject = _noteModelContainer->currentNoteObject;
+        auto currentNoteObject = _noteModelContainer->CurrentNoteObject;
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
@@ -278,7 +341,7 @@ namespace Qosmetics::Notes
         auto rightColor = colorScheme->saberBColor;
 
         auto noteCubeTransform = original->get_transform()->Find(ConstStrings::NoteCube());
-        auto currentNoteObject = _noteModelContainer->currentNoteObject;
+        auto currentNoteObject = _noteModelContainer->CurrentNoteObject;
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
@@ -296,7 +359,7 @@ namespace Qosmetics::Notes
             notes->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
             notes->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
 
-            objectParent->handler = notes->GetComponent<ChainHandler*>();
+            objectParent->Handler = notes->GetComponent<ChainHandler*>();
             int childCount = notes->get_transform()->get_childCount();
             SetAndFixObjectChildren<CyoobColorHandler*>(notes->get_transform(), leftColor, rightColor);
 
@@ -361,7 +424,7 @@ namespace Qosmetics::Notes
         Qosmetics::Notes::ChainParent::globalLeftColor = Chroma::NoteAPI::getGlobalNoteColorSafe(0).value_or(leftColor);
 #endif
         auto noteCubeTransform = original->get_transform()->Find(ConstStrings::NoteCube());
-        auto currentNoteObject = _noteModelContainer->currentNoteObject;
+        auto currentNoteObject = _noteModelContainer->CurrentNoteObject;
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
@@ -379,7 +442,7 @@ namespace Qosmetics::Notes
             notes->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
             notes->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
 
-            objectParent->handler = notes->GetComponent<ChainHandler*>();
+            objectParent->Handler = notes->GetComponent<ChainHandler*>();
             int childCount = notes->get_transform()->get_childCount();
             SetAndFixObjectChildren<CyoobColorHandler*>(notes->get_transform(), leftColor, rightColor);
 
@@ -448,7 +511,7 @@ namespace Qosmetics::Notes
         auto leftColor = colorScheme->saberAColor;
         auto rightColor = colorScheme->saberBColor;
 
-        auto currentNoteObject = _noteModelContainer->currentNoteObject;
+        auto currentNoteObject = _noteModelContainer->CurrentNoteObject;
         bool addCustomPrefab = !(_ghostNotes || _disappearingArrows) && useDebris && !forceDefaultDebris;
 
         auto& config = _noteModelContainer->GetNoteConfig();
@@ -460,7 +523,7 @@ namespace Qosmetics::Notes
         {
             auto noteDebrisParent = original->get_gameObject()->AddComponent<Qosmetics::Notes::DebrisParent*>();
 
-            auto meshTransform = original->meshTransform;
+            auto meshTransform = original->_meshTransform;
             auto actualDebris = currentNoteObject->get_transform()->Find(targetName);
             auto debris = UnityEngine::Object::Instantiate(actualDebris->get_gameObject(), meshTransform);
             Qosmetics::Notes::MaterialUtils::ReplaceMaterialsForGameObject(debris);
@@ -490,7 +553,7 @@ namespace Qosmetics::Notes
         auto rightColor = colorScheme->saberBColor;
 
         auto noteCubeTransform = original->get_transform()->Find(ConstStrings::NoteCube());
-        auto currentNoteObject = _noteModelContainer->currentNoteObject;
+        auto currentNoteObject = _noteModelContainer->CurrentNoteObject;
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
@@ -509,7 +572,7 @@ namespace Qosmetics::Notes
             notes->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
             notes->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
 
-            objectParent->handler = notes->GetComponent<CyoobHandler*>();
+            objectParent->Handler = notes->GetComponent<CyoobHandler*>();
             SetAndFixObjectChildren<CyoobColorHandler*>(notes->get_transform(), leftColor, rightColor);
 
             // if we don't want to show arrows, disable the arrow gameobjects
@@ -565,7 +628,7 @@ namespace Qosmetics::Notes
         auto rightColor = colorScheme->saberBColor;
 
         auto noteCubeTransform = original->get_transform()->Find(ConstStrings::NoteCube());
-        auto currentNoteObject = _noteModelContainer->currentNoteObject;
+        auto currentNoteObject = _noteModelContainer->CurrentNoteObject;
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
@@ -583,7 +646,7 @@ namespace Qosmetics::Notes
             notes->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
             notes->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
 
-            objectParent->handler = notes->GetComponent<ChainHandler*>();
+            objectParent->Handler = notes->GetComponent<ChainHandler*>();
             SetAndFixObjectChildren<CyoobColorHandler*>(notes->get_transform(), leftColor, rightColor);
 
             // if we don't want to show arrows, disable the arrow gameobjects
@@ -639,7 +702,7 @@ namespace Qosmetics::Notes
         auto rightColor = colorScheme->saberBColor;
 
         auto noteCubeTransform = original->get_transform()->Find(ConstStrings::NoteCube());
-        auto currentNoteObject = _noteModelContainer->currentNoteObject;
+        auto currentNoteObject = _noteModelContainer->CurrentNoteObject;
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();
@@ -657,7 +720,7 @@ namespace Qosmetics::Notes
             notes->get_transform()->set_localPosition(Sombrero::FastVector3::zero());
             notes->get_transform()->set_localScale(Sombrero::FastVector3::one() * 0.4f);
 
-            objectParent->handler = notes->GetComponent<ChainHandler*>();
+            objectParent->Handler = notes->GetComponent<ChainHandler*>();
             SetAndFixObjectChildren<CyoobColorHandler*>(notes->get_transform(), leftColor, rightColor);
 
             // if we don't want to show arrows, disable the arrow gameobjects
@@ -710,7 +773,7 @@ namespace Qosmetics::Notes
     {
         auto mesh = original->get_transform()->Find(ConstStrings::Mesh());
         auto meshRenderer = mesh->get_gameObject()->GetComponent<UnityEngine::MeshRenderer*>();
-        auto currentNoteObject = _noteModelContainer->currentNoteObject;
+        auto currentNoteObject = _noteModelContainer->CurrentNoteObject;
 
         auto& config = _noteModelContainer->GetNoteConfig();
         auto& globalConfig = Qosmetics::Notes::Config::get_config();

@@ -9,20 +9,20 @@
 #include "qosmetics-core/shared/Data/Descriptor.hpp"
 #include "qosmetics-core/shared/Data/Manifest.hpp"
 
-#include "private_field.hpp"
-
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, NoteModelContainer, UnityEngine::MonoBehaviour,
                       DECLARE_INSTANCE_METHOD(void, Start);
                       DECLARE_INSTANCE_METHOD(void, OnDestroy);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(UnityEngine::AssetBundle*, bundle);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(bool, isLoading);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(UnityEngine::GameObject*, currentNoteObject);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(UnityEngine::AssetBundle*, bundle);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(bool, isLoading);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(UnityEngine::GameObject*, currentNoteObject);
 
                       DECLARE_CTOR(ctor);
                       public
                       :
 
                       using Manifest = Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig>;
+                      __declspec(property(get = get_CurrentNoteObject)) UnityEngine::GameObject * CurrentNoteObject;
+                      UnityEngine::GameObject * get_CurrentNoteObject() const;
 
                       static NoteModelContainer * get_instance();
                       bool LoadObject(const Manifest& manifest, std::function<void(NoteModelContainer*)> onFinished);
@@ -30,6 +30,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, NoteModelContainer, UnityEngine::MonoBeh
                       const NoteObjectConfig& GetNoteConfig();
                       const Qosmetics::Core::Descriptor& GetDescriptor();
                       bool Default();
+
                       private
                       :
 

@@ -8,12 +8,10 @@
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "custom-types/shared/macros.hpp"
 
-#include "private_field.hpp"
-
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, DebrisParent, UnityEngine::MonoBehaviour,
-                      DECLARE_INSTANCE_PRIVATE_FIELD(DebrisHandler*, debrisHandler);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::NoteDebris*, noteDebris);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::ColorManager*, colorManager);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(DebrisHandler*, debrisHandler);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(GlobalNamespace::NoteDebris*, noteDebris);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(GlobalNamespace::ColorManager*, colorManager);
 
                       DECLARE_INSTANCE_METHOD(void, Awake);
                       DECLARE_INSTANCE_METHOD(void, OnDestroy);

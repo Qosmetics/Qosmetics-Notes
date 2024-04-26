@@ -9,20 +9,18 @@
 #include "bsml/shared/BSML/Components/Settings/ToggleSetting.hpp"
 #include "bsml/shared/macros.hpp"
 
-#include "private_field.hpp"
-
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SettingsViewController, HMUI::ViewController,
-                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, overrideNoteSizeToggle);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::SliderSetting*, noteSizeSlider);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, alsoChangeHitboxesToggle);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, forceDefaultBombsToggle);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, forceDefaultChainsToggle);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, forceDefaultDebrisToggle);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, forceDefaultChainDebrisToggle);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, disableReflectionsToggle);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(BSML::ToggleSetting*, keepMissingReflectionsToggle);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(BSML::ToggleSetting*, overrideNoteSizeToggle);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(BSML::SliderSetting*, noteSizeSlider);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(BSML::ToggleSetting*, alsoChangeHitboxesToggle);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(BSML::ToggleSetting*, forceDefaultBombsToggle);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(BSML::ToggleSetting*, forceDefaultChainsToggle);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(BSML::ToggleSetting*, forceDefaultDebrisToggle);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(BSML::ToggleSetting*, forceDefaultChainDebrisToggle);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(BSML::ToggleSetting*, disableReflectionsToggle);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(BSML::ToggleSetting*, keepMissingReflectionsToggle);
 
-                      DECLARE_INSTANCE_PRIVATE_FIELD(PreviewViewController*, previewViewController);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(PreviewViewController*, previewViewController);
 
                       DECLARE_BSML_PROPERTY(bool, overrideNoteSize);
                       DECLARE_BSML_PROPERTY(float, noteSize);
@@ -37,7 +35,7 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, SettingsViewController, HMUI::ViewContro
                       DECLARE_INJECT_METHOD(void, Inject, PreviewViewController* previewViewController);
                       DECLARE_INSTANCE_METHOD(StringW, get_gaydient);
                       DECLARE_INSTANCE_METHOD(bool, get_gay);
-                      DECLARE_OVERRIDE_METHOD(void, DidActivate, il2cpp_utils::il2cpp_type_check::MetadataGetter<&HMUI::ViewController::DidActivate>::get(), bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
+                      DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
                       DECLARE_DEFAULT_CTOR();
                       public
                       :

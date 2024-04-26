@@ -9,7 +9,6 @@
 #include "static-defines.hpp"
 
 #include "HMUI/TableView.hpp"
-#include "HMUI/TableView_ScrollPositionType.hpp"
 
 #include "bsml/shared/BSML.hpp"
 #include "bsml/shared/Helpers/utilities.hpp"
@@ -32,7 +31,7 @@ namespace Qosmetics::Notes
     {
         if (firstActivation)
         {
-            BSML::parse_and_construct(IncludedAssets::SelectionView_bsml, get_transform(), this);
+            BSML::parse_and_construct(Assets::Views::SelectionView_bsml, get_transform(), this);
         }
 
         Refresh();
@@ -53,7 +52,7 @@ namespace Qosmetics::Notes
         descriptorList->deletionConfirmationModal = deletionConfirmationModal;
         descriptorList->onSelect = std::bind(reinterpret_cast<void (SelectionViewController::*)(HMUI::TableCell*)>(&SelectionViewController::OnSelectDescriptor), this, std::placeholders::_1);
         descriptorList->onDelete = std::bind(reinterpret_cast<void (SelectionViewController::*)(HMUI::TableCell*)>(&SelectionViewController::OnDeleteCell), this, std::placeholders::_1);
-        descriptorList->defaultSprite = BSML::Utilities::LoadSpriteRaw(IncludedAssets::PlaceholderIcon_png);
+        descriptorList->defaultSprite = BSML::Utilities::LoadSpriteRaw(Assets::Icons::PlaceholderIcon_png);
     }
 
     void SelectionViewController::Refresh()
@@ -72,10 +71,10 @@ namespace Qosmetics::Notes
 
     int SelectionViewController::GetSelectedCellIdx()
     {
-        if (!descriptorList || !descriptorList->m_CachedPtr.m_value)
+        if (!descriptorList || !descriptorList->m_CachedPtr)
             return -1;
         auto tableView = descriptorList->tableView;
-        auto enumerator = tableView->selectedCellIdxs->GetEnumerator();
+        auto enumerator = tableView->_selectedCellIdxs->GetEnumerator();
         int result = -1;
         if (enumerator.MoveNext())
             result = enumerator.get_Current();

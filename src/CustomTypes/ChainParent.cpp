@@ -95,4 +95,8 @@ namespace Qosmetics::Notes
         if (handler)
             handler->SetColors(leftColor, rightColor);
     }
+
+    ChainHandler* ChainParent::get_Handler() const { return handler; }
+    void ChainParent::set_Handler(ChainHandler* handler) { this->handler = handler; }
+
 }

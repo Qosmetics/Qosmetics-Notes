@@ -4,6 +4,8 @@
 
 #include "UnityEngine/Shader.hpp"
 #include "UnityEngine/Transform.hpp"
+#include "UnityEngine/Vector4.hpp"
+
 
 DEFINE_TYPE(Qosmetics::Notes, DebrisHandler);
 
@@ -35,7 +37,7 @@ namespace Qosmetics::Notes
 
         objects = ArrayW<UnityEngine::GameObject*>(2);
         colorHandlers = ArrayW<DebrisColorHandler*>(2);
-        sliceMaterials = ArrayW<UnityEngine::Material*>(2);
+        sliceMaterials = ArrayW<ArrayW<RendererMaterialPair>>(2);
         anySliceMaterials = ArrayW<bool>(2);
 
         FindObjects();
@@ -66,7 +68,7 @@ namespace Qosmetics::Notes
 
         if (magnitude > 0.04f)
         {
-            cutPoint = 0.2f * cutPoint / Sombrero::sqroot(magnitude);
+            cutPoint = (cutPoint * 0.2f) / Sombrero::sqroot(magnitude);
         }
 
         UnityEngine::Vector4 slicePos(cutPoint.x, cutPoint.y, cutPoint.z, 0.0f);
