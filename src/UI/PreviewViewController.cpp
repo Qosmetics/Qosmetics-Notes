@@ -83,20 +83,20 @@ namespace Qosmetics::Notes
     {
         if (firstActivation)
         {
-            auto parser = BSML::parse_and_construct(IncludedAssets::PreviewView_bsml, get_transform(), this);
+            auto parser = BSML::parse_and_construct(Assets::Views::PreviewView_bsml, get_transform(), this);
             auto params = parser->parserParams.get();
             auto objectBG = params->GetObjectsWithTag("objectBG").at(0)->GetComponent<BSML::Backgroundable*>();
             auto imageView = objectBG->background;
-            imageView->skew = 0;
+            imageView->_skew = 0;
             imageView->set_gradient(true);
-            imageView->gradientDirection = 1;
+            imageView->_gradientDirection = 1;
             imageView->set_color(Sombrero::FastColor::white());
             auto color = Sombrero::FastColor::get_black();
             color.a = 0.3f;
             imageView->set_color0(color);
             color.a = 0.7f;
             imageView->set_color1(color);
-            imageView->curvedCanvasSettingsHelper->Reset();
+            imageView->_curvedCanvasSettingsHelper->Reset();
 
             ShowLoading(true);
             UpdatePreview(true);
@@ -114,7 +114,7 @@ namespace Qosmetics::Notes
 
     void PreviewViewController::SetTitleText(StringW text)
     {
-        if (!(title && title->m_CachedPtr.m_value))
+        if (!(title && title->m_CachedPtr))
             return;
         if (Qosmetics::Core::DateUtils::isMonth(6))
         {
@@ -127,7 +127,7 @@ namespace Qosmetics::Notes
 
     void PreviewViewController::ShowLoading(bool isLoading)
     {
-        if (!(loadingIndicator && loadingIndicator->m_CachedPtr.m_value))
+        if (!(loadingIndicator && loadingIndicator->m_CachedPtr))
             return;
 
         loadingIndicator->get_gameObject()->SetActive(isLoading);
@@ -206,7 +206,7 @@ namespace Qosmetics::Notes
             {
                 auto overrideColorScheme = playerDataModel->playerData->colorSchemesSettings->GetOverrideColorScheme();
                 if (!overrideColorScheme)
-                    playerDataModel->playerData->colorSchemesSettings->colorSchemesDict->TryGetValue("TheFirst", byref(overrideColorScheme));
+                    playerDataModel->playerData->colorSchemesSettings->_colorSchemesDict->TryGetValue("TheFirst", ByRef<GlobalNamespace::ColorScheme*>(overrideColorScheme));
 
                 if (overrideColorScheme)
                 {
@@ -317,10 +317,10 @@ namespace Qosmetics::Notes
 
     void PreviewViewController::InstantiatePrefab()
     {
-        if (noteModelContainer->currentNoteObject)
+        if (noteModelContainer->CurrentNoteObject)
         {
-            DEBUG("Found a new note object, instantiating it! name: {}", noteModelContainer->currentNoteObject->get_name());
-            currentPrefab = UnityEngine::Object::Instantiate(noteModelContainer->currentNoteObject, get_transform());
+            DEBUG("Found a new note object, instantiating it! name: {}", noteModelContainer->CurrentNoteObject->get_name());
+            currentPrefab = UnityEngine::Object::Instantiate(noteModelContainer->CurrentNoteObject, get_transform());
             currentPrefab->SetActive(true);
             auto t = currentPrefab->get_transform();
             t->set_localScale(Sombrero::FastVector3::one() * 30.0f);

@@ -7,10 +7,10 @@
 #include "qosmetics-core/shared/Utils/FileUtils.hpp"
 #include "static-defines.hpp"
 
-#include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "UnityEngine/ImageConversion.hpp"
 #include "UnityEngine/TextAsset.hpp"
 #include "UnityEngine/Texture2D.hpp"
+#include "bsml/shared/BSML/SharedCoroutineStarter.hpp"
 #include "zip/shared/zip.h"
 
 #include "beatsaber-hook/shared/config/rapidjson-utils.hpp"
@@ -23,7 +23,7 @@ namespace Qosmetics::Notes::QbloqConversion
 {
     void ConvertOldQbloqs(std::function<void()> onFinished)
     {
-        GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(coro(ConvertAllFoundQbloqs(GetNonConverted(GetQbloqFiles()), std::move(onFinished))));
+        BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(coro(ConvertAllFoundQbloqs(GetNonConverted(GetQbloqFiles()), std::move(onFinished))));
     }
 
     std::vector<std::string> GetQbloqFiles()

@@ -72,9 +72,9 @@ namespace Qosmetics::Notes::MaterialUtils
 
     void ReplaceMaterialForRenderer(Renderer* renderer, Material* replacingMaterial, std::u16string_view materialToReplaceName)
     {
-        ArrayW<Material*> materials = renderer->get_materials();
+        auto materials = renderer->materials;
 
-        int length = materials.Length();
+        int length = materials.size();
         ArrayW<Material*> materialsCopy(length);
         bool materialsDidChange = false;
         for (int i = 0; i < length; i++)

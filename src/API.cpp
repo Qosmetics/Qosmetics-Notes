@@ -15,6 +15,7 @@
 #pragma GCC diagnostic ignored "-Wreturn-type-c-linkage"
 
 #define GET_NOTEMODELCONTAINER() auto noteModelContainer = Qosmetics::Notes::NoteModelContainer::get_instance()
+
 EXPOSE_API(GetActiveDescriptor, Qosmetics::Core::Descriptor)
 {
     return Qosmetics::Notes::NoteModelContainer::get_instance()->GetDescriptor();
@@ -49,31 +50,31 @@ EXPOSE_API(SetActive, bool, std::string fileName)
 
 EXPOSE_API(GetNoteIsCustom, bool)
 {
-    return Qosmetics::Notes::NoteModelContainer::get_instance()->currentNoteObject != nullptr;
+    return Qosmetics::Notes::NoteModelContainer::get_instance()->CurrentNoteObject != nullptr;
 }
 
 EXPOSE_API(GetBomb, UnityEngine::GameObject*)
 {
     GET_NOTEMODELCONTAINER();
 
-    if (!noteModelContainer->currentNoteObject)
+    if (!noteModelContainer->CurrentNoteObject)
         return nullptr;
     auto& config = noteModelContainer->GetNoteConfig();
     if (!config.get_hasBomb())
         return nullptr;
-    return UnityEngine::Object::Instantiate(noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Bomb())->get_gameObject());
+    return UnityEngine::Object::Instantiate(noteModelContainer->CurrentNoteObject->get_transform()->Find(ConstStrings::Bomb())->get_gameObject());
 }
 
 EXPOSE_API(GetDebris, UnityEngine::GameObject*, bool right)
 {
     GET_NOTEMODELCONTAINER();
 
-    if (!noteModelContainer->currentNoteObject)
+    if (!noteModelContainer->CurrentNoteObject)
         return nullptr;
     auto& config = noteModelContainer->GetNoteConfig();
     if (!config.get_hasDebris())
         return nullptr;
-    auto debrisT = noteModelContainer->currentNoteObject->get_transform()->Find(ConstStrings::Debris());
+    auto debrisT = noteModelContainer->CurrentNoteObject->get_transform()->Find(ConstStrings::Debris());
     return UnityEngine::Object::Instantiate(debrisT->Find(right ? ConstStrings::RightDebris() : ConstStrings::LeftDebris())->get_gameObject());
 }
 
@@ -81,9 +82,9 @@ EXPOSE_API(GetNote, UnityEngine::GameObject*, int type)
 {
     GET_NOTEMODELCONTAINER();
 
-    if (!noteModelContainer->currentNoteObject)
+    if (!noteModelContainer->CurrentNoteObject)
         return nullptr;
-    auto t = noteModelContainer->currentNoteObject->get_transform();
+    auto t = noteModelContainer->CurrentNoteObject->get_transform();
     switch (type)
     {
     case 0:
@@ -102,14 +103,14 @@ EXPOSE_API(GetPrefabClone, UnityEngine::GameObject*)
 {
     GET_NOTEMODELCONTAINER();
 
-    if (!noteModelContainer->currentNoteObject)
+    if (!noteModelContainer->CurrentNoteObject)
         return nullptr;
-    return UnityEngine::Object::Instantiate(noteModelContainer->currentNoteObject);
+    return UnityEngine::Object::Instantiate(noteModelContainer->CurrentNoteObject);
 }
 
 EXPOSE_API(GetPrefab, UnityEngine::GameObject*)
 {
-    return Qosmetics::Notes::NoteModelContainer::get_instance()->currentNoteObject;
+    return Qosmetics::Notes::NoteModelContainer::get_instance()->CurrentNoteObject;
 }
 
 EXPOSE_API(GetNotesDisabled, bool)
@@ -117,12 +118,12 @@ EXPOSE_API(GetNotesDisabled, bool)
     return Qosmetics::Notes::Disabling::GetAnyDisabling();
 }
 
-EXPOSE_API(UnregisterNoteDisablingInfo, void, ModInfo info)
+EXPOSE_API(UnregisterNoteDisablingInfo, void, modloader::ModInfo info)
 {
     Qosmetics::Notes::Disabling::UnregisterDisablingModInfo(info);
 }
 
-EXPOSE_API(RegisterNoteDisablingInfo, void, ModInfo info)
+EXPOSE_API(RegisterNoteDisablingInfo, void, modloader::ModInfo info)
 {
     Qosmetics::Notes::Disabling::RegisterDisablingModInfo(info);
 }

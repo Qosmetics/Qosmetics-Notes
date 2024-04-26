@@ -11,19 +11,12 @@
 #include "sombrero/shared/FastColor.hpp"
 #include <unordered_map>
 
-#ifndef DECLARE_OVERRIDE_METHOD_MATCH
-#define DECLARE_OVERRIDE_METHOD_MATCH(retval, method, mptr, ...) \
-    DECLARE_OVERRIDE_METHOD(retval, method, il2cpp_utils::il2cpp_type_check::MetadataGetter<mptr>::get(), __VA_ARGS__)
-#endif
-
-#include "private_field.hpp"
-
 DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, CyoobParent, UnityEngine::MonoBehaviour, classof(GlobalNamespace::INoteControllerDidInitEvent*),
 
-                                 DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::NoteControllerBase*, noteController);
-                                 DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::ColorManager*, colorManager);
-                                 DECLARE_INSTANCE_PRIVATE_FIELD(CyoobHandler*, handler);
-                                 DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::ColorType, currentColorType);
+                                 DECLARE_INSTANCE_FIELD_PRIVATE(GlobalNamespace::NoteControllerBase*, noteController);
+                                 DECLARE_INSTANCE_FIELD_PRIVATE(GlobalNamespace::ColorManager*, colorManager);
+                                 DECLARE_INSTANCE_FIELD_PRIVATE(CyoobHandler*, handler);
+                                 DECLARE_INSTANCE_FIELD_PRIVATE(GlobalNamespace::ColorType, currentColorType);
                                  DECLARE_INSTANCE_METHOD(void, Awake);
                                  DECLARE_INSTANCE_METHOD(void, OnDestroy);
                                  DECLARE_INSTANCE_METHOD(void, Colorize, Sombrero::FastColor thisColor, Sombrero::FastColor otherColor);
@@ -39,5 +32,9 @@ DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, CyoobParent, UnityEngine::Mon
 
                                  static void ColorizeSpecific(GlobalNamespace::NoteControllerBase* noteController, const Sombrero::FastColor& color, GlobalNamespace::ColorType colorType);
                                  static std::unordered_map<GlobalNamespace::NoteControllerBase*, CyoobParent*> noteControllerToParentMap;
+
+                                 __declspec(property(get = get_Handler, put = set_Handler)) CyoobHandler * Handler;
+                                 CyoobHandler * get_Handler() const;
+                                 void set_Handler(CyoobHandler* handler);
 
 )

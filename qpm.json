@@ -1,49 +1,58 @@
 {
+  "version": "0.1.0",
   "sharedDir": "shared",
   "dependenciesDir": "extern",
   "info": {
     "name": "Qosmetics Cyoobs",
     "id": "qosmetics-notes",
-    "version": "0.0.1",
+    "version": "0.1.6",
     "url": "https://github.com/Qosmetics/Qosmetics-Notes",
     "additionalData": {
       "headersOnly": true,
-      "overrideSoName": "libqosmetics-notes.so"
+      "overrideSoName": "libqosmetics-notes.so",
+      "cmake": true
+    }
+  },
+  "workspace": {
+    "scripts": {
+      "qmod": [
+        "pwsh ./scripts/build.ps1 -clean",
+        "qpm qmod manifest",
+        "pwsh ./scripts/createqmod.ps1 QosmeticsCyoobs -clean"
+      ]
     }
   },
   "dependencies": [
     {
       "id": "libil2cpp",
-      "versionRange": "^0.2.3",
+      "versionRange": "^0.3.0",
       "additionalData": {}
     },
     {
       "id": "beatsaber-hook",
-      "versionRange": "^3.14.0",
+      "versionRange": "^5.1.6",
+      "additionalData": {}
+    },
+    {
+      "id": "scotland2",
+      "versionRange": "^0.1.4",
       "additionalData": {
-        "extraFiles": [
-          "src/inline-hook"
-        ]
+        "includeQmod": false
       }
     },
     {
-      "id": "codegen",
-      "versionRange": "^0.33.0",
+      "id": "bs-cordl",
+      "versionRange": "^3500.0.0",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.15.23",
+      "versionRange": "^0.17.6",
       "additionalData": {
         "private": true
       }
-    },
-    {
-      "id": "modloader",
-      "versionRange": "^1.2.3",
-      "additionalData": {}
     },
     {
       "id": "sombrero",
@@ -54,19 +63,19 @@
     },
     {
       "id": "conditional-dependencies",
-      "versionRange": "^0.1.0",
+      "versionRange": "^0.3.0",
       "additionalData": {}
     },
     {
       "id": "bs-utils",
-      "versionRange": "^0.7.2",
+      "versionRange": "^0.8.2",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "paper",
-      "versionRange": "^1.2.9",
+      "versionRange": "^3.0.0",
       "additionalData": {
         "private": true
       }
@@ -80,54 +89,29 @@
     },
     {
       "id": "qosmetics-core",
-      "versionRange": "^2.1.3",
+      "versionRange": "^2.3.0",
       "additionalData": {
         "private": true
       }
     },
     {
-      "id": "chroma",
-      "versionRange": "^2.6.2",
-      "additionalData": {
-        "private": true,
-        "includeQmod": false
-      }
-    },
-    {
       "id": "lapiz",
-      "versionRange": "^0.1.11",
+      "versionRange": "^0.2.5",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "bsml",
-      "versionRange": "^0.3.1",
+      "versionRange": "^0.4.19",
       "additionalData": {
         "private": true
       }
+    },
+    {
+      "id": "kaleb",
+      "versionRange": "^0.1.9",
+      "additionalData": {}
     }
-  ],
-  "workspace": {
-    "scripts": {
-      "build": [
-        "pwsh ./scripts/build.ps1"
-      ],
-      "clean": [
-        "pwsh ./scripts/build.ps1 -clean"
-      ],
-      "copy": [
-        "pwsh ./scripts/copy.ps1"
-      ],
-      "log": [
-        "pwsh ./scripts/log.ps1"
-      ],
-      "qmod": [
-        "pwsh ./scripts/build.ps1 -clean",
-        "qpm-rust qmod build",
-        "pwsh ./scripts/createqmod.ps1 QosmeticsCyoobs -clean"
-      ]
-    }
-  },
-  "additionalData": {}
+  ]
 }

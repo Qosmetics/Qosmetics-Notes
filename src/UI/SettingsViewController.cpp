@@ -30,7 +30,7 @@ namespace Qosmetics::Notes
     {
         auto& globalConfig = Config::get_config();
         if (firstActivation)
-            BSML::parse_and_construct(IncludedAssets::SettingsView_bsml, get_transform(), this);
+            BSML::parse_and_construct(Assets::Views::SettingsView_bsml, get_transform(), this);
         else if (justChangedProfile)
         {
             justChangedProfile = false;

@@ -11,20 +11,13 @@
 #include "sombrero/shared/FastColor.hpp"
 #include <unordered_map>
 
-#ifndef DECLARE_OVERRIDE_METHOD_MATCH
-#define DECLARE_OVERRIDE_METHOD_MATCH(retval, method, mptr, ...) \
-    DECLARE_OVERRIDE_METHOD(retval, method, il2cpp_utils::il2cpp_type_check::MetadataGetter<mptr>::get(), __VA_ARGS__)
-#endif
-
-#include "private_field.hpp"
-
 DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, ChainParent, UnityEngine::MonoBehaviour, classof(GlobalNamespace::INoteControllerDidInitEvent*),
 
-                                 DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::NoteControllerBase*, noteController);
-                                 DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::ColorManager*, colorManager);
-                                 DECLARE_INSTANCE_PRIVATE_FIELD(ChainHandler*, handler);
-                                 DECLARE_INSTANCE_PRIVATE_FIELD(GlobalNamespace::ColorType, currentColorType);
-                                 DECLARE_INSTANCE_PRIVATE_FIELD(bool, isHead);
+                                 DECLARE_INSTANCE_FIELD_PRIVATE(GlobalNamespace::NoteControllerBase*, noteController);
+                                 DECLARE_INSTANCE_FIELD_PRIVATE(GlobalNamespace::ColorManager*, colorManager);
+                                 DECLARE_INSTANCE_FIELD_PRIVATE(ChainHandler*, handler);
+                                 DECLARE_INSTANCE_FIELD_PRIVATE(GlobalNamespace::ColorType, currentColorType);
+                                 DECLARE_INSTANCE_FIELD_PRIVATE(bool, isHead);
                                  DECLARE_INSTANCE_METHOD(void, Awake);
                                  DECLARE_INSTANCE_METHOD(void, OnDestroy);
                                  DECLARE_INSTANCE_METHOD(void, Colorize, Sombrero::FastColor thisColor, Sombrero::FastColor otherColor);
@@ -40,5 +33,9 @@ DECLARE_CLASS_CODEGEN_INTERFACES(Qosmetics::Notes, ChainParent, UnityEngine::Mon
 
                                  static void ColorizeSpecific(GlobalNamespace::NoteControllerBase* noteController, const Sombrero::FastColor& color, GlobalNamespace::ColorType colorType);
                                  static std::unordered_map<GlobalNamespace::NoteControllerBase*, ChainParent*> noteControllerToParentMap;
+
+                                 __declspec(property(get = get_Handler, put = set_Handler)) ChainHandler * Handler;
+                                 ChainHandler * get_Handler() const;
+                                 void set_Handler(ChainHandler* handler);
 
 )

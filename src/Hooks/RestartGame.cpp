@@ -85,7 +85,7 @@ MAKE_AUTO_HOOK_WRAPPER(MenuTransitionsHelper_RestartGame, &GlobalNamespace::Menu
     auto selfC = (GlobalNamespace::MenuTransitionsHelper*)self.convert();
     DEBUG("name: {}", selfC->get_name());
     DEBUG("enabled: {}", selfC->get_enabled());
-    DEBUG("value: {}", selfC->m_CachedPtr.m_value);
+    DEBUG("value: {}", selfC->m_CachedPtr);
 
     // Qosmetics::Notes::NoteModelContainer::get_instance()->OnGameRestart();
     MenuTransitionsHelper_RestartGame(self, finishCallback);

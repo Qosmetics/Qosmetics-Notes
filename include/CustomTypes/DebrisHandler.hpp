@@ -12,17 +12,17 @@
 
 #include "CustomTypes/DebrisColorHandler.hpp"
 
-#include "private_field.hpp"
-
 DECLARE_CLASS_CODEGEN(Qosmetics::Notes, DebrisHandler, UnityEngine::MonoBehaviour,
-                      DECLARE_INSTANCE_PRIVATE_FIELD(int, previouslyActive);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(ArrayW<UnityEngine::GameObject*>, objects);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(ArrayW<DebrisColorHandler*>, colorHandlers);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(int, previouslyActive);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(ArrayW<UnityEngine::GameObject*>, objects);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(ArrayW<DebrisColorHandler*>, colorHandlers);
+                      public :
+
                       using RendererMaterialPair = System::Collections::Generic::KeyValuePair_2<UnityEngine::Renderer*, UnityEngine::Material*>;
-                      DECLARE_INSTANCE_PRIVATE_FIELD(ArrayW<ArrayW<RendererMaterialPair>>, sliceMaterials);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(ArrayW<bool>, anySliceMaterials);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(Sombrero::FastVector3, lastCutPoint);
-                      DECLARE_INSTANCE_PRIVATE_FIELD(Sombrero::FastVector3, lastCutNormal);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(ArrayW<ArrayW<RendererMaterialPair>>, sliceMaterials);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(ArrayW<bool>, anySliceMaterials);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(Sombrero::FastVector3, lastCutPoint);
+                      DECLARE_INSTANCE_FIELD_PRIVATE(Sombrero::FastVector3, lastCutNormal);
 
                       DECLARE_INSTANCE_METHOD(void, Awake);
                       DECLARE_INSTANCE_METHOD(void, SetColors, Sombrero::FastColor thisColor, Sombrero::FastColor thatColor);

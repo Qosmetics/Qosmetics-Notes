@@ -53,7 +53,7 @@ namespace Qosmetics::Notes
             currentColorType = noteData->get_colorType();
             bool right = currentColorType == GlobalNamespace::ColorType::ColorB;
 
-            handler->ShowNote(right, noteData->get_cutDirection() & 0b1000);
+            handler->ShowNote(right, noteData->cutDirection.value__ & 0b1000);
 
 #ifdef CHROMA_EXISTS
             if (Chroma::CoreAPI::isChromaRunning())
@@ -95,4 +95,8 @@ namespace Qosmetics::Notes
         if (handler)
             handler->SetColors(leftColor, rightColor);
     }
+
+    CyoobHandler* CyoobParent::get_Handler() const { return handler; }
+    void CyoobParent::set_Handler(CyoobHandler* handler) { this->handler = handler; }
+
 }

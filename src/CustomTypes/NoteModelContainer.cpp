@@ -15,17 +15,17 @@
 #include "CustomTypes/DebrisColorHandler.hpp"
 #include "CustomTypes/DebrisHandler.hpp"
 
-#include "GlobalNamespace/SharedCoroutineStarter.hpp"
 #include "UnityEngine/Coroutine.hpp"
 #include "UnityEngine/Material.hpp"
 #include "UnityEngine/MeshRenderer.hpp"
 #include "UnityEngine/Transform.hpp"
+#include "bsml/shared/BSML/SharedCoroutineStarter.hpp"
 
 #include <fmt/format.h>
 
 DEFINE_TYPE(Qosmetics::Notes, NoteModelContainer);
 
-#define STARTCOROUTINE(routine) GlobalNamespace::SharedCoroutineStarter::get_instance()->StartCoroutine(routine)
+#define STARTCOROUTINE(routine) BSML::SharedCoroutineStarter::get_instance()->StartCoroutine(routine)
 
 using namespace UnityEngine;
 
@@ -430,11 +430,14 @@ namespace Qosmetics::Notes
 
     void NoteModelContainer::Unload()
     {
-        if (currentNoteObject && currentNoteObject->m_CachedPtr.m_value)
+        if (currentNoteObject && currentNoteObject->m_CachedPtr)
             Object::DestroyImmediate(currentNoteObject);
         currentNoteObject = nullptr;
-        if (bundle && bundle->m_CachedPtr.m_value)
+        if (bundle && bundle->m_CachedPtr)
             bundle->Unload(true);
         bundle = nullptr;
     }
+
+    UnityEngine::GameObject* NoteModelContainer::get_CurrentNoteObject() const { return currentNoteObject; }
+
 }

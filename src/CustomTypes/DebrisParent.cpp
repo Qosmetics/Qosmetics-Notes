@@ -30,7 +30,7 @@ namespace Qosmetics::Notes
         debrisHandler = get_gameObject()->GetComponentInChildren<DebrisHandler*>();
         noteDebris = GetComponent<GlobalNamespace::NoteDebris*>();
         noteDebrisCache[noteDebris] = this;
-        colorManager = noteDebris->colorManager;
+        colorManager = noteDebris->_colorManager;
     }
 
     void DebrisParent::OnDestroy()
@@ -41,7 +41,7 @@ namespace Qosmetics::Notes
     void DebrisParent::SetSliceProperties(GlobalNamespace::ColorType colorType, UnityEngine::Vector3 cutPoint, UnityEngine::Vector3 cutNormal)
     {
         DEBUG("{}: Setting slice properties", fmt::ptr(this));
-        debrisHandler->ShowDebris(colorType);
+        debrisHandler->ShowDebris(colorType.value__);
         debrisHandler->SetSliceProperties(cutPoint, cutNormal);
 
 #ifdef CHROMA_EXISTS

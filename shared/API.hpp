@@ -159,18 +159,18 @@ namespace Qosmetics::Notes::API
 
     /// @brief Unregister your mod as disabling Notes replacements
     /// @param info your mod info
-    void UnregisterNoteDisablingInfo(ModInfo info)
+    void UnregisterNoteDisablingInfo(modloader::ModInfo info)
     {
-        static auto function = CondDeps::Find<void, ModInfo>(QOSMETICS_NOTES, "UnregisterNoteDisablingInfo");
+        static auto function = CondDeps::Find<void, modloader::ModInfo>(QOSMETICS_NOTES, "UnregisterNoteDisablingInfo");
         if (function)
             function.value()(info);
     }
 
     /// @brief register your mod as disabling Notes replacements
     /// @param info your mod info
-    void RegisterNoteDisablingInfo(ModInfo info)
+    void RegisterNoteDisablingInfo(modloader::ModInfo info)
     {
-        static auto function = CondDeps::Find<void, ModInfo>(QOSMETICS_NOTES, "RegisterNoteDisablingInfo");
+        static auto function = CondDeps::Find<void, modloader::ModInfo>(QOSMETICS_NOTES, "RegisterNoteDisablingInfo");
         if (function)
             function.value()(info);
     }
