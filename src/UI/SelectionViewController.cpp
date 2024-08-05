@@ -71,7 +71,7 @@ namespace Qosmetics::Notes
 
     int SelectionViewController::GetSelectedCellIdx()
     {
-        if (!descriptorList || !descriptorList->m_CachedPtr)
+        if (!descriptorList || !descriptorList->m_CachedPtr.m_value)
             return -1;
         auto tableView = descriptorList->tableView;
         auto enumerator = tableView->_selectedCellIdxs->GetEnumerator();

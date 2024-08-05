@@ -430,10 +430,10 @@ namespace Qosmetics::Notes
 
     void NoteModelContainer::Unload()
     {
-        if (currentNoteObject && currentNoteObject->m_CachedPtr)
+        if (currentNoteObject && currentNoteObject->m_CachedPtr.m_value)
             Object::DestroyImmediate(currentNoteObject);
         currentNoteObject = nullptr;
-        if (bundle && bundle->m_CachedPtr)
+        if (bundle && bundle->m_CachedPtr.m_value)
             bundle->Unload(true);
         bundle = nullptr;
     }

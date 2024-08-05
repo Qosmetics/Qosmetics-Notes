@@ -16,7 +16,6 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, PreviewViewController, HMUI::ViewControl
                       DECLARE_INSTANCE_FIELD_PRIVATE(TMPro::TextMeshProUGUI*, title);
                       DECLARE_INSTANCE_FIELD_PRIVATE(HMUI::ImageView*, loadingIndicator);
                       DECLARE_INSTANCE_FIELD_PRIVATE(UnityEngine::GameObject*, currentPrefab);
-                      DECLARE_INSTANCE_METHOD(void, SetTitleText, StringW text);
 
                       DECLARE_INJECT_METHOD(void, Inject, Qosmetics::Notes::NoteModelContainer* modelContainer, GlobalNamespace::PlayerDataModel* playerDataModel);
                       DECLARE_OVERRIDE_METHOD_MATCH(void, DidActivate, &HMUI::ViewController::DidActivate, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
@@ -34,5 +33,6 @@ DECLARE_CLASS_CODEGEN(Qosmetics::Notes, PreviewViewController, HMUI::ViewControl
                       void UpdatePreview(bool reinstantiate = false);
                       void InstantiatePrefab();
                       void ClearPrefab();
+                      void SetTitleText(std::string_view text);
 
 )
