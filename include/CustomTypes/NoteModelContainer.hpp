@@ -9,36 +9,38 @@
 #include "qosmetics-core/shared/Data/Descriptor.hpp"
 #include "qosmetics-core/shared/Data/Manifest.hpp"
 
-DECLARE_CLASS_CODEGEN(Qosmetics::Notes, NoteModelContainer, UnityEngine::MonoBehaviour,
-                      DECLARE_INSTANCE_METHOD(void, Start);
-                      DECLARE_INSTANCE_METHOD(void, OnDestroy);
-                      DECLARE_INSTANCE_FIELD_PRIVATE(UnityEngine::AssetBundle*, bundle);
-                      DECLARE_INSTANCE_FIELD_PRIVATE(bool, isLoading);
-                      DECLARE_INSTANCE_FIELD_PRIVATE(UnityEngine::GameObject*, currentNoteObject);
+DECLARE_CLASS_CODEGEN(
+    Qosmetics::Notes, NoteModelContainer, UnityEngine::MonoBehaviour,
+    DECLARE_INSTANCE_METHOD(void, Start);
+    DECLARE_INSTANCE_METHOD(void, OnDestroy);
+    DECLARE_INSTANCE_FIELD(UnityEngine::AssetBundle*, bundle);
+    DECLARE_INSTANCE_FIELD(bool, isLoading);
+    DECLARE_INSTANCE_FIELD(UnityEngine::GameObject*, currentNoteObject);
 
-                      DECLARE_CTOR(ctor);
-                      public
-                      :
+    DECLARE_CTOR(ctor);
+    public
+    :
 
-                      using Manifest = Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig>;
-                      __declspec(property(get = get_CurrentNoteObject)) UnityEngine::GameObject * CurrentNoteObject;
-                      UnityEngine::GameObject * get_CurrentNoteObject() const;
+    using Manifest = Qosmetics::Core::Manifest<Qosmetics::Notes::NoteObjectConfig>;
+    __declspec(property(get = get_CurrentNoteObject)) UnityEngine::GameObject * CurrentNoteObject;
+    UnityEngine::GameObject * get_CurrentNoteObject() const;
 
-                      static NoteModelContainer * get_instance();
-                      bool LoadObject(const Manifest& manifest, std::function<void(NoteModelContainer*)> onFinished);
-                      bool LoadObject(const Qosmetics::Core::Descriptor& descriptor, std::function<void(NoteModelContainer*)> onFinished = nullptr);
-                      const NoteObjectConfig& GetNoteConfig();
-                      const Qosmetics::Core::Descriptor& GetDescriptor();
-                      bool Default();
+    static NoteModelContainer * get_instance();
+    bool LoadObject(const Manifest& manifest, std::function<void(NoteModelContainer*)> onFinished);
+    bool LoadObject(const Qosmetics::Core::Descriptor& descriptor, std::function<void(NoteModelContainer*)> onFinished = nullptr);
+    const NoteObjectConfig& GetNoteConfig();
+    const Qosmetics::Core::Descriptor& GetDescriptor();
+    bool Default();
 
-                      private
-                      :
+    public :
 
-                      custom_types::Helpers::Coroutine LoadBundleRoutine(std::function<void(NoteModelContainer*)> onFinished);
-                      void Unload();
+    custom_types::Helpers::Coroutine LoadBundleRoutine(std::function<void(NoteModelContainer*)> onFinished);
+    void Unload();
 
-                      Manifest currentManifest;
+    Manifest currentManifest;
 
-                      static NoteModelContainer * instance;
+    static NoteModelContainer * instance;
 
 )
+
+static_assert(offsetof(Qosmetics::Notes::NoteModelContainer, ___backing_field_currentNoteObject) == 0x28);
